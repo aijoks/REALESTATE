@@ -350,3 +350,79 @@ export function hotspotTexture(color = '#3b82f6') {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+
+// Vertical vinyl leasing banner, laid out like the one on the building:
+// logo, SPACE / FOR / LEASE, uses, contact box, web + phone, logo.
+export function leaseBannerTexture({
+  brand = 'FIRST PIONEER',
+  brandSub = 'REALTY',
+  headline = ['SPACE', 'FOR', 'LEASE'],
+  uses = ['Office', 'Medical', 'Retail'],
+  contactLines = ['Exclusive', 'Leasing Agents'],
+  web = '',
+  phone = '',
+} = {}) {
+  const w = 512;
+  const h = 2200;
+  const c = makeCanvas(w, h);
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#24479e');
+  g.addColorStop(1, '#1d3c8c');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  ctx.strokeStyle = '#e9edf5';
+  ctx.lineWidth = 10;
+  ctx.strokeRect(14, 14, w - 28, h - 28);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+
+  const logo = (y) => {
+    // Stepped-squares mark, then the wordmark.
+    const s = 22;
+    const x0 = 58;
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col <= row; col++) {
+        ctx.fillStyle = (row + col) % 2 ? '#ffffff' : '#d8322b';
+        ctx.fillRect(x0 + col * s, y + 70 - row * s, s - 3, s - 3);
+      }
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'left';
+    const words = brand.split(' ');
+    ctx.font = '600 56px Georgia, "Times New Roman", serif';
+    ctx.fillText(words[0] ?? '', 168, y + 40);
+    ctx.fillText(words.slice(1).join(' '), 168, y + 94);
+    ctx.font = '500 22px Georgia, serif';
+    ctx.fillText(brandSub.split('').join(' '), 172, y + 124);
+    ctx.textAlign = 'center';
+  };
+
+  logo(50);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 150px Impact, "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+  headline.forEach((t, i) => ctx.fillText(t, w / 2, 400 + i * 172, w - 70));
+  ctx.font = '800 92px "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+  uses.forEach((t, i) => ctx.fillText(t, w / 2, 1000 + i * 104, w - 90));
+
+  // Orange-red contact box.
+  ctx.fillStyle = '#e1542c';
+  ctx.fillRect(70, 1360, w - 140, 240);
+  ctx.strokeStyle = '#f6b8a2';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(84, 1374, w - 168, 212);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'italic 500 50px Georgia, serif';
+  contactLines.forEach((t, i) => ctx.fillText(t, w / 2, 1460 + i * 70, w - 190));
+
+  ctx.font = '700 46px "Helvetica Neue", Arial, sans-serif';
+  if (web) ctx.fillText(web, w / 2, 1700, w - 80);
+  ctx.font = '800 72px "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+  if (phone) ctx.fillText(phone, w / 2, 1800, w - 70);
+  logo(1900);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}

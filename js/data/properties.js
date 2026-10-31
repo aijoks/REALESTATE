@@ -74,7 +74,16 @@ export const properties = [
         depth: 30.5, // metres deep (~100 ft)
         pavilionWidth: 4.4,
         pavilionProjection: 1.6,
-        leaseBanner: ['SPACE', 'FOR', 'LEASE', '', 'Office', 'Medical', 'Retail'],
+        // Mirrors the vinyl banner on the building's west wall.
+        leaseBanner: {
+          brand: 'FIRST PIONEER',
+          brandSub: 'REALTY',
+          headline: ['SPACE', 'FOR', 'LEASE'],
+          uses: ['Office', 'Medical', 'Retail'],
+          contactLines: ['Exclusive', 'Leasing Agents'],
+          web: 'www.FPR.nyc',
+          phone: '212.594.7272',
+        },
       },
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'Attended lobby behind the black portal, with elevator access to all floors.', at: [0.5, 0.075, 'front'] },

@@ -10,7 +10,7 @@
 // Every window is a real recessed opening with frame, glass, blind and a fake
 // interior, so the model reads correctly from any angle.
 import * as THREE from 'three';
-import { BRICK, stone, grime, textTexture, stripedAwning, rand } from './textures.js';
+import { BRICK, stone, grime, textTexture, stripedAwning, leaseBannerTexture, rand } from './textures.js';
 
 const Q0 = new THREE.Quaternion();
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -120,7 +120,7 @@ export function buildPrewarBrick(params) {
     floorH: FH = 3.35,
     pavilionWidth: pw = 4.4,
     pavilionProjection: proj = 1.6,
-    leaseBanner = ['SPACE', 'FOR', 'LEASE', '', 'Office', 'Medical', 'Retail'],
+    leaseBanner = null,
   } = params;
 
   const r = rand(1926);
@@ -509,10 +509,11 @@ export function buildPrewarBrick(params) {
   const sideH = towerTop + parapet;
   const sideWin = (x, f) => ({ x, y: baseH + winY(f), w: 1.2, h: WH, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });
   {
-    // West (+x) — the exposed wall with the leasing banner.
+    // West (+x) — the exposed wall with the leasing banner. Like the real
+    // building it is blank brick; only the top floors at the rear have windows.
     const Fw = face(Math.PI / 2, W / 2, 0, D / 2);
     const holes = [];
-    for (const f of floorsList) for (const x of [1.7, 3.4, D - 1.8, D - 4.0, D - 6.2]) holes.push(sideWin(x, f));
+    for (const f of floorsList) if (f >= towerFloors - 4) for (const x of [D - 1.8, D - 4.0]) holes.push(sideWin(x, f));
     add(wall(Fw, D, sideH, holes, matCommon(41)));
     holes.forEach((o) => opening(Fw, o));
     // East (-x), local x runs rear -> front.
@@ -534,17 +535,28 @@ export function buildPrewarBrick(params) {
     add(wall(Fr, W, sideH, holesR, matCommon(43)));
     holesR.forEach((o) => opening(Fr, o));
 
-    // Leasing banner on the west wall.
-    if (leaseBanner?.length) {
-      const tex = textTexture({
-        lines: leaseBanner, width: 512, height: 2304, bg: '#1f3378', ink: '#fff',
-        font: 'bold 176px "Arial Narrow", Arial', subFont: '700 118px Arial',
-      });
-      const banner = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 20.5), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.75 }));
-      banner.position.set(W / 2 + 0.06, baseH + 1.2 + 10.25, D / 2 - 6.9);
+    // Leasing banner near the front of the west wall, hung from a steel rail.
+    if (leaseBanner) {
+      const bw = 4.4;
+      const bh = 19;
+      const bz = D / 2 - 3.3;
+      const by = baseH + 0.9 + bh / 2;
+      const banner = new THREE.Mesh(
+        new THREE.PlaneGeometry(bw, bh),
+        new THREE.MeshStandardMaterial({ map: leaseBannerTexture(leaseBanner), roughness: 0.7 }),
+      );
+      banner.position.set(W / 2 + 0.07, by, bz);
       banner.rotation.y = Math.PI / 2;
       banner.castShadow = true;
       add(banner);
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.22, bw + 0.5), matSteel);
+      rail.position.set(W / 2 + 0.09, by + bh / 2 + 0.12, bz);
+      add(rail);
+      for (const dz of [-bw / 2 - 0.15, bw / 2 + 0.15]) {
+        const strap = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.1, 0.06), matSteel);
+        strap.position.set(W / 2 + 0.07, by + bh / 2 + 0.6, bz + dz);
+        add(strap);
+      }
     }
 
     // Fire escape on the rear wall.
