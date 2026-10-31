@@ -177,6 +177,7 @@ export class BuildingViewer {
       { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
       { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
       { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },
+      { id: 'park', label: 'From Park Avenue', pos: new THREE.Vector3(80, 1.7, D / 2 + 10.5), target: look(13, D / 2 + 5, 8), fov: 62, hold: 3.5, fade: 'street' },
       { id: 'west', label: 'West side · lease banner', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, fov: 40, hold: 2.5 },
       { id: 'rear-west', label: 'Southwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.62, -D / 2 - r * 0.65), target: mid, fov: 40, hold: 1.5 },
       { id: 'back', label: 'Rear facade', pos: new THREE.Vector3(0, H * 0.5, -D / 2 - r), target: mid, fov: 40, hold: 2.5 },
@@ -184,6 +185,20 @@ export class BuildingViewer {
       { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.75, D / 2 + r * 0.6), target: look(H * 0.8), fov: 45, hold: 3 },
       { id: 'crown', label: 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
     ];
+  }
+
+  // Most stops ghost any neighbour in the foreground; street-level stops
+  // (like the view from Park Avenue) keep the real streetscape and only fade
+  // what actually blocks the building's front-west corner and banner.
+  _chapterFade(ch) {
+    const { width: W, depth: D } = this.model;
+    this.fadeOpts = ch.fade === 'street'
+      ? {
+        foreground: false,
+        pos: ch.pos,
+        targets: [new THREE.Vector3(W / 2 - 1, 8, D / 2 + 1), new THREE.Vector3(W / 2 - 1, 24, D / 2 + 1), new THREE.Vector3(W / 2 + 0.2, 30, D / 2 - 3.3)],
+      }
+      : {};
   }
 
   // ---------- public API ----------
@@ -205,6 +220,7 @@ export class BuildingViewer {
     if (!this.chapters) return;
     this.tour.index = ((i % this.chapters.length) + this.chapters.length) % this.chapters.length;
     const ch = this.chapters[this.tour.index];
+    this._chapterFade(ch);
     this.onChapter?.(ch, this.tour.index);
     if (instant) {
       this._setFov(ch.fov);
@@ -283,7 +299,8 @@ export class BuildingViewer {
     } else if (this.tour.playing && this.chapters) {
       this._stepTour(dt);
     }
-    if (this.context) updateFades(this.context.fadeables, this.camera, dt, this.subjectBox);
+    if (this.fadeOpts?.pos && !this.fly && !this.tour.playing && this.camera.position.distanceTo(this.fadeOpts.pos) > 25) this.fadeOpts = {};
+    if (this.context) updateFades(this.context.fadeables, this.camera, dt, this.subjectBox, this.fadeOpts);
     // Gentle pulse on hotspots.
     const pulse = 2 + Math.sin(performance.now() / 350) * 0.15;
     for (const s of this.hotspots) s.scale.set(pulse, pulse, 1);
@@ -319,6 +336,7 @@ export class BuildingViewer {
         t.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov };
         t.t = 0;
         t.phase = 'move';
+        this._chapterFade(this.chapters[t.index]);
         this.onChapter?.(this.chapters[t.index], t.index);
       }
     }
