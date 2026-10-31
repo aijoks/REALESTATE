@@ -509,11 +509,10 @@ export function buildPrewarBrick(params) {
   const sideH = towerTop + parapet;
   const sideWin = (x, f) => ({ x, y: baseH + winY(f), w: 1.2, h: WH, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });
   {
-    // West (+x) — the exposed wall with the leasing banner. Like the real
-    // building it is blank brick; only the top floors at the rear have windows.
+    // West (+x) — a blank party wall; the fluted tower next door is built
+    // against it, leaving only the front strip with the leasing banner exposed.
     const Fw = face(Math.PI / 2, W / 2, 0, D / 2);
     const holes = [];
-    for (const f of floorsList) if (f >= towerFloors - 4) for (const x of [D - 1.8, D - 4.0]) holes.push(sideWin(x, f));
     add(wall(Fw, D, sideH, holes, matCommon(41)));
     holes.forEach((o) => opening(Fw, o));
     // East (-x), local x runs rear -> front.

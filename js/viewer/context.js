@@ -1,6 +1,7 @@
 // Street + neighbouring buildings around 120 E 56th St (front faces +z = north).
 //   east  (-x): Tower 56 — stepped podium with slanted glass setbacks, tall tower behind
-//   west  (+x): low construction shed, silver fluted tower, glass tower with canopy
+//   west  (+x): silver fluted tower built tight against the west wall (front set
+//               back so the banner strip shows), low black structure in front of it
 //   south (-z): large banded office tower behind the lot
 //   north (+z): across E 56th St — white grid tower, pre-war stone building, 445 Park
 //   Park Avenue (+x, ~56 m west): two roadways + planted median, 425 Park on the
@@ -324,11 +325,23 @@ export function buildContext(scene, { W, D }) {
     group(parts);
   }
 
-  // West: shed in the gap, fluted tower, glass tower with lobby canopy.
+  // West: the fluted tower abuts the building's west wall. Its street face is
+  // set back ~6 m, leaving the front strip of the wall (with the lease banner)
+  // exposed above a low black structure.
   {
-    const shed = block('louver', W / 2 + 0.1, W / 2 + 4.5, front - 6, front, 3.4, 0, { fade: false });
-    shed.material = new THREE.MeshStandardMaterial({ color: '#202224', roughness: 0.7 });
-    block('fluted', W / 2 + 4.8, W / 2 + 13.5, -D / 2, front - 2, 165);
+    const setback = 6.2;
+    const shed = block('louver', W / 2 + 0.02, W / 2 + 13.5, front - setback, front - 0.3, 3.6, 0, { fade: false });
+    shed.material = new THREE.MeshStandardMaterial({ color: '#1c1e20', roughness: 0.7 });
+    const scaffold = new THREE.MeshStandardMaterial({ color: '#8c2a22', roughness: 0.6, metalness: 0.4 });
+    for (let x = W / 2 + 4; x < W / 2 + 12; x += 1.6) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.2, 0.06), scaffold);
+      post.position.set(x, 4.7, front - 0.8);
+      scene.add(post);
+    }
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(8, 0.06, 0.06), scaffold);
+    rail.position.set(W / 2 + 8, 5.7, front - 0.8);
+    scene.add(rail);
+    block('fluted', W / 2 + 0.02, W / 2 + 13.5, -D / 2 - 6, front - setback, 165);
   }
 
   // 425 Park Avenue — SE corner of Park & 56th: glass lobby under an
