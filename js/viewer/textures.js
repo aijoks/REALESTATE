@@ -1,5 +1,9 @@
 // Procedural canvas textures — no external image assets needed for the model.
+// Brick textures are generated at real-world scale (one tile = TILE metres)
+// with a matching normal map so mortar joints catch the light.
 import * as THREE from 'three';
+
+export const TILE = 1.625; // metres covered by one brick texture tile (8 bricks x 24 courses)
 
 function makeCanvas(w, h) {
   const c = document.createElement('canvas');
@@ -8,55 +12,262 @@ function makeCanvas(w, h) {
   return c;
 }
 
-function rand(seed) {
-  // Tiny deterministic PRNG so the facade looks the same on every load.
-  let s = seed >>> 0;
+export function rand(seed) {
+  // Deterministic PRNG so the facade looks the same on every load.
+  let s = seed >>> 0 || 1;
   return () => {
     s = (s * 1664525 + 1013904223) >>> 0;
     return s / 4294967296;
   };
 }
 
-export function brickTexture({ base = '#8a4234', mortar = '#b5a797', variance = 22, seed = 7, size = 512 } = {}) {
-  const c = makeCanvas(size, size);
-  const ctx = c.getContext('2d');
-  const r = rand(seed);
-  ctx.fillStyle = mortar;
-  ctx.fillRect(0, 0, size, size);
-  const bw = size / 8;
-  const bh = size / 24;
-  const gap = Math.max(1, size / 256);
-  const [br, bg, bb] = hexToRgb(base);
-  for (let row = 0; row < 24; row++) {
-    const offset = row % 2 ? bw / 2 : 0;
-    for (let col = -1; col < 9; col++) {
-      const v = (r() - 0.5) * 2 * variance;
-      ctx.fillStyle = `rgb(${clamp(br + v)},${clamp(bg + v * 0.8)},${clamp(bb + v * 0.7)})`;
-      ctx.fillRect(col * bw + offset + gap, row * bh + gap, bw - gap * 2, bh - gap * 2);
-    }
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
+const cache = new Map();
+function cached(key, make) {
+  if (!cache.has(key)) cache.set(key, make());
+  return cache.get(key);
+}
+
+function finish(canvas, { srgb = true, repeat = true } = {}) {
+  const tex = new THREE.CanvasTexture(canvas);
+  if (repeat) tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   return tex;
 }
 
-export function stoneTexture({ base = '#cfc6b4', seed = 3, size = 256 } = {}) {
-  const c = makeCanvas(size, size);
-  const ctx = c.getContext('2d');
-  const r = rand(seed);
-  ctx.fillStyle = base;
-  ctx.fillRect(0, 0, size, size);
-  for (let i = 0; i < 1800; i++) {
-    const v = (r() - 0.5) * 30;
-    ctx.fillStyle = `rgba(${v > 0 ? 255 : 0},${v > 0 ? 255 : 0},${v > 0 ? 255 : 0},${Math.abs(v) / 200})`;
-    ctx.fillRect(r() * size, r() * size, 2, 2);
+// Height map -> tangent-space normal map.
+function normalFromHeight(hctx, size, strength = 2.5) {
+  const src = hctx.getImageData(0, 0, size, size).data;
+  const out = makeCanvas(size, size);
+  const octx = out.getContext('2d');
+  const img = octx.createImageData(size, size);
+  const h = (x, y) => src[(((y + size) % size) * size + ((x + size) % size)) * 4] / 255;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dx = (h(x + 1, y) - h(x - 1, y)) * strength;
+      const dy = (h(x, y + 1) - h(x, y - 1)) * strength;
+      const len = Math.hypot(dx, dy, 1);
+      const i = (y * size + x) * 4;
+      img.data[i] = ((-dx / len) * 0.5 + 0.5) * 255;
+      img.data[i + 1] = ((dy / len) * 0.5 + 0.5) * 255;
+      img.data[i + 2] = ((1 / len) * 0.5 + 0.5) * 255;
+      img.data[i + 3] = 255;
+    }
   }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  octx.putImageData(img, 0, 0);
+  return out;
+}
+
+// Variegated running-bond brick with occasional dark clinkers.
+// palette: list of [r,g,b] brick colours; mortar: css colour.
+export function brick(name, { palette, mortar, clinker = 0.08, seed = 7, size = 1024 }) {
+  return cached(`brick:${name}`, () => {
+    const c = makeCanvas(size, size);
+    const ctx = c.getContext('2d');
+    const hc = makeCanvas(size, size);
+    const hctx = hc.getContext('2d');
+    const r = rand(seed);
+    ctx.fillStyle = mortar;
+    ctx.fillRect(0, 0, size, size);
+    hctx.fillStyle = '#3a3a3a';
+    hctx.fillRect(0, 0, size, size);
+    const cols = 8;
+    const rows = 24;
+    const bw = size / cols;
+    const bh = size / rows;
+    const joint = Math.max(2, Math.round(size / 220));
+    for (let row = 0; row < rows; row++) {
+      const offset = row % 2 ? bw / 2 : 0;
+      for (let col = -1; col <= cols; col++) {
+        const base = palette[Math.floor(r() * palette.length)];
+        const dark = r() < clinker ? 0.62 : 1;
+        const v = 0.86 + r() * 0.26;
+        const k = v * dark;
+        const x = col * bw + offset + joint / 2;
+        const y = row * bh + joint / 2;
+        const w = bw - joint;
+        const hgt = bh - joint;
+        ctx.fillStyle = `rgb(${base[0] * k | 0},${base[1] * k | 0},${base[2] * k | 0})`;
+        ctx.fillRect(x, y, w, hgt);
+        // Speckle + soft edge burn for texture inside each brick.
+        for (let i = 0; i < 26; i++) {
+          const a = r() * 0.16;
+          ctx.fillStyle = r() < 0.5 ? `rgba(0,0,0,${a})` : `rgba(255,235,215,${a * 0.6})`;
+          ctx.fillRect(x + r() * w, y + r() * hgt, 1 + r() * 3, 1 + r() * 2);
+        }
+        const g = ctx.createLinearGradient(x, y, x, y + hgt);
+        g.addColorStop(0, 'rgba(255,255,255,0.05)');
+        g.addColorStop(1, 'rgba(0,0,0,0.12)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, y, w, hgt);
+        hctx.fillStyle = `rgb(${200 + r() * 40 | 0},0,0)`;
+        hctx.fillRect(x, y, w, hgt);
+      }
+    }
+    const map = finish(c);
+    const normalMap = finish(normalFromHeight(hctx, size), { srgb: false });
+    for (const t of [map, normalMap]) t.repeat.set(1 / TILE, 1 / TILE);
+    return { map, normalMap };
+  });
+}
+
+export const BRICK = {
+  // Deep red-brown face brick of the tower (Candela-era Flemish feel).
+  tower: () => brick('tower', {
+    palette: [[156, 74, 52], [140, 64, 46], [166, 86, 62], [126, 58, 42], [150, 80, 60], [176, 96, 70]],
+    mortar: '#9c8e80', clinker: 0.09, seed: 11,
+  }),
+  // Chocolate-brown brick of the two-storey retail base.
+  base: () => brick('base', {
+    palette: [[100, 64, 52], [88, 56, 46], [110, 72, 58], [78, 50, 42], [116, 80, 66]],
+    mortar: '#6a5a50', clinker: 0.05, seed: 5,
+  }),
+  // Lighter, rougher common brick on the side and rear walls.
+  common: () => brick('common', {
+    palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],
+    mortar: '#9a8f84', clinker: 0.04, seed: 23,
+  }),
+};
+
+export function stone() {
+  return cached('stone', () => {
+    const size = 512;
+    const c = makeCanvas(size, size);
+    const ctx = c.getContext('2d');
+    const r = rand(3);
+    ctx.fillStyle = '#d4c9b3';
+    ctx.fillRect(0, 0, size, size);
+    for (let i = 0; i < 9000; i++) {
+      const a = r() * 0.08;
+      ctx.fillStyle = r() < 0.55 ? `rgba(60,50,40,${a})` : `rgba(255,255,255,${a})`;
+      ctx.fillRect(r() * size, r() * size, 1 + r() * 3, 1 + r() * 3);
+    }
+    // Faint ashlar joints.
+    ctx.strokeStyle = 'rgba(90,80,70,0.25)';
+    ctx.lineWidth = 2;
+    for (let y = 0; y < size; y += size / 4) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(size, y); ctx.stroke();
+    }
+    const map = finish(c);
+    map.repeat.set(1 / 1.2, 1 / 1.2);
+    return map;
+  });
+}
+
+// Large-scale weathering: soot streaks under sills, darker base, blotches.
+// Sampled with a 0..1 face UV so it never tiles.
+export function grime(name, { seed = 1, streaks = 60, strength = 1, w = 512, h = 1024 } = {}) {
+  return cached(`grime:${name}`, () => {
+    const c = makeCanvas(w, h);
+    const ctx = c.getContext('2d');
+    const r = rand(seed);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 40; i++) {
+      const x = r() * w;
+      const y = r() * h;
+      const rad = 40 + r() * 160;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+      const a = (0.05 + r() * 0.12) * strength;
+      const tone = r() < 0.5 ? '60,60,60' : '120,110,100';
+      g.addColorStop(0, `rgba(${tone},${a})`);
+      g.addColorStop(1, `rgba(${tone},0)`);
+      ctx.fillStyle = g;
+      ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+    for (let i = 0; i < streaks; i++) {
+      const x = r() * w;
+      const y = r() * h;
+      const len = 60 + r() * 260;
+      const g = ctx.createLinearGradient(0, y, 0, y + len);
+      g.addColorStop(0, `rgba(40,40,40,${(0.08 + r() * 0.12) * strength})`);
+      g.addColorStop(1, 'rgba(40,40,40,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, 2 + r() * 10, len);
+    }
+    const g = ctx.createLinearGradient(0, h, 0, h * 0.75);
+    g.addColorStop(0, `rgba(30,30,30,${0.25 * strength})`);
+    g.addColorStop(1, 'rgba(30,30,30,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, h * 0.75, w, h * 0.25);
+    const tex = finish(c, { repeat: false });
+    tex.flipY = true;
+    return tex;
+  });
+}
+
+// Curtain wall / punched window facades for neighbouring towers.
+export function facadeTexture(kind, seed = 1) {
+  return cached(`facade:${kind}:${seed}`, () => {
+    const size = 512;
+    const c = makeCanvas(size, size);
+    const ctx = c.getContext('2d');
+    const r = rand(seed);
+    if (kind === 'glass') {
+      const g = ctx.createLinearGradient(0, 0, size, size);
+      g.addColorStop(0, '#5f7f9c');
+      g.addColorStop(1, '#2f4a63');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 64) for (let x = 0; x < size; x += 32) {
+        ctx.fillStyle = `rgba(${r() < 0.5 ? '255,255,255' : '0,0,0'},${r() * 0.08})`;
+        ctx.fillRect(x, y, 32, 64);
+      }
+      ctx.fillStyle = '#2a3440';
+      for (let y = 0; y < size; y += 64) ctx.fillRect(0, y, size, 5);
+      for (let x = 0; x < size; x += 32) ctx.fillRect(x, 0, 3, size);
+    } else if (kind === 'banded') {
+      ctx.fillStyle = '#c8b9a2';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 64) {
+        ctx.fillStyle = '#4b5966';
+        ctx.fillRect(0, y + 24, size, 26);
+        for (let x = 0; x < size; x += 32) {
+          ctx.fillStyle = `rgba(255,240,210,${r() < 0.2 ? 0.35 : 0})`;
+          ctx.fillRect(x + 2, y + 26, 28, 22);
+          ctx.fillStyle = '#9b8e7b';
+          ctx.fillRect(x, y + 24, 2, 26);
+        }
+      }
+    } else if (kind === 'fluted') {
+      ctx.fillStyle = '#a9adb2';
+      ctx.fillRect(0, 0, size, size);
+      for (let x = 0; x < size; x += 8) {
+        const g = ctx.createLinearGradient(x, 0, x + 8, 0);
+        g.addColorStop(0, '#7d8288');
+        g.addColorStop(0.5, '#d9dde1');
+        g.addColorStop(1, '#868b91');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, 0, 8, size);
+      }
+      ctx.fillStyle = 'rgba(60,60,60,0.35)';
+      for (let y = 0; y < size; y += 128) ctx.fillRect(0, y, size, 2);
+    } else if (kind === 'louver') {
+      ctx.fillStyle = '#5c4636';
+      ctx.fillRect(0, 0, size, size);
+      for (let x = 0; x < size; x += 16) {
+        ctx.fillStyle = r() < 0.5 ? '#7a5e48' : '#6b513e';
+        ctx.fillRect(x, 0, 10, size);
+      }
+    } else if (kind === 'prewar') {
+      ctx.fillStyle = '#d8cfbf';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 8; y < size; y += 64) for (let x = 10; x < size; x += 64) {
+        ctx.fillStyle = r() < 0.25 ? '#e9d7ad' : '#3b4450';
+        ctx.fillRect(x, y + 10, 30, 40);
+        ctx.fillStyle = '#b9ad98';
+        ctx.fillRect(x - 3, y + 50, 36, 4);
+      }
+    } else if (kind === 'whitegrid') {
+      ctx.fillStyle = '#eef0f2';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 32) for (let x = 0; x < size; x += 32) {
+        ctx.fillStyle = r() < 0.15 ? '#8aa0b4' : '#55687a';
+        ctx.fillRect(x + 6, y + 6, 20, 20);
+      }
+    }
+    return finish(c);
+  });
 }
 
 export function textTexture({
@@ -68,30 +279,23 @@ export function textTexture({
   ink = '#f2f2f2',
   font = 'bold 120px "Helvetica Neue", Arial, sans-serif',
   subFont = '600 44px "Helvetica Neue", Arial, sans-serif',
-  stripes = false,
   lines = null,
+  draw = null,
 } = {}) {
   const c = makeCanvas(width, height);
   const ctx = c.getContext('2d');
-  if (stripes) {
-    for (let x = 0; x < width; x += 48) {
-      ctx.fillStyle = (x / 48) % 2 ? '#2b6fd0' : '#e8eef8';
-      ctx.fillRect(x, 0, 48, height);
-    }
-    ctx.fillStyle = 'rgba(31,95,191,0.55)';
-    ctx.fillRect(0, 0, width, height);
-  } else {
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, width, height);
-  }
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = ink;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  if (lines) {
+  if (draw) {
+    draw(ctx, width, height);
+  } else if (lines) {
     const step = height / (lines.length + 1);
     lines.forEach((ln, i) => {
-      ctx.font = i < 3 ? font : subFont;
-      ctx.fillText(ln, width / 2, step * (i + 1));
+      ctx.font = typeof ln === 'object' ? ln.font : i < 3 ? font : subFont;
+      ctx.fillText(typeof ln === 'object' ? ln.text : ln, width / 2, step * (i + 1));
     });
   } else {
     ctx.font = font;
@@ -105,6 +309,26 @@ export function textTexture({
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 8;
   return tex;
+}
+
+export function stripedAwning(text) {
+  return textTexture({
+    width: 2048,
+    height: 256,
+    draw(ctx, w, h) {
+      for (let x = 0; x < w; x += 56) {
+        ctx.fillStyle = (x / 56) % 2 ? '#2463c4' : '#dfe8f6';
+        ctx.fillRect(x, 0, 56, h);
+      }
+      ctx.fillStyle = 'rgba(28,80,170,0.78)';
+      ctx.fillRect(0, h * 0.18, w, h * 0.64);
+      ctx.fillStyle = '#fff';
+      ctx.font = '600 120px Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, w / 2, h / 2 + 6);
+    },
+  });
 }
 
 export function hotspotTexture(color = '#3b82f6') {
@@ -125,12 +349,4 @@ export function hotspotTexture(color = '#3b82f6') {
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
-}
-
-function hexToRgb(hex) {
-  const n = parseInt(hex.slice(1), 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-function clamp(v) {
-  return Math.max(0, Math.min(255, Math.round(v)));
 }

@@ -2,9 +2,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildPrewarBrick } from './building.js';
 import { hotspotTexture } from './textures.js';
+import { buildContext, updateFades } from './context.js';
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -25,16 +25,15 @@ export class BuildingViewer {
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#dfe9f3');
-    this.scene.fog = new THREE.Fog('#dfe9f3', 220, 600);
+    this.scene.fog = new THREE.Fog('#cfdbe6', 260, 900);
 
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, 1, 0.3, 2000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.06;
     this.controls.maxPolarAngle = Math.PI / 2 - 0.02;
-    this.controls.minDistance = 8;
-    this.controls.maxDistance = 320;
+    this.controls.minDistance = 4;
+    this.controls.maxDistance = 360;
 
     this.clock = new THREE.Clock();
     this.tour = { playing: false, index: 0, t: 0, from: null };
@@ -43,9 +42,11 @@ export class BuildingViewer {
     this.hotspots = [];
     this.highlight = null;
 
+    this._setupSky();
     this._setupLights();
-    this._setupGround();
     this._loadModel().then(() => {
+      this.context = buildContext(this.scene, { W: this.model.width, D: this.model.depth });
+      this.subjectBox = new THREE.Box3().setFromObject(this.model.group);
       this._setupHotspots();
       this._buildChapters();
       this.goToChapter(0, true);
@@ -66,56 +67,65 @@ export class BuildingViewer {
   }
 
   // ---------- scene setup ----------
-  _setupLights() {
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    const hemi = new THREE.HemisphereLight('#cfe3ff', '#6b5a4a', 0.55);
-    this.scene.add(hemi);
-    const sun = new THREE.DirectionalLight('#fff4e0', 2.4);
-    sun.position.set(-40, 80, 60);
-    sun.castShadow = true;
-    sun.shadow.mapSize.set(2048, 2048);
-    const s = 70;
-    Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 1, far: 250 });
-    sun.shadow.bias = -0.0005;
-    this.scene.add(sun);
+  // Gradient sky dome, also used to build the reflection environment.
+  _skyMaterial() {
+    return new THREE.ShaderMaterial({
+      side: THREE.BackSide,
+      depthWrite: false,
+      fog: false,
+      uniforms: {
+        top: { value: new THREE.Color('#3f7fd0') },
+        mid: { value: new THREE.Color('#9cc3ea') },
+        horizon: { value: new THREE.Color('#e4edf4') },
+        bottom: { value: new THREE.Color('#8c8d8f') },
+      },
+      vertexShader: 'varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+      fragmentShader: `uniform vec3 top; uniform vec3 mid; uniform vec3 horizon; uniform vec3 bottom; varying vec3 vDir;
+        void main(){ float h = vDir.y; vec3 c = h > 0.0 ? mix(horizon, mid, smoothstep(0.0, 0.25, h)) : mix(horizon, bottom, smoothstep(0.0, 0.08, -h));
+        if (h > 0.25) c = mix(mid, top, smoothstep(0.25, 0.9, h)); gl_FragColor = vec4(c, 1.0);
+        #include <colorspace_fragment>
+        }`,
+    });
   }
 
-  _setupGround() {
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(600, 600),
-      new THREE.MeshStandardMaterial({ color: '#8f8f8f', roughness: 1 }),
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    this.scene.add(ground);
-    // Sidewalk + street in front (the +z side).
-    const sidewalk = new THREE.Mesh(new THREE.BoxGeometry(120, 0.15, 5), new THREE.MeshStandardMaterial({ color: '#b9b4ab', roughness: 1 }));
-    sidewalk.position.set(0, 0.075, 18);
-    sidewalk.receiveShadow = true;
-    this.scene.add(sidewalk);
-    const street = new THREE.Mesh(new THREE.PlaneGeometry(120, 14), new THREE.MeshStandardMaterial({ color: '#3d3d40', roughness: 1 }));
-    street.rotation.x = -Math.PI / 2;
-    street.position.set(0, 0.01, 27.5);
-    street.receiveShadow = true;
-    this.scene.add(street);
-    for (let i = -11; i <= 11; i++) {
-      const dash = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 0.25), new THREE.MeshBasicMaterial({ color: '#e6d36b' }));
-      dash.rotation.x = -Math.PI / 2;
-      dash.position.set(i * 5, 0.02, 27.5);
-      this.scene.add(dash);
+  _setupSky() {
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1500, 32, 16), this._skyMaterial());
+    dome.renderOrder = -1;
+    this.scene.add(dome);
+  }
+
+  _setupLights() {
+    // Reflection environment: sky + a ring of grey/blue "buildings" + a sun
+    // patch, so glass and metal reflect a city rather than a studio.
+    const env = new THREE.Scene();
+    env.add(new THREE.Mesh(new THREE.SphereGeometry(100, 32, 16), this._skyMaterial()));
+    const tones = ['#6d7782', '#8d969e', '#4f5a66', '#a7a59f', '#5d6b78'];
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * Math.PI * 2;
+      const h = 15 + ((i * 37) % 23) * 2.2;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(14, h, 14), new THREE.MeshBasicMaterial({ color: tones[i % tones.length] }));
+      b.position.set(Math.cos(a) * 60, h / 2 - 8, Math.sin(a) * 60);
+      b.lookAt(0, b.position.y, 0);
+      env.add(b);
     }
-    // Ghosted neighbours for scale (the real neighbours are glass/metal towers).
-    const ghost = new THREE.MeshStandardMaterial({ color: '#c9d4de', roughness: 0.3, metalness: 0.4, transparent: true, opacity: 0.35, depthWrite: false });
-    const nbrs = [
-      [-26, 90, 36, -1], [26, 110, 36, 1],
-      [-10, 60, 28, 0, -50], [12, 75, 28, 0, -50],
-    ];
-    for (const [x, h, d, , z = 0] of nbrs) {
-      const b = new THREE.Mesh(new THREE.BoxGeometry(20, h, d), ghost);
-      b.position.set(x, h / 2, z);
-      this.scene.add(b);
-    }
+    const sunPatch = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(8, 7.5, 6.5) }));
+    sunPatch.position.set(-30, 70, 60);
+    env.add(sunPatch);
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(env, 0.02).texture;
+    this.scene.environmentIntensity = 0.75;
+
+    this.scene.add(new THREE.HemisphereLight('#cfe1f5', '#7a6e62', 0.6));
+    const sun = new THREE.DirectionalLight('#fff1dc', 2.6);
+    sun.position.set(-45, 95, 80);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(4096, 4096);
+    const s = 60;
+    Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 10, far: 320 });
+    sun.shadow.bias = -0.0004;
+    sun.shadow.normalBias = 0.03;
+    this.scene.add(sun);
+    this.scene.add(sun.target);
   }
 
   async _loadModel() {
@@ -158,19 +168,21 @@ export class BuildingViewer {
   // The guided 360° tour: a loop of camera stops around the building.
   _buildChapters() {
     const { width: W, depth: D, height: H } = this.model;
-    const r = Math.max(H * 1.35, D * 1.3);
+    const r = Math.max(H * 1.25, D * 1.3);
     const mid = new THREE.Vector3(0, H * 0.48, 0);
-    const look = (y, z = 0) => new THREE.Vector3(0, y, z);
+    const look = (y, z = 0, x = 0) => new THREE.Vector3(x, y, z);
+    // Front faces +z (north, onto E 56th St); +x is west, -x is east.
     this.chapters = [
-      { id: 'street', label: 'Street level', pos: new THREE.Vector3(-22, 2.0, D / 2 + 30), target: look(10, D / 2), hold: 2.5 },
-      { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.5, D / 2 + r), target: mid, hold: 2.5 },
-      { id: 'front-right', label: 'Corner · East', pos: new THREE.Vector3(r * 0.75, H * 0.55, D / 2 + r * 0.65), target: mid, hold: 1.5 },
-      { id: 'right', label: 'East side', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, hold: 2.5 },
-      { id: 'back-right', label: 'Corner · Rear', pos: new THREE.Vector3(r * 0.75, H * 0.6, -D / 2 - r * 0.65), target: mid, hold: 1.5 },
-      { id: 'back', label: 'Rear facade', pos: new THREE.Vector3(0, H * 0.5, -D / 2 - r), target: mid, hold: 2.5 },
-      { id: 'left', label: 'West side', pos: new THREE.Vector3(-r * 1.05, H * 0.5, 0), target: mid, hold: 2.5 },
-      { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.9, D / 2 + r * 0.7), target: look(H * 0.85), hold: 3 },
-      { id: 'crown', label: 'Crown detail', pos: new THREE.Vector3(8, H + 4, D / 2 + 30), target: look(H - 3, D / 2), hold: 2.5 },
+      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-1, 1.6, D / 2 + 12.5), target: look(13, D / 2 - 1), fov: 82, hold: 3 },
+      { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
+      { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
+      { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },
+      { id: 'west', label: 'West side · lease banner', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, fov: 40, hold: 2.5 },
+      { id: 'rear-west', label: 'Southwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.62, -D / 2 - r * 0.65), target: mid, fov: 40, hold: 1.5 },
+      { id: 'back', label: 'Rear facade', pos: new THREE.Vector3(0, H * 0.5, -D / 2 - r), target: mid, fov: 40, hold: 2.5 },
+      { id: 'east', label: 'East side', pos: new THREE.Vector3(-r * 1.05, H * 0.55, 0), target: mid, fov: 40, hold: 2.5 },
+      { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.75, D / 2 + r * 0.6), target: look(H * 0.8), fov: 45, hold: 3 },
+      { id: 'crown', label: 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
     ];
   }
 
@@ -178,7 +190,7 @@ export class BuildingViewer {
   play() {
     if (!this.chapters) return;
     this.tour.playing = true;
-    this.tour.from = { pos: this.camera.position.clone(), target: this.controls.target.clone() };
+    this.tour.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov };
     this.tour.t = 0;
     this.tour.phase = 'move';
   }
@@ -195,19 +207,25 @@ export class BuildingViewer {
     const ch = this.chapters[this.tour.index];
     this.onChapter?.(ch, this.tour.index);
     if (instant) {
+      this._setFov(ch.fov);
       this.camera.position.copy(ch.pos);
       this.controls.target.copy(ch.target);
       this.controls.update();
       return;
     }
-    this.flyTo(ch.pos, ch.target);
+    this.flyTo(ch.pos, ch.target, 2.2, ch.fov);
   }
   next() { this.goToChapter(this.tour.index + 1); }
   prev() { this.goToChapter(this.tour.index - 1); }
 
-  flyTo(pos, target, duration = 2.2) {
+  flyTo(pos, target, duration = 2.2, fov = this.camera.fov) {
     this.pause();
-    this.fly = { from: { pos: this.camera.position.clone(), target: this.controls.target.clone() }, to: { pos, target }, t: 0, duration };
+    this.fly = { from: { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov }, to: { pos, target, fov }, t: 0, duration };
+  }
+  _setFov(f) {
+    if (Math.abs(this.camera.fov - f) < 1e-3) return;
+    this.camera.fov = f;
+    this.camera.updateProjectionMatrix();
   }
 
   // Highlight a floor and fly the camera to it.
@@ -232,7 +250,7 @@ export class BuildingViewer {
     this.highlight.scale.y = y1 - y0;
     this.highlight.position.y = (y0 + y1) / 2;
     const y = (y0 + y1) / 2;
-    this.flyTo(new THREE.Vector3(W * 2.2, y + 8, D / 2 + Math.max(W, D) * 1.4), new THREE.Vector3(0, y, 0));
+    this.flyTo(new THREE.Vector3(W * 2.0, y + 8, D / 2 + Math.max(W, D) * 1.5), new THREE.Vector3(0, y, 0), 2.2, 42);
   }
   clearFloor() {
     if (this.highlight) this.highlight.visible = false;
@@ -260,10 +278,12 @@ export class BuildingViewer {
       const k = easeInOut(Math.min(f.t, 1));
       this.camera.position.lerpVectors(f.from.pos, f.to.pos, k);
       this.controls.target.lerpVectors(f.from.target, f.to.target, k);
+      this._setFov(f.from.fov + (f.to.fov - f.from.fov) * k);
       if (f.t >= 1) this.fly = null;
     } else if (this.tour.playing && this.chapters) {
       this._stepTour(dt);
     }
+    if (this.context) updateFades(this.context.fadeables, this.camera, dt, this.subjectBox);
     // Gentle pulse on hotspots.
     const pulse = 2 + Math.sin(performance.now() / 350) * 0.15;
     for (const s of this.hotspots) s.scale.set(pulse, pulse, 1);
@@ -285,6 +305,7 @@ export class BuildingViewer {
       pos.z *= 1 + bulge;
       this.camera.position.copy(pos);
       this.controls.target.lerpVectors(t.from.target, ch.target, k);
+      this._setFov(t.from.fov + (ch.fov - t.from.fov) * k);
       this.onProgress?.((t.index + k * 0.5) / this.chapters.length);
       if (t.t >= 1) { t.phase = 'hold'; t.t = 0; }
     } else {
@@ -295,7 +316,7 @@ export class BuildingViewer {
       this.onProgress?.((t.index + 0.5 + Math.min(t.t, 1) * 0.5) / this.chapters.length);
       if (t.t >= 1) {
         t.index = (t.index + 1) % this.chapters.length;
-        t.from = { pos: this.camera.position.clone(), target: this.controls.target.clone() };
+        t.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov };
         t.t = 0;
         t.phase = 'move';
         this.onChapter?.(this.chapters[t.index], t.index);

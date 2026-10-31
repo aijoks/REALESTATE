@@ -28,15 +28,17 @@ export const properties = [
     uses: ['Office', 'Medical', 'Retail'],
     headline: 'Pre-war brick office tower steps from Park Avenue',
     description:
-      'A classic pre-war, 15-story red-brick building on East 56th Street with a ' +
-      'limestone-trimmed crown, projecting corner bays and a double-height retail base. ' +
+      'A 1926 Rosario Candela-designed, 15-story red-brick building on East 56th Street with ' +
+      'projecting corner pavilions, a limestone-trimmed Flemish-gable crown and a two-storey retail base. ' +
       'Light-filled floors suit boutique office and medical users, with street-level ' +
       'retail in one of Midtown’s most trafficked blocks.',
+    // Public listings (Metro Manhattan, Showcase, Compass) report 1926, Rosario Candela,
+    // ~86,000 SF; story count is listed as 15 or 16 depending on the source.
     stats: [
       { label: 'Stories', value: '15' },
-      { label: 'Built', value: 'c. 1920s' }, // SAMPLE
-      { label: 'Typical floor', value: '±2,200 SF' }, // SAMPLE
-      { label: 'Uses', value: 'Office · Medical · Retail' },
+      { label: 'Built', value: '1926' },
+      { label: 'Building size', value: '±86,000 SF' },
+      { label: 'Architect', value: 'Rosario Candela' },
     ],
     highlights: [
       'Steps from the 59th St / Lexington Ave subway hub',
@@ -52,11 +54,11 @@ export const properties = [
     // SAMPLE availability — floor numbers match the 3D model's floors.
     availability: [
       { floor: 1, suite: 'Retail B', sf: 1100, use: 'Retail', rent: 'Upon request' },
-      { floor: 4, suite: 'Full floor', sf: 2200, use: 'Medical', rent: '$58 / SF' },
-      { floor: 7, suite: 'Full floor', sf: 2200, use: 'Office', rent: '$54 / SF' },
-      { floor: 8, suite: '8A', sf: 1150, use: 'Office', rent: '$55 / SF' },
-      { floor: 11, suite: 'Full floor', sf: 2200, use: 'Office', rent: '$56 / SF' },
-      { floor: 14, suite: 'Penthouse', sf: 1900, use: 'Office', rent: '$62 / SF' },
+      { floor: 4, suite: 'Full floor', sf: 5600, use: 'Medical', rent: '$58 / SF' },
+      { floor: 7, suite: 'Full floor', sf: 5600, use: 'Office', rent: '$54 / SF' },
+      { floor: 8, suite: '8A', sf: 2700, use: 'Office', rent: '$55 / SF' },
+      { floor: 11, suite: 'Full floor', sf: 5600, use: 'Office', rent: '$56 / SF' },
+      { floor: 14, suite: 'Full floor', sf: 5400, use: 'Office', rent: '$62 / SF' },
     ],
     photos: [
       { src: 'assets/properties/120-e-56th/street-view.webp', caption: 'Looking east along E 56th Street' },
@@ -68,22 +70,20 @@ export const properties = [
       procedural: {
         generator: 'prewarBrick',
         floors: 15,
-        width: 15.2, // metres of street frontage (~50 ft)
-        depth: 30, // metres deep (~100 ft)
-        storefronts: [
-          { kind: 'sign', text: "TRUMAN'S", sub: "GENTLEMEN'S GROOMERS", color: '#121212', ink: '#f2f2f2', span: [0, 0.4] },
-          { kind: 'entrance', text: '120 E 56 ST', span: [0.4, 0.62] },
-          { kind: 'awning', text: '120 E 56TH   MiRano   RISTORANTE', color: '#1f5fbf', span: [0.62, 1] },
-        ],
-        bannerText: ['SPACE', 'FOR', 'LEASE', '', 'Office', 'Medical', 'Retail'],
+        width: 18.3, // metres of street frontage (~60 ft)
+        depth: 30.5, // metres deep (~100 ft)
+        pavilionWidth: 4.4,
+        pavilionProjection: 1.6,
+        leaseBanner: ['SPACE', 'FOR', 'LEASE', '', 'Office', 'Medical', 'Retail'],
       },
       hotspots: [
-        { id: 'entrance', label: 'Lobby entrance', text: 'Attended lobby with elevator access to all floors.', at: [0.51, 0.06, 'front'] },
-        { id: 'retail', label: 'Street retail', text: "Ground-floor retail: Truman's and MiRano Ristorante.", at: [0.2, 0.05, 'front'] },
-        { id: 'spa', label: '2nd floor · Wellness', text: '22 Day Spa occupies the double-height 2nd floor.', at: [0.8, 0.13, 'front'] },
-        { id: 'crown', label: 'Limestone crown', text: 'Ornamental pre-war cornice and pediments.', at: [0.5, 0.97, 'front'] },
-        { id: 'roof', label: 'Roof & water tower', text: 'Classic NYC timber water tank and mechanical bulkhead.', at: [0.5, 1.08, 'roof'] },
-        { id: 'rear', label: 'Rear facade', text: 'Rear windows face the mid-block light court.', at: [0.5, 0.55, 'back'] },
+        { id: 'entrance', label: 'Lobby entrance', text: 'Attended lobby behind the black portal, with elevator access to all floors.', at: [0.5, 0.075, 'front'] },
+        { id: 'retail', label: 'Street retail', text: "Ground-floor retail: Truman's Gentlemen's Groomers and MiRano Ristorante.", at: [0.2, 0.05, 'front'] },
+        { id: 'spa', label: '2nd floor · Wellness', text: '22 Day Spa occupies the 2nd floor behind the five large windows.', at: [0.8, 0.13, 'front'] },
+        { id: 'pavilions', label: 'Corner pavilions', text: 'Projecting brick pavilions give corner offices windows on two sides.', at: [0.12, 0.55, 'front'] },
+        { id: 'crown', label: 'Limestone crown', text: 'Stone-framed top floors under a shaped Flemish gable.', at: [0.5, 0.9, 'front'] },
+        { id: 'roof', label: 'Roof & water tank', text: 'Timber water tank and stair bulkhead on the roof.', at: [0.75, 1.12, 'roof'] },
+        { id: 'rear', label: 'Rear facade', text: 'Rear windows face the mid-block yard; fire escape on the south wall.', at: [0.15, 0.5, 'back'] },
       ],
     },
   },
