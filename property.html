@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Property — Skyline & Co.</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="mark"></span><span data-company></span></a>
+      <nav>
+        <a href="index.html#listings">Listings</a>
+        <a href="#availability">Availability</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="crumbs"><a href="index.html">Home</a> / <a href="index.html#listings">Listings</a> / <span data-address></span></div>
+    <div class="prop-head">
+      <div>
+        <span class="status" data-status></span>
+        <h1 data-address></h1>
+        <div class="addr" data-location></div>
+      </div>
+      <div class="cta">
+        <a class="btn" href="#availability">See availability</a>
+        <a class="btn primary" href="#contact">Request a showing</a>
+      </div>
+    </div>
+
+    <div class="viewer-shell">
+      <div class="viewer" id="viewer">
+        <div class="viewer-loading" id="loading"><div><div class="spin"></div>Building 3D tour…</div></div>
+        <div class="hint" id="hint">Drag to orbit · Scroll to zoom · Click a marker for details</div>
+        <div class="hud top">
+          <span class="pill"><span class="dot"></span><span id="tour-state">Guided tour</span></span>
+          <span class="pill">360° · Front · Sides · Rear · Roof</span>
+        </div>
+        <div class="hud bottom">
+          <div class="chapter-title"><span class="eyebrow">Now viewing</span><span id="chapter-name">—</span></div>
+          <div class="progress"><i id="progress"></i></div>
+          <div class="chapters" id="chapters">
+            <span class="spacer"></span>
+            <button class="ctl" id="btn-prev" title="Previous stop">‹</button>
+            <button class="ctl" id="btn-play" title="Play / pause tour">❚❚ Pause</button>
+            <button class="ctl" id="btn-next" title="Next stop">›</button>
+          </div>
+        </div>
+        <div class="tooltip" id="tooltip" hidden><button class="x" id="tooltip-close">×</button><b></b><span></span></div>
+      </div>
+    </div>
+
+    <div class="detail">
+      <div>
+        <div class="panel">
+          <h3 data-headline></h3>
+          <p data-description></p>
+          <div class="statgrid" data-stats></div>
+        </div>
+        <div class="panel" id="availability">
+          <h3>Availability</h3>
+          <table>
+            <thead><tr><th>Floor</th><th>Suite</th><th>Size</th><th>Use</th><th>Asking rent</th></tr></thead>
+            <tbody data-availability></tbody>
+          </table>
+          <div class="table-note">Click a floor to see it highlighted on the building. Sizes and rents are sample figures pending verification.</div>
+        </div>
+        <div class="panel">
+          <h3>Photos</h3>
+          <div class="gallery" data-gallery></div>
+        </div>
+      </div>
+      <aside>
+        <div class="sticky">
+          <div class="panel">
+            <h3>Highlights</h3>
+            <ul class="hl" data-highlights></ul>
+          </div>
+          <div class="panel">
+            <h3>Tenants</h3>
+            <div class="tenants" data-tenants></div>
+          </div>
+          <div class="panel" id="contact">
+            <h3>Request a showing</h3>
+            <form class="contact" id="contact-form">
+              <input name="name" placeholder="Your name" required />
+              <input name="email" type="email" placeholder="Email" required />
+              <input name="company" placeholder="Company" />
+              <textarea name="message" placeholder="Which floors or uses interest you?"></textarea>
+              <button class="btn primary" type="submit">Send request</button>
+              <div class="contact-note" id="contact-note">Or call <span data-phone></span></div>
+            </form>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span data-company></span></span>
+      <span>3D model is a reconstruction for visualisation only.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/property.js"></script>
+</body>
+</html>
