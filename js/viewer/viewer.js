@@ -173,7 +173,7 @@ export class BuildingViewer {
     const look = (y, z = 0, x = 0) => new THREE.Vector3(x, y, z);
     // Front faces +z (north, onto E 56th St); +x is west, -x is east.
     this.chapters = [
-      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-1, 1.6, D / 2 + 12.5), target: look(13, D / 2 - 1), fov: 82, hold: 3 },
+      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-2, 9, D / 2 + 62), target: look(26, D / 2), fov: 52, hold: 3 },
       { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
       { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
       { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },
@@ -205,7 +205,7 @@ export class BuildingViewer {
   play() {
     if (!this.chapters) return;
     this.tour.playing = true;
-    this.tour.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov };
+    this.tour.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this._fov ?? this.camera.fov };
     this.tour.t = 0;
     this.tour.phase = 'move';
   }
@@ -234,13 +234,18 @@ export class BuildingViewer {
   next() { this.goToChapter(this.tour.index + 1); }
   prev() { this.goToChapter(this.tour.index - 1); }
 
-  flyTo(pos, target, duration = 2.2, fov = this.camera.fov) {
+  flyTo(pos, target, duration = 2.2, fov = this._fov ?? this.camera.fov) {
     this.pause();
-    this.fly = { from: { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov }, to: { pos, target, fov }, t: 0, duration };
+    this.fly = { from: { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this._fov ?? this.camera.fov }, to: { pos, target, fov }, t: 0, duration };
   }
+  // Chapter FOVs are authored for a landscape view; on narrow (portrait)
+  // screens widen the vertical FOV so the same horizontal framing fits.
   _setFov(f) {
-    if (Math.abs(this.camera.fov - f) < 1e-3) return;
-    this.camera.fov = f;
+    this._fov = f;
+    const k = Math.max(1, 1.5 / this.camera.aspect);
+    const eff = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(f) / 2) * k));
+    if (Math.abs(this.camera.fov - eff) < 1e-3) return;
+    this.camera.fov = Math.min(eff, 100);
     this.camera.updateProjectionMatrix();
   }
 
@@ -276,6 +281,7 @@ export class BuildingViewer {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
     this.camera.aspect = w / h;
+    if (this._fov) this._setFov(this._fov);
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h, false);
   }
@@ -333,7 +339,7 @@ export class BuildingViewer {
       this.onProgress?.((t.index + 0.5 + Math.min(t.t, 1) * 0.5) / this.chapters.length);
       if (t.t >= 1) {
         t.index = (t.index + 1) % this.chapters.length;
-        t.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this.camera.fov };
+        t.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this._fov ?? this.camera.fov };
         t.t = 0;
         t.phase = 'move';
         this._chapterFade(this.chapters[t.index]);

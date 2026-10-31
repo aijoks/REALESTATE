@@ -44,18 +44,15 @@
       <div class="viewer" id="viewer">
         <div class="viewer-loading" id="loading"><div><div class="spin"></div>Building 3D tour…</div></div>
         <div class="hint" id="hint">Drag to orbit · Scroll to zoom · Click a marker for details</div>
-        <div class="hud top">
-          <span class="pill"><span class="dot"></span><span id="tour-state">Guided tour</span></span>
-          <span class="pill">360° · Front · Sides · Rear · Roof</span>
-        </div>
         <div class="hud bottom">
-          <div class="chapter-title"><span class="eyebrow">Now viewing</span><span id="chapter-name">—</span></div>
           <div class="progress"><i id="progress"></i></div>
-          <div class="chapters" id="chapters">
-            <span class="spacer"></span>
-            <button class="ctl" id="btn-prev" title="Previous stop">‹</button>
-            <button class="ctl" id="btn-play" title="Play / pause tour">❚❚ Pause</button>
-            <button class="ctl" id="btn-next" title="Next stop">›</button>
+          <div class="tour-bar">
+            <div class="chapter-strip" id="chapters" role="tablist" aria-label="Tour stops"></div>
+            <div class="tour-controls">
+              <button class="ctl" id="btn-prev" title="Previous stop" aria-label="Previous stop">‹</button>
+              <button class="ctl" id="btn-play" title="Pause tour" aria-label="Pause tour">❚❚</button>
+              <button class="ctl" id="btn-next" title="Next stop" aria-label="Next stop">›</button>
+            </div>
           </div>
         </div>
         <div class="tooltip" id="tooltip" hidden><button class="x" id="tooltip-close">×</button><b></b><span></span></div>

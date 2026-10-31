@@ -30,11 +30,9 @@ tbody.innerHTML = p.availability
 
 // ---------- 3D viewer ----------
 const el = document.getElementById('viewer');
-const chapterName = document.getElementById('chapter-name');
 const progress = document.getElementById('progress');
 const chaptersEl = document.getElementById('chapters');
 const playBtn = document.getElementById('btn-play');
-const stateEl = document.getElementById('tour-state');
 const tooltip = document.getElementById('tooltip');
 const hint = document.getElementById('hint');
 let activeHotspot = null;
@@ -42,9 +40,14 @@ let chapterButtons = [];
 
 const viewer = new BuildingViewer(el, p, {
   onChapter(ch, i) {
-    chapterName.textContent = ch.label;
     if (!chapterButtons.length) buildChapterButtons();
-    chapterButtons.forEach((b, j) => b.classList.toggle('active', j === i));
+    chapterButtons.forEach((b, j) => {
+      b.classList.toggle('active', j === i);
+      b.setAttribute('aria-selected', j === i);
+    });
+    // Keep the active stop visible in the one-line strip.
+    const active = chapterButtons[i];
+    chaptersEl.scrollTo({ left: active.offsetLeft - chaptersEl.clientWidth / 2 + active.offsetWidth / 2, behavior: 'smooth' });
     document.getElementById('loading').classList.add('hide');
   },
   onProgress(f) { progress.style.width = `${f * 100}%`; },
@@ -58,20 +61,21 @@ const viewer = new BuildingViewer(el, p, {
 });
 
 function buildChapterButtons() {
-  const spacer = chaptersEl.querySelector('.spacer');
   viewer.chapters.forEach((ch, i) => {
     const b = document.createElement('button');
     b.textContent = ch.label;
+    b.setAttribute('role', 'tab');
     b.addEventListener('click', () => { viewer.goToChapter(i); syncState(); });
-    chaptersEl.insertBefore(b, spacer);
+    chaptersEl.appendChild(b);
     chapterButtons.push(b);
   });
 }
 
 function syncState() {
   const playing = viewer.tour.playing;
-  playBtn.textContent = playing ? '❚❚ Pause' : '▶ Play tour';
-  stateEl.textContent = playing ? 'Guided tour' : 'Free look';
+  playBtn.textContent = playing ? '❚❚' : '▶';
+  playBtn.title = playing ? 'Pause tour' : 'Play tour';
+  playBtn.setAttribute('aria-label', playBtn.title);
 }
 playBtn.addEventListener('click', () => { viewer.toggle(); syncState(); });
 document.getElementById('btn-next').addEventListener('click', () => { viewer.next(); syncState(); });
