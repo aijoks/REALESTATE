@@ -378,13 +378,20 @@ export function leaseBannerTexture({
   ctx.textBaseline = 'alphabetic';
 
   const logo = (y) => {
-    // Stepped-squares mark, then the wordmark.
-    const s = 22;
-    const x0 = 58;
-    for (let row = 0; row < 4; row++) {
-      for (let col = 0; col <= row; col++) {
-        ctx.fillStyle = (row + col) % 2 ? '#ffffff' : '#d8322b';
-        ctx.fillRect(x0 + col * s, y + 70 - row * s, s - 3, s - 3);
+    // Staircase mark: four columns of 1-4 squares rising to the right, each
+    // column capped in orange over blue, separated by thin white joints.
+    const s = 24;
+    const gap = 3;
+    const x0 = 54;
+    const yb = y + 96;
+    for (let c = 0; c < 4; c++) {
+      for (let k = 0; k <= c; k++) {
+        const x = x0 + c * s;
+        const top = yb - (k + 1) * s;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x - gap, top - gap, s + gap, s + gap);
+        ctx.fillStyle = k === c ? '#cf5b2c' : '#1f4f99';
+        ctx.fillRect(x, top, s - gap, s - gap);
       }
     }
     ctx.fillStyle = '#ffffff';
