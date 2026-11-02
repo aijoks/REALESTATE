@@ -63,6 +63,8 @@ export const properties = [
     photos: [
       { src: 'assets/properties/120-e-56th/street-view.webp', caption: 'Looking east along E 56th Street' },
       { src: 'assets/properties/120-e-56th/storefront.webp', caption: 'Retail base & lobby entrance' },
+      { src: 'assets/properties/120-e-56th/interior-open-plan.webp', caption: 'Open-plan office with maple floors & glass offices' },
+      { src: 'assets/properties/120-e-56th/interior-window-bay.webp', caption: 'Window bay with French doors between glass offices' },
     ],
     cover: 'assets/properties/120-e-56th/street-view.webp',
     model: {

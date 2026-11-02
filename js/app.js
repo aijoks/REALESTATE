@@ -11,8 +11,14 @@ function card(p) {
   a.className = 'card reveal';
   a.href = `property.html?id=${encodeURIComponent(p.id)}`;
   a.innerHTML = `
-    <div class="media">
-      <img src="${p.cover}" alt="${p.address}" loading="lazy" />
+    <div class="media" data-carousel>
+      <div class="slides">
+        ${p.photos.map((ph, i) => `<img src="${ph.src}" alt="${ph.caption}" ${i ? 'loading="lazy"' : ''} />`).join('')}
+      </div>
+      ${p.photos.length > 1 ? `
+      <button class="nav prev" type="button" aria-label="Previous photo">‹</button>
+      <button class="nav next" type="button" aria-label="Next photo">›</button>
+      <div class="dots">${p.photos.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}
       <span class="badge">${p.status}</span>
       <span class="badge tour">360° 3D tour</span>
     </div>
@@ -27,11 +33,35 @@ function card(p) {
   return a;
 }
 
+// Photo carousel inside each card: arrows flick through the property's
+// photos without following the card's link.
+function initCarousel(media) {
+  const slides = media.querySelector('.slides');
+  const dots = [...media.querySelectorAll('.dots i')];
+  const n = slides.children.length;
+  let i = 0;
+  const show = (k) => {
+    i = (k + n) % n;
+    slides.style.transform = `translateX(${-i * 100}%)`;
+    dots.forEach((d, j) => d.classList.toggle('on', j === i));
+  };
+  media.querySelectorAll('.nav').forEach((b) => b.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    show(i + (b.classList.contains('next') ? 1 : -1));
+  }));
+}
+
 function render(use = 'all') {
   grid.innerHTML = '';
   properties
     .filter((p) => use === 'all' || p.uses.includes(use))
-    .forEach((p) => grid.appendChild(card(p)));
+    .forEach((p) => {
+      const c = card(p);
+      grid.appendChild(c);
+      const media = c.querySelector('[data-carousel]');
+      if (media.querySelector('.nav')) initCarousel(media);
+    });
   observeReveals();
 }
 
