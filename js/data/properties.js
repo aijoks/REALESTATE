@@ -87,6 +87,12 @@ export const properties = [
           phone: '212.594.7272',
         },
       },
+      // Streetscape: neighbours + the avenue (eastLine = x of its east building line).
+      site: { id: 'e56-park', street: 'E 56 St', avenue: { kind: 'park', name: 'Park Av', eastLine: 56 } },
+      tour: {
+        avenue: { label: 'From Park Avenue', pos: [80, 1.7, 25.75], target: [8, 13, 20.25], fov: 62 },
+        westLabel: 'West side · lease banner',
+      },
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'Attended lobby behind the black portal, with elevator access to all floors.', at: [0.5, 0.075, 'front'] },
         { id: 'retail', label: 'Street retail', text: "Ground-floor retail: Truman's Gentlemen's Groomers and MiRano Ristorante.", at: [0.2, 0.05, 'front'] },
@@ -95,6 +101,81 @@ export const properties = [
         { id: 'crown', label: 'Limestone crown', text: 'Stone-framed top floors under a shaped Flemish gable.', at: [0.5, 0.9, 'front'] },
         { id: 'roof', label: 'Roof & water tank', text: 'Timber water tank and stair bulkhead on the roof.', at: [0.75, 1.12, 'roof'] },
         { id: 'rear', label: 'Rear facade', text: 'Rear windows face the mid-block yard; fire escape on the south wall.', at: [0.15, 0.5, 'back'] },
+      ],
+    },
+  },
+  {
+    id: '10-e-38th',
+    address: '10 E 38th Street',
+    city: 'New York, NY 10016',
+    neighborhood: 'Murray Hill',
+    crossStreets: 'Between Fifth Ave & Madison Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: 'Loft office floors half a block from Fifth Avenue',
+    description:
+      'A buff-brick loft building on East 38th Street, a few steps from Fifth Avenue. Wide floor plates ' +
+      'with original hardwood floors, high ceilings, exposed ductwork and eleven oversized windows across ' +
+      'every floor, plus a furnished shared roof terrace looking out to the Empire State Building.',
+    // Public listings (Crexi, Office Freedom) give 1916 and ~68,000 SF; one database
+    // lists 11 floors / 45 m. The model uses 11 storeys at loft floor heights.
+    stats: [
+      { label: 'Stories', value: '11' },
+      { label: 'Built', value: '1916' },
+      { label: 'Building size', value: '±68,000 SF' },
+      { label: 'Class', value: 'B · Loft office' },
+    ],
+    highlights: [
+      'Half a block from Fifth Avenue; short walk to Bryant Park and Grand Central',
+      'Hardwood floors, high ceilings and exposed ductwork',
+      'Eleven oversized windows across each floor',
+      'Shared roof terrace with Empire State Building views',
+    ],
+    tenants: [],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 2, suite: 'Full floor', sf: 6000, use: 'Office / Showroom', rent: '$52 / SF' },
+      { floor: 5, suite: 'Full floor', sf: 6000, use: 'Office', rent: '$50 / SF' },
+      { floor: 7, suite: '7S', sf: 3100, use: 'Office', rent: '$51 / SF' },
+      { floor: 9, suite: 'Full floor', sf: 6000, use: 'Office', rent: '$53 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/10-e-38th/street-angle.jpg', caption: 'Looking west along E 38th Street' },
+      { src: 'assets/properties/10-e-38th/facade.webp', caption: 'Buff-brick facade over the stone base' },
+      { src: 'assets/properties/10-e-38th/loft-floor.webp', caption: 'Open loft floor with hardwood and exposed ductwork' },
+      { src: 'assets/properties/10-e-38th/loft-floor-2.webp', caption: 'Column-free bays along the street windows' },
+      { src: 'assets/properties/10-e-38th/roof-terrace.webp', caption: 'Shared roof terrace facing the Empire State Building' },
+    ],
+    cover: 'assets/properties/10-e-38th/street-angle.jpg',
+    model: {
+      glb: null,
+      procedural: {
+        generator: 'buffLoft',
+        floors: 11,
+        width: 17.4, // metres of street frontage (~57 ft)
+        depth: 30.5, // metres deep (~100 ft)
+        flag: ['OFFICE', 'SPACE', 'FOR LEASE'],
+        address: '10',
+      },
+      site: { id: 'e38-fifth', street: 'E 38 St', avenue: { kind: 'fifth', name: '5 Av', eastLine: 38.7 } },
+      tour: {
+        avenue: { label: 'From Fifth Avenue', pos: [56, 1.7, 25.75], target: [7, 12, 20.25], fov: 62 },
+        omit: ['crown'],
+        extra: [
+          { id: 'terrace', label: 'Roof terrace', pos: [-3, 55, 25], target: [0.5, 46.5, 6], fov: 48 },
+          {
+            id: 'esb', label: 'Terrace view · Empire State', pos: [-4, 47.4, 10], target: [15.4, 76.1, -39], fov: 62,
+            fade: 'street', targets: [[133, 320, -335], [133, 160, -335]],
+          },
+        ],
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Lobby entrance', text: 'Lobby behind the stone surround with "10" over the door.', at: [0.15, 0.06, 'front'] },
+        { id: 'retail', label: 'Street retail', text: 'Restaurant and shop at grade; sidewalk shed currently in place.', at: [0.62, 0.05, 'front'] },
+        { id: 'second', label: '2nd floor', text: 'Three oversized gridded windows across the stone base.', at: [0.5, 0.15, 'front'] },
+        { id: 'facade', label: 'Loft floors', text: 'Eleven windows per floor in a 3 · 5 · 3 rhythm; high ceilings inside.', at: [0.8, 0.6, 'front'] },
+        { id: 'terrace', label: 'Roof terrace', text: 'Shared terrace with lounge seating, bistro tables and skyline views.', at: [0.35, 1.06, 'roof'] },
+        { id: 'rear', label: 'Rear facade', text: 'Rear windows face a small mid-block yard.', at: [0.3, 0.5, 'back'] },
       ],
     },
   },

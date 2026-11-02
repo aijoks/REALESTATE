@@ -9,7 +9,7 @@ const grid = document.querySelector('[data-grid]');
 function card(p) {
   const a = document.createElement('a');
   a.className = 'card reveal';
-  a.href = `property.html?id=${encodeURIComponent(p.id)}`;
+  a.href = `property.html#${encodeURIComponent(p.id)}`;
   a.innerHTML = `
     <div class="media" data-carousel>
       <div class="slides">

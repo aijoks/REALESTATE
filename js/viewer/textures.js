@@ -122,6 +122,11 @@ export const BRICK = {
     palette: [[100, 64, 52], [88, 56, 46], [110, 72, 58], [78, 50, 42], [116, 80, 66]],
     mortar: '#6a5a50', clinker: 0.05, seed: 5,
   }),
+  // Buff / cream face brick of 1910s loft buildings (10 E 38th St).
+  buff: () => brick('buff', {
+    palette: [[214, 198, 172], [202, 186, 160], [222, 208, 184], [192, 176, 150], [208, 192, 164], [198, 178, 148]],
+    mortar: '#c3bcae', clinker: 0.05, seed: 38,
+  }),
   // Lighter, rougher common brick on the side and rear walls.
   common: () => brick('common', {
     palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],
@@ -257,6 +262,56 @@ export function facadeTexture(kind, seed = 1) {
         ctx.fillRect(x, y + 10, 30, 40);
         ctx.fillStyle = '#b9ad98';
         ctx.fillRect(x - 3, y + 50, 36, 4);
+      }
+    } else if (kind === 'netting') {
+      // Black construction netting with orange stripes over pipe scaffold.
+      ctx.fillStyle = '#16181a';
+      ctx.fillRect(0, 0, size, size);
+      for (let i = 0; i < 3000; i++) { ctx.fillStyle = `rgba(255,255,255,${r() * 0.05})`; ctx.fillRect(r() * size, r() * size, 1, 3); }
+      ctx.fillStyle = 'rgba(60,64,68,0.55)';
+      for (let y = 0; y < size; y += 43) ctx.fillRect(0, y, size, 3);
+      for (let x = 0; x < size; x += 64) {
+        ctx.fillStyle = '#b8521d';
+        ctx.fillRect(x + 30, 0, 3, size);
+        ctx.fillStyle = 'rgba(90,96,100,0.5)';
+        ctx.fillRect(x + 6, 0, 2, size);
+      }
+    } else if (kind === 'beaux') {
+      // Beaux-arts limestone: deep window pairs between pilasters.
+      ctx.fillStyle = '#d6ccb8';
+      ctx.fillRect(0, 0, size, size);
+      for (let i = 0; i < 4000; i++) { ctx.fillStyle = `rgba(80,70,55,${r() * 0.06})`; ctx.fillRect(r() * size, r() * size, 2, 2); }
+      for (let y = 0; y < size; y += 128) {
+        ctx.fillStyle = '#c2b7a1'; ctx.fillRect(0, y + 116, size, 12);
+        for (let x = 0; x < size; x += 128) {
+          ctx.fillStyle = '#e3dac8'; ctx.fillRect(x, y, 18, 128);
+          for (const dx of [32, 78]) {
+            ctx.fillStyle = '#9d9282'; ctx.fillRect(x + dx - 3, y + 18, 40, 86);
+            ctx.fillStyle = r() < 0.2 ? '#4f5156' : '#2a2d31'; ctx.fillRect(x + dx, y + 22, 34, 78);
+            ctx.fillStyle = '#c9bfab'; ctx.fillRect(x + dx - 4, y + 100, 42, 6);
+          }
+        }
+      }
+    } else if (kind === 'brickwall') {
+      // Plain red-brick party wall.
+      ctx.fillStyle = '#8b4c3a';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 8) {
+        const off = (y / 8) % 2 ? 12 : 0;
+        for (let x = -off; x < size; x += 24) {
+          const v = 0.85 + r() * 0.3;
+          ctx.fillStyle = `rgb(${142 * v | 0},${76 * v | 0},${58 * v | 0})`;
+          ctx.fillRect(x + 1, y + 1, 22, 6);
+        }
+      }
+      for (let i = 0; i < 25; i++) { ctx.fillStyle = `rgba(40,40,40,${r() * 0.12})`; ctx.fillRect(r() * size, r() * size, 40 + r() * 120, 20 + r() * 80); }
+    } else if (kind === 'esb') {
+      // Limestone with continuous vertical window strips and metal spandrels.
+      ctx.fillStyle = '#cdc7ba';
+      ctx.fillRect(0, 0, size, size);
+      for (let x = 8; x < size; x += 32) {
+        ctx.fillStyle = '#9aa1a8'; ctx.fillRect(x, 0, 14, size);
+        for (let y = 0; y < size; y += 36) { ctx.fillStyle = r() < 0.12 ? '#e7d8b0' : '#3a4148'; ctx.fillRect(x + 2, y + 6, 10, 24); }
       }
     } else if (kind === 'whitegrid') {
       ctx.fillStyle = '#eef0f2';

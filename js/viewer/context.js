@@ -1,4 +1,7 @@
-// Street + neighbouring buildings around 120 E 56th St (front faces +z = north).
+// Street, avenue and neighbouring buildings for each site (front faces +z = north,
+// +x = west). Shared streetscape + per-site neighbours, chosen by `site.id`.
+//
+// e56-park — 120 E 56th St:
 //   east  (-x): Tower 56 — stepped podium with slanted glass setbacks, tall tower behind
 //   west  (+x): silver fluted tower built tight against the west wall (front set
 //               back so the banner strip shows), open paving in front of it
@@ -6,9 +9,16 @@
 //   north (+z): across E 56th St — white grid tower, pre-war stone building, 445 Park
 //   Park Avenue (+x, ~56 m west): two roadways + planted median, 425 Park on the
 //   SE corner, 445 Park on the NE corner, towers lining the avenue
+//
+// e38-fifth — 10 E 38th St:
+//   east  (-x): building wrapped in black construction netting + pipe scaffold
+//   west  (+x): ornate limestone corner building with a deep dark cornice
+//   south (-z): plain brick party walls a few storeys above the roof terrace
+//   Fifth Avenue (+x, ~30 m west): one-way southbound, Empire State Building 4
+//   blocks south; green sidewalk shed along the frontage
 // Neighbours fade out whenever they block the view of the subject building.
 import * as THREE from 'three';
-import { facadeTexture, rand } from './textures.js';
+import { facadeTexture, textTexture, rand } from './textures.js';
 
 function boxUV(w, h, d, tileW, tileH) {
   const g = new THREE.BoxGeometry(w, h, d);
@@ -30,9 +40,16 @@ const TILES = {
   louver: [6, 6],
   prewar: [14, 22],
   whitegrid: [12, 13.4],
+  netting: [12, 24],
+  beaux: [10, 16.4],
+  brickwall: [8, 12],
+  esb: [10, 14],
 };
 
-export function buildContext(scene, { W, D }) {
+export function buildContext(scene, { W, D, site = {} }) {
+  const siteId = site.id ?? 'e56-park';
+  const av = site.avenue ?? { kind: 'park', name: 'Park Av', eastLine: 56 };
+  const streetName = site.street ?? 'E 56 St';
   const fadeables = [];
   const r = rand(56);
   const front = D / 2;
@@ -40,9 +57,16 @@ export function buildContext(scene, { W, D }) {
   const road = 10.6;
   const farWalk = front + walk + road;
   const acrossZ = farWalk + walk;
-  // Park Avenue (runs along z). x grows westward.
-  const PK = { eastLine: 56, eastCurb: 61, median0: 73, median1: 79, westCurb: 91, westLine: 96 };
-  const streetZ = (k) => front + walk + road / 2 + k * 80; // centre of E 56th (k=0), 57th (1), 55th (-1)...
+  // The avenue runs along z; x grows westward. Park Ave: two roadways and a
+  // planted median. Fifth Ave: one wide one-way (southbound) roadway.
+  const e = av.eastLine;
+  const PK = av.kind === 'park'
+    ? { eastLine: e, eastCurb: e + 5, median0: e + 17, median1: e + 23, westCurb: e + 35, westLine: e + 40, median: true,
+      lanes: [e + 9, e + 13, e + 27, e + 31] }
+    : { eastLine: e, eastCurb: e + 6, westCurb: e + 24.5, westLine: e + 30.5, median: false,
+      lanes: [e + 9.7, e + 13.4, e + 17.1, e + 20.8] };
+  const avMid = (PK.eastLine + PK.westLine) / 2;
+  const streetZ = (k) => front + walk + road / 2 + k * 80; // centre of our street (k=0), next street north (1), south (-1)...
 
   // ---------- ground, sidewalks, street ----------
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600), new THREE.MeshStandardMaterial({ color: '#7d7b78', roughness: 1 }));
@@ -104,7 +128,7 @@ export function buildContext(scene, { W, D }) {
     for (const [x0, x1] of [[-260, PK.eastLine - 1], [PK.westLine + 1, 320]]) flat(lineMat, x0, x1, front + walk + dz - 0.06, front + walk + dz + 0.06, 0.02);
   }
 
-  // ---------- Park Avenue ----------
+  // ---------- the avenue ----------
   {
     const half = road / 2;
     const zMin = -420;
@@ -126,6 +150,11 @@ export function buildContext(scene, { W, D }) {
         c.position.set(x, 0.085, (z0 + z1) / 2);
         scene.add(c);
       }
+      // Lane dashes.
+      for (const x of PK.lanes) {
+        for (let z = z0 + 6; z < z1 - 6; z += 9) flat(lineMat, x - 0.06, x + 0.06, z, z + 3, 0.02);
+      }
+      if (!PK.median) continue;
       // Planted median, stopping short of the crosswalks, with yellow noses.
       const m0 = z0 + 3.6;
       const m1 = z1 - 3.6;
@@ -146,12 +175,9 @@ export function buildContext(scene, { W, D }) {
       for (let z = m0 + 1.4; z < m1 - 1.2; z += 1.1) {
         for (const dx of [-1.6, 0, 1.6]) shrubs.push([(PK.median0 + PK.median1) / 2 + dx + (r() - 0.5) * 0.5, z + (r() - 0.5) * 0.4, 0.45 + r() * 0.35]);
       }
-      // Lane dashes: three lanes each way.
-      for (const x of [PK.eastCurb + 4, PK.eastCurb + 8, PK.median1 + 4, PK.median1 + 8]) {
-        for (let z = z0 + 6; z < z1 - 6; z += 9) flat(lineMat, x - 0.06, x + 0.06, z, z + 3, 0.02);
-      }
     }
     // Shrubs on the median (instanced).
+    if (shrubs.length) {
     const shrubMesh = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1 }), shrubs.length);
     const mm = new THREE.Matrix4();
     const cc = new THREE.Color();
@@ -162,12 +188,13 @@ export function buildContext(scene, { W, D }) {
     });
     shrubMesh.castShadow = true;
     scene.add(shrubMesh);
+    }
 
-    // Crosswalks at E 56th: across the avenue (both sides) and across 56th.
+    // Crosswalks at our street: across the avenue (both sides) and across the street.
     const zebra = new THREE.MeshBasicMaterial({ color: '#e9e7e0' });
     for (const [za, zb] of [[front + 0.6, front + walk - 0.6], [farWalk + 0.6, acrossZ - 0.6]]) {
       for (let x = PK.eastCurb + 0.6; x < PK.westCurb - 0.4; x += 1.2) {
-        if (x > PK.median0 - 0.3 && x < PK.median1 + 0.3) continue;
+        if (PK.median && x > PK.median0 - 0.3 && x < PK.median1 + 0.3) continue;
         flat(zebra, x - 0.3, x + 0.3, za, zb, 0.021);
       }
     }
@@ -176,8 +203,12 @@ export function buildContext(scene, { W, D }) {
     }
     // Stop bars.
     flat(zebra, PK.eastLine - 4.4, PK.eastLine - 3.9, front + walk, farWalk, 0.021);
-    flat(zebra, PK.eastCurb, PK.median0, front - 0.6, front - 0.1, 0.021);
-    flat(zebra, PK.median1, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021);
+    if (PK.median) {
+      flat(zebra, PK.eastCurb, PK.median0, front - 0.6, front - 0.1, 0.021);
+      flat(zebra, PK.median1, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021);
+    } else {
+      flat(zebra, PK.eastCurb, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021); // southbound only
+    }
 
     // Traffic signals, one-way and street-name signs.
     const poleMat = new THREE.MeshStandardMaterial({ color: '#3a3f3b', roughness: 0.55, metalness: 0.5 });
@@ -211,8 +242,10 @@ export function buildContext(scene, { W, D }) {
     signal(PK.eastCurb - 0.5, acrossZ - 0.8, Math.PI, 'green');
     signal(PK.westCurb + 0.5, front + 0.8, 0, 'red');
     signal(PK.westCurb + 0.5, acrossZ - 0.8, -Math.PI / 2, 'red');
-    signal((PK.median0 + PK.median1) / 2, front - 3.2, Math.PI, 'green');
-    signal((PK.median0 + PK.median1) / 2, acrossZ + 3.2, 0, 'green');
+    if (PK.median) {
+      signal((PK.median0 + PK.median1) / 2, front - 3.2, Math.PI, 'green');
+      signal((PK.median0 + PK.median1) / 2, acrossZ + 3.2, 0, 'green');
+    }
 
     const signTex = (draw, w = 256, h = 96) => {
       const c = document.createElement('canvas');
@@ -222,14 +255,20 @@ export function buildContext(scene, { W, D }) {
       t.colorSpace = THREE.SRGBColorSpace;
       return t;
     };
-    const oneWay = signTex((ctx, w, h) => {
+    const oneWaySign = (pointRight) => signTex((ctx, w, h) => {
       ctx.fillStyle = '#111'; ctx.fillRect(0, 0, w, h);
+      ctx.save();
+      if (!pointRight) { ctx.translate(w, 0); ctx.scale(-1, 1); }
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.moveTo(18, h / 2 - 22); ctx.lineTo(w - 70, h / 2 - 22); ctx.lineTo(w - 70, h / 2 - 38); ctx.lineTo(w - 14, h / 2);
       ctx.lineTo(w - 70, h / 2 + 38); ctx.lineTo(w - 70, h / 2 + 22); ctx.lineTo(18, h / 2 + 22); ctx.closePath(); ctx.fill();
+      ctx.restore();
       ctx.fillStyle = '#111'; ctx.font = 'bold 34px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('ONE WAY', w / 2 - 20, h / 2 + 2);
+      ctx.fillText('ONE WAY', pointRight ? w / 2 - 20 : w / 2 + 20, h / 2 + 2);
     });
+    // A plate facing +z shows texture-right as world +x (west); one facing -z
+    // shows it as world -x (east).
+    const east = (site.streetDir ?? 'east') === 'east';
     const blade = (txt) => signTex((ctx, w, h) => {
       ctx.fillStyle = '#0f6b3a'; ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = '#fff'; ctx.lineWidth = 4; ctx.strokeRect(5, 5, w - 10, h - 10);
@@ -242,15 +281,16 @@ export function buildContext(scene, { W, D }) {
       m.rotation.y = ry;
       scene.add(m);
     };
-    // One-way (westbound) signs on E 56th at the avenue, plus street-name blades.
-    plate(oneWay, 1.2, 0.45, PK.eastCurb - 0.5, 3.4, acrossZ - 0.62, 0);
-    plate(oneWay, 1.2, 0.45, PK.eastCurb - 0.5, 3.4, front + 0.98, Math.PI);
-    plate(blade('E 56 St'), 1.3, 0.3, PK.eastCurb - 0.5, 5.45, front + 0.8, 0);
-    plate(blade('Park Av'), 1.3, 0.3, PK.eastCurb - 0.5, 5.8, front + 0.8, Math.PI / 2);
-    plate(blade('E 56 St'), 1.3, 0.3, PK.westCurb + 0.5, 5.45, acrossZ - 0.8, 0);
-    plate(blade('Park Av'), 1.3, 0.3, PK.westCurb + 0.5, 5.8, acrossZ - 0.8, Math.PI / 2);
+    // One-way signs on our street at the avenue, plus street-name blades.
+    plate(oneWaySign(!east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, acrossZ - 0.62, 0);
+    plate(oneWaySign(east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, front + 0.98, Math.PI);
+    plate(blade(streetName), 1.3, 0.3, PK.eastCurb - 0.5, 5.45, front + 0.8, 0);
+    plate(blade(av.name), 1.3, 0.3, PK.eastCurb - 0.5, 5.8, front + 0.8, Math.PI / 2);
+    plate(blade(streetName), 1.3, 0.3, PK.westCurb + 0.5, 5.45, acrossZ - 0.8, 0);
+    plate(blade(av.name), 1.3, 0.3, PK.westCurb + 0.5, 5.8, acrossZ - 0.8, Math.PI / 2);
 
     // Con Ed steam stack in E 56th, as in the photo from Park Ave.
+    if (siteId === 'e56-park') {
     const stackTex = signTex((ctx, w, h) => {
       for (let y = 0; y < h; y += 16) { ctx.fillStyle = (y / 16) % 2 ? '#f1f1ef' : '#ee5a1c'; ctx.fillRect(0, y, w, 16); }
     }, 64, 128);
@@ -263,6 +303,7 @@ export function buildContext(scene, { W, D }) {
       const puff = new THREE.Mesh(new THREE.SphereGeometry(0.45 + i * 0.12, 14, 10), steamMat);
       puff.position.set(44 + (r() - 0.5) * 0.6 - i * 0.12, 2.9 + i * 0.55, front + walk + 3.2 + (r() - 0.5) * 0.5);
       scene.add(puff);
+    }
     }
   }
 
@@ -307,6 +348,7 @@ export function buildContext(scene, { W, D }) {
   };
 
   const eastX = -W / 2 - 0.05;
+  if (siteId === 'e56-park') {
   // Tower 56 — granite/glass podium, stepped louvred setbacks, tower behind.
   {
     const parts = [];
@@ -377,6 +419,10 @@ export function buildContext(scene, { W, D }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'e38-fifth') {
+    neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, acrossZ, streetZ, PK, slab, r });
+  }
+
   // Further along the street, to make the canyon.
   for (const side of [-1, 1]) {
     for (let i = 0; i < 5; i++) {
@@ -396,6 +442,7 @@ export function buildContext(scene, { W, D }) {
       const z0 = streetZ(k) + road / 2 + walk;
       const z1 = streetZ(k + 1) - road / 2 - walk;
       block(kinds[n++ % kinds.length], 18, PK.eastLine, z0, z1, 55 + r() * 170, 0, { fade: false });
+      if (siteId === 'e38-fifth' && k === -5) { n++; continue; } // Empire State Building lot
       block(kinds[n++ % kinds.length], PK.westLine, PK.westLine + 50, z0, z1, 55 + r() * 190, 0, { fade: false });
     }
   }
@@ -411,7 +458,7 @@ export function buildContext(scene, { W, D }) {
       const dist = 230 + r() * 420;
       const w = 20 + r() * 35;
       const h = 30 + r() ** 2 * 220;
-      if (Math.abs(Math.cos(a) * dist - 76) < 45) { m.makeScale(0, 0, 0); sky.setMatrixAt(i, m); continue; }
+      if (Math.abs(Math.cos(a) * dist - avMid) < 45) { m.makeScale(0, 0, 0); sky.setMatrixAt(i, m); continue; }
       m.compose(new THREE.Vector3(Math.cos(a) * dist, h / 2, Math.sin(a) * dist), new THREE.Quaternion(), new THREE.Vector3(w, h, 20 + r() * 35));
       sky.setMatrixAt(i, m);
       sky.setColorAt(i, col.set(['#9aa6b1', '#b8b2a6', '#7f8d9a', '#c9cdd1'][i % 4]));
@@ -452,14 +499,25 @@ export function buildContext(scene, { W, D }) {
   vehicle(2, front + walk + 5.2, { len: 4.8, ht: 1.6, body: yellow, cabin: 0.5 });
   vehicle(-30, farWalk - 1.2, { len: 4.7, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#2b3a4f', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
 
-  // Park Avenue traffic: northbound on the east roadway, southbound on the west.
   const cab = { len: 4.8, ht: 1.7, body: yellow, cabin: 0.5 };
   const black = new THREE.MeshStandardMaterial({ color: '#15171b', roughness: 0.25, metalness: 0.6 });
-  vehicle(PK.eastCurb + 2, front - 8, { ...cab, heading: -Math.PI / 2 });
-  vehicle(PK.eastCurb + 6, front - 22, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: -Math.PI / 2 });
-  vehicle(PK.median1 + 6, acrossZ + 9, { ...cab, heading: Math.PI / 2 });
-  vehicle(PK.median1 + 10, acrossZ + 24, { len: 7.5, ht: 3.4, body: white, cabin: 0.3, heading: Math.PI / 2 });
-  vehicle(PK.median1 + 2, front - 30, { len: 4.7, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#6b6f75', roughness: 0.3, metalness: 0.6 }), cabin: 0.5, heading: Math.PI / 2 });
+  const grey = new THREE.MeshStandardMaterial({ color: '#6b6f75', roughness: 0.3, metalness: 0.6 });
+  if (PK.median) {
+    // Park Avenue traffic: northbound on the east roadway, southbound on the west.
+    vehicle(PK.eastCurb + 2, front - 8, { ...cab, heading: -Math.PI / 2 });
+    vehicle(PK.eastCurb + 6, front - 22, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: -Math.PI / 2 });
+    vehicle(PK.median1 + 6, acrossZ + 9, { ...cab, heading: Math.PI / 2 });
+    vehicle(PK.median1 + 10, acrossZ + 24, { len: 7.5, ht: 3.4, body: white, cabin: 0.3, heading: Math.PI / 2 });
+    vehicle(PK.median1 + 2, front - 30, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: Math.PI / 2 });
+  } else {
+    // One-way avenue (Fifth): everything southbound, plus a city bus.
+    const bus = new THREE.MeshStandardMaterial({ color: '#1e5bb8', roughness: 0.35, metalness: 0.3 });
+    vehicle(PK.eastCurb + 3, acrossZ + 14, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: Math.PI / 2 });
+    vehicle(PK.eastCurb + 8, acrossZ + 6, { ...cab, heading: Math.PI / 2 });
+    vehicle(PK.eastCurb + 12, front - 12, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: Math.PI / 2 });
+    vehicle(PK.eastCurb + 16, acrossZ + 30, { ...cab, heading: Math.PI / 2 });
+    vehicle(PK.eastCurb + 8, front - 34, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: Math.PI / 2 });
+  }
   vehicle(PK.eastLine - 9, front + walk + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5 });
 
   const pole = new THREE.MeshStandardMaterial({ color: '#2e3134', roughness: 0.5, metalness: 0.6 });
@@ -507,5 +565,157 @@ export function updateFades(fadeables, camera, dt, subject, { foreground = true,
       m.depthWrite = f.opacity > 0.98;
     }
     f.mesh.castShadow = true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 10 E 38th St neighbours (between Fifth and Madison; Fifth is to the west).
+function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, acrossZ, streetZ, PK, slab, r }) {
+  const zS = streetZ(-1) + road / 2 + walk; // north building line of the next street south
+  const zN = streetZ(1) - road / 2 - walk; // south building line of the next street north
+  const eastX = -W / 2 - 0.02;
+  const westX = W / 2 + 0.02;
+
+  // East: building wrapped in black netting over pipe scaffolding.
+  {
+    const net = block('netting', -W / 2 - 24, eastX, -D / 2, front + 0.3, 56);
+    const pipeMat = new THREE.MeshStandardMaterial({ color: '#8d9296', roughness: 0.5, metalness: 0.6, transparent: true, opacity: 1 });
+    const pipes = [];
+    for (let x = -W / 2 - 23.5; x < eastX; x += 2.4) pipes.push([x, 28, front + 0.45, 0.06, 56, 0.06]);
+    for (let y = 2; y < 56; y += 2) pipes.push([-W / 2 - 12, y, front + 0.45, 24, 0.05, 0.05]);
+    const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), pipeMat, pipes.length);
+    const m = new THREE.Matrix4();
+    pipes.forEach(([x, y, z, sx, sy, sz], i) => im.setMatrixAt(i, m.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion(), new THREE.Vector3(sx, sy, sz))));
+    scene.add(im);
+    group([net, im]);
+  }
+
+  // West: ornate limestone corner building to Fifth Avenue, deep dark cornice.
+  {
+    const x1 = PK.eastLine;
+    const z0 = front - 30;
+    const base = block('glass', westX, x1, z0, front, 9);
+    const body = block('beaux', westX, x1, z0, front, 52, 9);
+    const corniceMat = new THREE.MeshStandardMaterial({ color: '#26282a', roughness: 0.7, transparent: true, opacity: 1 });
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX + 0.8, 2.4, 31.8), corniceMat);
+    cornice.position.set((westX + x1) / 2 + 0.4, 61.2, (z0 + front) / 2 + 0.9);
+    cornice.castShadow = true;
+    scene.add(cornice);
+    const bracketMat = new THREE.MeshStandardMaterial({ color: '#1d1f21', roughness: 0.7, transparent: true, opacity: 1 });
+    const brackets = new THREE.InstancedMesh(new THREE.BoxGeometry(0.35, 1.4, 1.6), bracketMat, Math.ceil((x1 - westX) / 1.6));
+    const mm = new THREE.Matrix4();
+    for (let i = 0; i < brackets.count; i++) brackets.setMatrixAt(i, mm.makeTranslation(westX + 0.8 + i * 1.6, 59.3, front + 0.8));
+    scene.add(brackets);
+    const band = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX, 1.2, 0.5), new THREE.MeshStandardMaterial({ color: '#cfc4ae', roughness: 0.8, transparent: true, opacity: 1 }));
+    band.position.set((westX + x1) / 2, 9.6, front + 0.25);
+    scene.add(band);
+    group([base, body, cornice, brackets, band]);
+    block('prewar', westX, x1, zS, z0 - 0.1, 70, 0, { fade: false });
+  }
+
+  // Behind (south): brick party walls a few storeys above the roof terrace,
+  // with a small yard behind the building.
+  block('brickwall', -W / 2 - 24, PK.eastLine, zS, -D / 2 - 6, 52);
+  block('brickwall', -W / 2 - 24, eastX, -D / 2 - 6, -D / 2, 52, 0, { fade: false });
+
+  // Further east on our side of the street.
+  block('prewar', -W / 2 - 58, -W / 2 - 24.1, zS, front, 46, 0, { fade: false });
+  block('banded', -104, -W / 2 - 58.1, zS, front, 72, 0, { fade: false });
+
+  // Across E 38th (north side), and the corners west of Fifth.
+  block('prewar', -46, -10, acrossZ, zN, 64);
+  block('banded', -9.9, 20, acrossZ, zN, 82);
+  block('beaux', 20.1, PK.eastLine, acrossZ, zN, 58);
+  block('glass', -104, -46.1, acrossZ, zN, 112, 0, { fade: false });
+  block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 140);
+  block('banded', PK.westLine, PK.westLine + 50, zS, front, 96);
+
+  // Empire State Building: west side of Fifth between 33rd and 34th St.
+  {
+    const z0 = streetZ(-5) + road / 2 + walk;
+    const z1 = streetZ(-4) - road / 2 - walk;
+    const cx = PK.westLine + 64;
+    const cz = (z0 + z1) / 2;
+    const tex = facadeTexture('esb', 3);
+    const tier = (w, d, y0, y1) => {
+      const g = new THREE.BoxGeometry(w, y1 - y0, d);
+      const uv = g.attributes.uv;
+      const dims = [[d, y1 - y0], [d, y1 - y0], [w, d], [w, d], [w, y1 - y0], [w, y1 - y0]];
+      for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, uv.getX(i) * dims[f][0] / 10, uv.getY(i) * dims[f][1] / 14); }
+      const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.15 }));
+      mesh.position.set(cx, (y0 + y1) / 2, cz);
+      mesh.castShadow = true;
+      scene.add(mesh);
+    };
+    tier(126, z1 - z0, 0, 25);
+    tier(96, 52, 25, 90);
+    tier(80, 46, 90, 125);
+    tier(58, 40, 125, 320);
+    tier(42, 30, 320, 345);
+    tier(24, 22, 345, 372);
+    tier(14, 14, 372, 381);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 4.5, 40, 16), new THREE.MeshStandardMaterial({ color: '#d8d6d0', roughness: 0.4, metalness: 0.5 }));
+    mast.position.set(cx, 401, cz);
+    scene.add(mast);
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.2, 62, 8), new THREE.MeshStandardMaterial({ color: '#c9c9c9', roughness: 0.4, metalness: 0.7 }));
+    spire.position.set(cx, 452, cz);
+    scene.add(spire);
+  }
+
+  // Green sidewalk shed along the frontage (and the netted building next door).
+  {
+    const x0 = -W / 2 - 24;
+    const x1 = W / 2 + 0.4;
+    const depth = 3.4;
+    const hgt = 3.7;
+    const green = new THREE.MeshStandardMaterial({ color: '#2f5848', roughness: 0.6, metalness: 0.3 });
+    const brace = new THREE.MeshStandardMaterial({ color: '#c2c6c9', roughness: 0.4, metalness: 0.6 });
+    const add = (geo, mat, x, y, z, q) => {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      if (q) m.quaternion.copy(q);
+      m.castShadow = true;
+      scene.add(m);
+      return m;
+    };
+    for (let x = x0 + 0.2; x <= x1; x += 2.44) {
+      for (const z of [front + 0.25, front + depth]) add(new THREE.BoxGeometry(0.14, hgt, 0.14), green, x, hgt / 2, z);
+    }
+    for (let x = x0 + 0.2; x + 2.44 <= x1; x += 4.88) {
+      const len = Math.hypot(2.44, hgt - 0.6);
+      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, Math.atan2(hgt - 0.6, 2.44)));
+      const q2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -Math.atan2(hgt - 0.6, 2.44)));
+      add(new THREE.BoxGeometry(len, 0.05, 0.05), brace, x + 1.22, hgt / 2, front + depth, q);
+      add(new THREE.BoxGeometry(len, 0.05, 0.05), brace, x + 1.22, hgt / 2, front + depth, q2);
+    }
+    add(new THREE.BoxGeometry(x1 - x0, 0.35, depth + 0.2), green, (x0 + x1) / 2, hgt + 0.17, front + depth / 2 + 0.1);
+    // Green railing on top of the deck.
+    add(new THREE.BoxGeometry(x1 - x0, 0.06, 0.06), green, (x0 + x1) / 2, hgt + 1.45, front + depth + 0.15);
+    for (let x = x0 + 0.2; x <= x1; x += 1.22) add(new THREE.BoxGeometry(0.06, 1.1, 0.06), green, x, hgt + 0.9, front + depth + 0.15);
+    const mesh = new THREE.MeshStandardMaterial({ color: '#2f5848', roughness: 0.8, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
+    add(new THREE.PlaneGeometry(x1 - x0, 1.0), mesh, (x0 + x1) / 2, hgt + 0.85, front + depth + 0.15);
+    // Lights under the deck.
+    const lamp = new THREE.MeshBasicMaterial({ color: '#fff6dc' });
+    for (let x = x0 + 1.4; x < x1; x += 4.88) add(new THREE.BoxGeometry(0.3, 0.06, 0.3), lamp, x, hgt - 0.02, front + depth / 2);
+    // White signs hung on the railing.
+    const sign = (text, x, w) => {
+      const t = textTexture({ text, width: 768, height: 192, bg: '#f4f4f2', ink: '#24456e', font: '600 64px "Helvetica Neue", Arial' });
+      add(new THREE.PlaneGeometry(w, 0.75), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 }), x, hgt + 0.95, front + depth + 0.2);
+    };
+    sign('10 East 38th Street, NYC', 3.4, 2.8);
+    sign('SIDEWALK SHED', -1.3, 2.2);
+  }
+
+  // Ornamental lampposts on 38th near Fifth.
+  const post = new THREE.MeshStandardMaterial({ color: '#3d4a45', roughness: 0.5, metalness: 0.5 });
+  const globe = new THREE.MeshStandardMaterial({ color: '#f2efe6', emissive: '#fff3d6', emissiveIntensity: 0.4, roughness: 0.3 });
+  for (const x of [W / 2 + 6, PK.eastLine + 1.5]) {
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.18, 6.5, 12), post);
+    p.position.set(x, 3.25, front + walk - 0.5);
+    const arm = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.05, 6, 16, Math.PI), post);
+    arm.position.set(x - 0.5, 6.4, front + walk - 0.5);
+    const gl = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), globe);
+    gl.position.set(x - 1.0, 6.1, front + walk - 0.5);
+    for (const o of [p, arm, gl]) { o.castShadow = true; scene.add(o); }
   }
 }

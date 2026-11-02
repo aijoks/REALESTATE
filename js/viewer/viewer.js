@@ -3,6 +3,9 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { buildPrewarBrick } from './building.js';
+import { buildBuffLoft } from './loft.js';
+
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 
@@ -31,7 +34,9 @@ export class BuildingViewer {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.06;
-    this.controls.maxPolarAngle = Math.PI / 2 - 0.02;
+    // Allow looking up at the building from the street; the ground clamp in
+    // _frame keeps the camera from going below street level.
+    this.controls.maxPolarAngle = Math.PI - 0.12;
     this.controls.minDistance = 4;
     this.controls.maxDistance = 360;
 
@@ -45,7 +50,7 @@ export class BuildingViewer {
     this._setupSky();
     this._setupLights();
     this._loadModel().then(() => {
-      this.context = buildContext(this.scene, { W: this.model.width, D: this.model.depth });
+      this.context = buildContext(this.scene, { W: this.model.width, D: this.model.depth, site: this.property.model.site });
       this.subjectBox = new THREE.Box3().setFromObject(this.model.group);
       this._setupHotspots();
       this._buildChapters();
@@ -148,7 +153,7 @@ export class BuildingViewer {
         console.warn('GLB model failed to load, using procedural model instead.', e);
       }
     }
-    this.model = buildPrewarBrick(model.procedural);
+    this.model = (GENERATORS[model.procedural.generator] ?? buildPrewarBrick)(model.procedural);
     this.scene.add(this.model.group);
   }
 
@@ -172,19 +177,25 @@ export class BuildingViewer {
     const mid = new THREE.Vector3(0, H * 0.48, 0);
     const look = (y, z = 0, x = 0) => new THREE.Vector3(x, y, z);
     // Front faces +z (north, onto E 56th St); +x is west, -x is east.
+    // Per-property tour settings (avenue view, labels, extra stops) come from
+    // properties.js; positions there are absolute scene coordinates.
+    const tour = this.property.model.tour ?? {};
+    const vec = (a) => new THREE.Vector3(...a);
+    const avenue = tour.avenue ?? { label: 'From the avenue', pos: [80, 1.7, D / 2 + 10.5], target: [8, 13, D / 2 + 5] };
     this.chapters = [
-      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-2, 9, D / 2 + 62), target: look(26, D / 2), fov: 52, hold: 3 },
+      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-2, H * 0.43, D / 2 + 62), target: look(H * 0.45, D / 2), fov: 52, hold: 3 },
       { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
       { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
       { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },
-      { id: 'park', label: 'From Park Avenue', pos: new THREE.Vector3(80, 1.7, D / 2 + 10.5), target: look(13, D / 2 + 5, 8), fov: 62, hold: 3.5, fade: 'street' },
-      { id: 'west', label: 'West side · lease banner', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, fov: 40, hold: 2.5 },
+      { id: 'avenue', label: avenue.label, pos: vec(avenue.pos), target: vec(avenue.target), fov: avenue.fov ?? 62, hold: 3.5, fade: 'street' },
+      { id: 'west', label: tour.westLabel ?? 'West side', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, fov: 40, hold: 2.5 },
       { id: 'rear-west', label: 'Southwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.62, -D / 2 - r * 0.65), target: mid, fov: 40, hold: 1.5 },
       { id: 'back', label: 'Rear facade', pos: new THREE.Vector3(0, H * 0.5, -D / 2 - r), target: mid, fov: 40, hold: 2.5 },
       { id: 'east', label: 'East side', pos: new THREE.Vector3(-r * 1.05, H * 0.55, 0), target: mid, fov: 40, hold: 2.5 },
+      ...(tour.extra ?? []).map((c) => ({ hold: 3, fov: 50, ...c, pos: vec(c.pos), target: vec(c.target), targets: c.targets?.map(vec) })),
       { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.75, D / 2 + r * 0.6), target: look(H * 0.8), fov: 45, hold: 3 },
-      { id: 'crown', label: 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
-    ];
+      { id: 'crown', label: tour.crownLabel ?? 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
+    ].filter((c) => !(tour.omit ?? []).includes(c.id));
   }
 
   // Most stops ghost any neighbour in the foreground; street-level stops
@@ -196,7 +207,11 @@ export class BuildingViewer {
       ? {
         foreground: false,
         pos: ch.pos,
-        targets: [new THREE.Vector3(W / 2 - 1, 8, D / 2 + 1), new THREE.Vector3(W / 2 - 1, 24, D / 2 + 1), new THREE.Vector3(W / 2 + 0.2, 30, D / 2 - 3.3)],
+        targets: ch.targets ?? [
+          new THREE.Vector3(W / 2 - 1, 8, D / 2 + 1),
+          new THREE.Vector3(W / 2 - 1, 24, D / 2 + 1),
+          ...(this.property.model.procedural.leaseBanner ? [new THREE.Vector3(W / 2 + 0.2, 30, D / 2 - 3.3)] : []),
+        ],
       }
       : {};
   }
@@ -307,10 +322,17 @@ export class BuildingViewer {
     }
     if (this.fadeOpts?.pos && !this.fly && !this.tour.playing && this.camera.position.distanceTo(this.fadeOpts.pos) > 25) this.fadeOpts = {};
     if (this.context) updateFades(this.context.fadeables, this.camera, dt, this.subjectBox, this.fadeOpts);
-    // Gentle pulse on hotspots.
+    // Gentle pulse on hotspots; markers fade out when the camera is right on top
+    // of them so they never fill the frame.
     const pulse = 2 + Math.sin(performance.now() / 350) * 0.15;
-    for (const s of this.hotspots) s.scale.set(pulse, pulse, 1);
+    for (const s of this.hotspots) {
+      s.scale.set(pulse, pulse, 1);
+      const o = THREE.MathUtils.clamp((s.position.distanceTo(this.camera.position) - 8) / 10, 0, 1);
+      s.material.opacity = o;
+      s.visible = o > 0.02;
+    }
     this.controls.update();
+    if (this.camera.position.y < 0.8) this.camera.position.y = 0.8;
     this.renderer.render(this.scene, this.camera);
   }
 

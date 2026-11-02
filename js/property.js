@@ -1,9 +1,11 @@
 import { company, getProperty, properties } from './data/properties.js';
 import { BuildingViewer } from './viewer/viewer.js';
 
-const id = new URLSearchParams(location.search).get('id') || properties[0].id;
+// Property id from #hash (preferred) or ?id= (older links).
+const id = decodeURIComponent(location.hash.slice(1)) || new URLSearchParams(location.search).get('id') || properties[0].id;
 const p = getProperty(id);
 if (!p) location.replace('index.html');
+window.addEventListener('hashchange', () => location.reload());
 
 document.title = `${p.address} — ${company.name}`;
 const fill = (sel, v) => document.querySelectorAll(sel).forEach((el) => (el.textContent = v));
@@ -18,8 +20,10 @@ fill('[data-description]', p.description);
 document.querySelector('[data-stats]').innerHTML = p.stats
   .map((s) => `<div class="stat"><small>${s.label}</small><b>${s.value}</b></div>`).join('');
 document.querySelector('[data-highlights]').innerHTML = p.highlights.map((h) => `<li>${h}</li>`).join('');
-document.querySelector('[data-tenants]').innerHTML = p.tenants
+const tenantsEl = document.querySelector('[data-tenants]');
+tenantsEl.innerHTML = (p.tenants ?? [])
   .map((t) => `<div class="tenant"><b>${t.name}</b><span>${t.floor} · ${t.kind}</span></div>`).join('');
+tenantsEl.closest('.panel').hidden = !p.tenants?.length;
 document.querySelector('[data-gallery]').innerHTML = p.photos
   .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" /><figcaption>${ph.caption}</figcaption></figure>`).join('');
 

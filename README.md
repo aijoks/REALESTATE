@@ -12,7 +12,7 @@ python3 -m http.server 8080
 ```
 
 Then open http://localhost:8080 and click the property, or go straight to
-http://localhost:8080/property.html?id=120-e-56th.
+http://localhost:8080/property.html#120-e-56th (or `#10-e-38th`).
 
 ## What's inside
 
@@ -22,7 +22,10 @@ http://localhost:8080/property.html?id=120-e-56th.
 | `property.html` / `js/property.js` | Property page: 3D viewer HUD, availability table, photos, contact |
 | `js/data/properties.js` | **The catalogue.** Add a property object here to list a new building |
 | `js/viewer/viewer.js` | Three.js scene, guided 360° tour, hotspots, floor highlight |
-| `js/viewer/building.js` | Procedural "pre-war brick" generator built from the listing photos |
+| `js/viewer/kit.js` | Shared building kit: brick materials, walls with openings, recessed windows |
+| `js/viewer/building.js` | `prewarBrick` generator (120 E 56th St) |
+| `js/viewer/loft.js` | `buffLoft` generator (10 E 38th St), incl. roof terrace |
+| `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |
 | `assets/properties/<id>/` | Listing photos |
