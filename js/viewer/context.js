@@ -74,14 +74,18 @@ export function buildContext(scene, { W, D, site = {} }) {
   const PK = av.kind === 'park'
     ? { eastLine: e, eastCurb: e + 5, median0: e + 17, median1: e + 23, westCurb: e + 35, westLine: e + 40, median: true,
       lanes: [e + 9, e + 13, e + 27, e + 31] }
-    : av.kind === 'parkSouth'
+    : av.kind === 'narrow'
+      // Narrow one-way side street (e.g. 35th St in Queens).
+      ? { eastLine: e, eastCurb: e + 4.5, westCurb: e + 14.5, westLine: e + 19, median: false, lanes: [e + 9.5] }
+      : av.kind === 'parkSouth'
       // Park Avenue South: one two-way roadway, double yellow centre line.
       ? { eastLine: e, eastCurb: e + 5, westCurb: e + 24, westLine: e + 29, median: false, twoWay: true,
         lanes: [e + 9.75, e + 19.25], centre: e + 14.5 }
       : { eastLine: e, eastCurb: e + 6, westCurb: e + 24.5, westLine: e + 30.5, median: false,
         lanes: [e + 9.7, e + 13.4, e + 17.1, e + 20.8] };
   const avMid = (PK.eastLine + PK.westLine) / 2;
-  const streetZ = (k) => front + walk + road / 2 + k * 80; // centre of our street (k=0), next street north (1), south (-1)...
+  const spacing = site.blockSpacing ?? 80;
+  const streetZ = (k) => front + walk + road / 2 + k * spacing; // centre of our street (k=0), next street north (1), south (-1)...
 
   // ---------- ground, sidewalks, street ----------
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(1600, 1600), new THREE.MeshStandardMaterial({ color: '#7d7b78', roughness: 1 }));
@@ -359,7 +363,9 @@ export function buildContext(scene, { W, D, site = {} }) {
     mats[kind] = mat;
     return mesh;
   };
-  const group = (meshes) => {
+  // `keep`: stay visible in the foreground; fade only when it actually blocks
+  // the sight-lines to the building (e.g. an elevated train).
+  const group = (meshes, { keep = false } = {}) => {
     // Fade a multi-part neighbour as one unit.
     const box = new THREE.Box3();
     const ms = [];
@@ -370,7 +376,7 @@ export function buildContext(scene, { W, D, site = {} }) {
     });
     // Sight-lines are tested against each part, so a tall tower's empty
     // bounding volume doesn't hide it unnecessarily.
-    fadeables.push({ mesh: meshes[0], mats: ms, box, boxes: meshes.map((m) => new THREE.Box3().setFromObject(m)), opacity: 1 });
+    fadeables.push({ mesh: meshes[0], mats: ms, box, boxes: meshes.map((m) => new THREE.Box3().setFromObject(m)), opacity: 1, keep });
   };
 
   const eastX = -W / 2 - 0.05;
@@ -445,6 +451,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'qb-34-35') {
+    neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, flat, asphaltMat, slab });
   } else if (siteId === 'w51-ninth') {
     neighbours370w51({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'e44-fifth') {
@@ -568,11 +576,13 @@ export function buildContext(scene, { W, D, site = {} }) {
     // One-way avenue: Fifth runs south; `heading` overrides (e.g. Sixth runs north).
     const oneWay = av.heading ?? Math.PI / 2;
     const bus = new THREE.MeshStandardMaterial({ color: '#1e5bb8', roughness: 0.35, metalness: 0.3 });
-    vehicle(PK.eastCurb + 3, acrossZ + 14, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: oneWay });
-    vehicle(PK.eastCurb + 8, acrossZ + 6, { ...cab, heading: oneWay });
-    vehicle(PK.eastCurb + 12, front - 12, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: oneWay });
-    vehicle(PK.eastCurb + 16, acrossZ + 30, { ...cab, heading: oneWay });
-    vehicle(PK.eastCurb + 8, front - 34, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: oneWay });
+    // Only place vehicles that fit inside the roadway (narrow side streets).
+    const fits = (x) => x < PK.westCurb - 1.5;
+    if (fits(PK.eastCurb + 3)) vehicle(PK.eastCurb + 3, acrossZ + 14, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: oneWay });
+    if (fits(PK.eastCurb + 8)) vehicle(PK.eastCurb + 8, acrossZ + 6, { ...cab, heading: oneWay });
+    if (fits(PK.eastCurb + 12)) vehicle(PK.eastCurb + 12, front - 12, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: oneWay });
+    if (fits(PK.eastCurb + 16)) vehicle(PK.eastCurb + 16, acrossZ + 30, { ...cab, heading: oneWay });
+    if (fits(PK.eastCurb + 8)) vehicle(PK.eastCurb + 8, front - 34, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: oneWay });
   }
   vehicle(PK.eastLine - 9, front + walk + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5 });
 
@@ -606,7 +616,7 @@ export function updateFades(fadeables, camera, dt, subject, { foreground = true,
   const subjectDist = subject ? subject.distanceToPoint(camera.position) : Infinity;
   for (const f of fadeables) {
     let blocks = f.boxes.some((bx) => bx.containsPoint(camera.position));
-    if (!blocks && foreground && subject && frustum.intersectsBox(f.box) && f.box.distanceToPoint(camera.position) < subjectDist - 3) blocks = true;
+    if (!blocks && foreground && !f.keep && subject && frustum.intersectsBox(f.box) && f.box.distanceToPoint(camera.position) < subjectDist - 3) blocks = true;
     for (const t of tg) {
       if (blocks) break;
       ray.origin.copy(camera.position);
@@ -1154,4 +1164,55 @@ function neighbours370w51({ scene, block, group, W, D, front, walk, road, across
     c.scale.set(1.1, 1, 1.1);
     for (const o of [t, c]) { o.castShadow = true; scene.add(o); }
   }
+}
+
+// ---------------------------------------------------------------------------
+// 34-09 Queens Blvd: the building fills the block between 34th St (-x) and
+// 35th St (+x, the side street modelled as the "avenue"). Queens Blvd is the
+// wide street in front, with the elevated 7 train over its centre.
+function neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, flat, asphaltMat, slab }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const west = -W / 2;
+
+  // 34th Street along the west end (sidewalks + one-way roadway).
+  slab(west - 4.5, west, zS, front, 0.165);
+  flat(asphaltMat, west - 14.5, west - 4.5, zS - 40, acrossZ + 40, 0.013);
+  slab(west - 19, west - 14.5, zS, front, 0.165);
+  slab(west - 19, west - 14.5, acrossZ, zN, 0.165);
+
+  // Elevated 7 train over the middle of Queens Blvd.
+  {
+    const zc = front + walk + road / 2;
+    const steel = new THREE.MeshStandardMaterial({ color: '#5f6a63', roughness: 0.6, metalness: 0.4, transparent: true, opacity: 1 });
+    const parts = [];
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(520, 1.6, 9), steel);
+    deck.position.set(0, 9.6, zc);
+    deck.castShadow = true;
+    scene.add(deck); parts.push(deck);
+    for (const dz of [-4.2, 4.2]) {
+      const girder = new THREE.Mesh(new THREE.BoxGeometry(520, 1.2, 0.3), steel);
+      girder.position.set(0, 10.9, zc + dz);
+      scene.add(girder); parts.push(girder);
+    }
+    const cols = new THREE.InstancedMesh(new THREE.BoxGeometry(0.7, 8.8, 0.7), steel, 2 * 27);
+    const m = new THREE.Matrix4();
+    let n = 0;
+    for (let x = -260; x <= 260; x += 20) for (const dz of [-3.5, 3.5]) cols.setMatrixAt(n++, m.makeTranslation(x, 4.4, zc + dz));
+    cols.count = n;
+    // Columns are thin and never fade (their combined bounding box would
+    // otherwise count as a solid wall across the view).
+    scene.add(cols);
+    group(parts, { keep: true });
+  }
+
+  // Across 35th St (east), across 34th St (west), behind, and across Queens Blvd.
+  block('prewar', PK.westLine, PK.westLine + 40, zS, front, 14);
+  block('tenement', west - 59, west - 19, front - 30, front, 10);
+  block('brickwall', west - 59, west - 19, zS, front - 30.1, 16);
+  block('brickwall', west, PK.eastLine, zS, -D / 2 - 6, 18);
+  block('prewar', -70, -15, acrossZ, zN, 12);
+  block('tenement', -14.9, 22, acrossZ, zN, 16);
+  block('prewar', 22.1, PK.eastLine, acrossZ, zN, 10);
+  block('glass', PK.westLine, PK.westLine + 40, acrossZ, zN, 60);
 }

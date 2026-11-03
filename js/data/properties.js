@@ -574,6 +574,76 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '34-09-queens-blvd',
+    address: '34-09 Queens Blvd',
+    city: 'Long Island City, NY 11101',
+    neighborhood: 'Long Island City / Sunnyside',
+    crossStreets: 'Full block · 34th St to 35th St',
+    status: 'For Lease',
+    uses: ['Retail', 'Industrial', 'Office'],
+    headline: '',
+    description:
+      'A block-long commercial and warehouse property on Queens Boulevard between 34th and 35th Streets. ' +
+      'A four-story pilastered brick building lines the boulevard with street-level retail and loft space ' +
+      'above, backed by a warehouse with loading docks, on a lot of about 2.3 acres. Its rooftop billboard ' +
+      'is a Queens Boulevard landmark, steps from the 7 train.',
+    // PropertyShark: 4 stories, 149,121 SF, fireproof warehouse, ~100,000 SF lot,
+    // two buildings; listing sites: ~160,000 SF on a 2.3-acre lot.
+    stats: [
+      { label: 'Stories', value: '4' },
+      { label: 'Building size', value: '±150,000 SF' },
+      { label: 'Lot', value: '±2.3 acres' },
+      { label: 'Frontage', value: 'Full block on Queens Blvd' },
+    ],
+    highlights: [
+      'Full-block frontage on Queens Boulevard, 34th to 35th Street',
+      'Street-level retail with high visibility',
+      'Rear warehouse with loading docks',
+      'Rooftop billboard; steps from the 7 train at 33rd St–Rawson St',
+    ],
+    tenants: [
+      { name: 'Pin Framing', floor: 'Ground', kind: 'Retail' },
+      { name: 'K2 Boxing Club', floor: 'Ground', kind: 'Fitness' },
+      { name: 'N.Y. Auto Brokerage (TLC Insurance)', floor: 'Ground', kind: 'Services' },
+    ],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/34-09-queens-blvd/corner-35th.jpg', caption: 'Queens Blvd at 35th Street', focus: 'center 55%' },
+      { src: 'assets/properties/34-09-queens-blvd/corner-34th.jpg', caption: 'Queens Blvd at 34th Street' },
+      { src: 'assets/properties/34-09-queens-blvd/rear-warehouse.jpg', caption: 'Rear warehouse and loading docks' },
+    ],
+    cover: 'assets/properties/34-09-queens-blvd/corner-35th.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'industrial', floors: 4, width: 85, frontDepth: 40, rearDepth: 40 },
+      // Faces south onto Queens Blvd; 35th St (+x, east) is the side street
+      // modelled as the avenue, 34th St is added along the west end.
+      site: {
+        id: 'qb-34-35', street: 'Queens Blvd', facing: 'south', streetTwoWay: true, road: 34, walk: 5,
+        blockSpacing: 170, lowRise: true,
+        avenue: { kind: 'narrow', name: '35 St', eastLine: 42.52 },
+      },
+      tour: {
+        avenue: {
+          label: 'Corner of 35th St', pos: [66, 1.7, 86], target: [30, 9, 34], fov: 60,
+          targets: [[40, 6, 40.5], [40, 11, 40.5], [43, 9, 30]],
+        },
+        labels: {
+          'front-west': 'Southeast corner', west: '35th Street side', 'rear-west': 'Northeast corner',
+          back: 'Rear warehouse & docks', east: '34th Street side', crown: 'Rooftop billboard',
+        },
+        streetDist: 70,
+        streetY: 3, // stand under the elevated 7 train, as on Queens Blvd
+      },
+      hotspots: [
+        { id: 'retail', label: 'Street retail', text: 'Shops between every pilaster along Queens Boulevard.', at: [0.55, 0.12, 'front'] },
+        { id: 'corner34', label: 'Pin Framing', text: 'Corner retail at 34th Street (34-09).', at: [0.06, 0.15, 'front'] },
+        { id: 'billboard', label: 'Rooftop billboard', text: 'Steel billboard frame with a First Pioneer panel.', at: [0.3, 1.6, 'roof'] },
+        { id: 'warehouse', label: 'Rear warehouse', text: 'Warehouse and loading docks behind the retail block.', at: [0.3, 0.5, 'back'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

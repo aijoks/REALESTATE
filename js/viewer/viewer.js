@@ -10,8 +10,9 @@ import { buildNarrowLoft } from './narrow.js';
 import { buildStoneBay } from './bay.js';
 import { buildArchLoft } from './arch.js';
 import { buildWalkup } from './walkup.js';
+import { buildIndustrial } from './industrial.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
@@ -225,7 +226,7 @@ export class BuildingViewer {
     const vec = (a) => new THREE.Vector3(...a);
     const avenue = tour.avenue ?? { label: 'From the avenue', pos: [80, 1.7, D / 2 + 10.5], target: [8, 13, D / 2 + 5] };
     this.chapters = [
-      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-2, H * 0.43, D / 2 + (tour.streetDist ?? 62)), target: look(H * 0.45, D / 2), fov: 52, hold: 3 },
+      { id: 'street', label: 'Street view', pos: new THREE.Vector3(-2, tour.streetY ?? H * 0.43, D / 2 + (tour.streetDist ?? 62)), target: look(H * 0.45, D / 2), fov: 52, hold: 3 },
       { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
       { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
       { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },

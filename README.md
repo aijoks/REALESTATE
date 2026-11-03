@@ -38,6 +38,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/bay.js` | `stoneBay` generator (8 W 36th St) |
 | `js/viewer/arch.js` | `archLoft` generator (12 E 44th St) |
 | `js/viewer/walkup.js` | `walkup` generator (370 W 51st St, corner) |
+| `js/viewer/industrial.js` | `industrial` generator (34-09 Queens Blvd, block-long + rear warehouse) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |

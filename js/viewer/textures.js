@@ -148,6 +148,19 @@ export const BRICK = {
     palette: [[156, 128, 98], [145, 118, 90], [166, 138, 106], [134, 110, 84], [152, 124, 94]],
     mortar: '#ab9d88', clinker: 0.07, seed: 51,
   }),
+  // 34-09 Queens Blvd: light red face brick, dark red bands, brown rear warehouse.
+  qred: () => brick('qred', {
+    palette: [[178, 86, 66], [168, 78, 60], [186, 96, 74], [160, 74, 58], [174, 90, 70]],
+    mortar: '#b9a493', clinker: 0.05, seed: 34,
+  }),
+  qdark: () => brick('qdark', {
+    palette: [[124, 50, 40], [114, 44, 36], [132, 56, 44], [106, 42, 34], [120, 48, 38]],
+    mortar: '#8e7a6c', clinker: 0.04, seed: 35,
+  }),
+  qbrown: () => brick('qbrown', {
+    palette: [[112, 72, 56], [104, 66, 52], [120, 80, 62], [96, 62, 48], [110, 74, 58]],
+    mortar: '#9a8a7c', clinker: 0.05, seed: 36,
+  }),
   // Lighter, rougher common brick on the side and rear walls.
   common: () => brick('common', {
     palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],
