@@ -238,7 +238,12 @@ export class BuildingViewer {
       { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.75, D / 2 + r * 0.6), target: look(H * 0.8), fov: 45, hold: 3 },
       { id: 'crown', label: tour.crownLabel ?? 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
     ].filter((c) => !(tour.omit ?? []).includes(c.id))
-      .map((c) => ({ ...c, label: tour.labels?.[c.id] ?? c.label }));
+      .map((c) => ({
+        ...c,
+        label: tour.labels?.[c.id] ?? c.label,
+        // Per-stop sight-lines: only neighbours blocking these points fade.
+        ...(tour.fades?.[c.id] ? { fade: 'street', targets: tour.fades[c.id].map(vec) } : {}),
+      }));
   }
 
   // Most stops ghost any neighbour in the foreground; street-level stops

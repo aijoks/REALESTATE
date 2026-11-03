@@ -444,6 +444,8 @@ export const properties = [
           targets: [[-4.2, 8, 16], [-4.2, 24, 16], [-4.2, 38, 16]],
         },
         westLabel: 'West side · banner',
+        // Keep the garage visible below the banner on the side-wall view.
+        fades: { west: [[5.4, 20, 11], [5.4, 32, 11], [5.4, 26, 4]] },
         crownLabel: 'Window bay & parapet',
       },
       hotspots: [

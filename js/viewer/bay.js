@@ -16,27 +16,27 @@ function bannerTexture() {
   return textTexture({
     width: 512, height: 1700, bg: '#f5f4f0',
     draw(ctx, w, h) {
-      const s = 46;
+      const s = 62;
       for (let c = 0; c < 4; c++) {
         for (let k = 0; k <= c; k++) {
           ctx.fillStyle = k === c ? '#d4511e' : '#2a6fc4';
-          ctx.fillRect(90 + c * (s + 4), 330 - k * (s + 4), s, s);
+          ctx.fillRect(110 + c * (s + 3), 420 - k * (s + 3), s, s);
         }
       }
       ctx.save();
-      ctx.translate(w / 2 + 30, 420);
+      ctx.translate(w / 2 + 40, 540);
       ctx.rotate(Math.PI / 2);
       ctx.fillStyle = '#2a6fc4';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.font = '400 170px "Libre Bodoni", "Times New Roman", Georgia, serif';
-      ctx.fillText('FIRST', 0, -95);
-      ctx.fillText('PIONEER', 0, 70);
+      ctx.font = '400 205px "Libre Bodoni", "Times New Roman", Georgia, serif';
+      ctx.fillText('FIRST', 0, -110);
+      ctx.fillText('PIONEER', 0, 80);
       ctx.font = '400 40px "Times New Roman", Georgia, serif';
-      ctx.fillText('P R O P E R T I E S ,   I N C .', 8, 190);
+      ctx.fillText('P R O P E R T I E S ,   I N C .', 8, 205);
       ctx.font = '600 26px Arial, sans-serif';
       ctx.fillStyle = '#6b7c8f';
-      ctx.fillText('NEXT GENERATION REAL ESTATE', 8, -205);
+      ctx.fillText('NEXT GENERATION REAL ESTATE', 8, 245);
       ctx.restore();
     },
   });
@@ -60,6 +60,10 @@ export function buildStoneBay(params) {
   matGrey.map = matStone.map;
   matGrey.color = new THREE.Color('#b9b6ae');
   const renderGrey = new THREE.MeshStandardMaterial({ color: '#a7a49d', roughness: 0.95 });
+  // Weathered grey stucco for the exposed side wall.
+  const stucco = brickMaterial('common', grime('baystucco', { seed: 361, streaks: 35, strength: 0.3 }));
+  stucco.map = matStone.map; stucco.normalMap = null; stucco.color = new THREE.Color('#f0ede6');
+  const bannerTop = garageH + 3 + 15;
   const granite = new THREE.MeshStandardMaterial({ color: '#2b2a2a', roughness: 0.35, metalness: 0.2 });
   const matCommon = (seed) => brickMaterial('common', grime(`baycommon${seed}`, { seed, streaks: 50, strength: 0.7 }));
   const black = '#1d1f21';
@@ -143,16 +147,18 @@ export function buildStoneBay(params) {
   for (let f = 1; f < floors; f++) {
     const y = baseH + wy(f);
     if (y < garageH + 1.5) continue;
-    sideHoles.push({ x: 2.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#7b7871', sillColor: '#9d998f', tint: skyTint() });
-    if (f >= floors - 3) sideHoles.push({ x: 4.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#7b7871', sillColor: '#9d998f', tint: skyTint() });
+    // As on site: the banner hangs near the street corner, a single column
+    // of windows runs just behind it, and a second window sits above it.
+    sideHoles.push({ x: 5.7, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
+    if (y > bannerTop + 1) sideHoles.push({ x: 2.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
   }
-  add(wall(Fw, D, top, sideHoles, renderGrey));
+  add(wall(Fw, D, top, sideHoles, stucco));
   sideHoles.forEach((o) => opening(Fw, o));
   {
     const bh = 15;
     const banner = new THREE.Mesh(new THREE.PlaneGeometry(4.4, bh), (() => { const t = bannerTexture(); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, emissive: '#ffffff', emissiveMap: t, emissiveIntensity: 0.35 }); })());
     banner.rotation.y = Math.PI / 2;
-    banner.position.set(W / 2 + 0.06, garageH + 3 + bh / 2, D / 2 - 9.5);
+    banner.position.set(W / 2 + 0.06, garageH + 3 + bh / 2, D / 2 - 2.45);
     banner.castShadow = true;
     add(banner);
   }
