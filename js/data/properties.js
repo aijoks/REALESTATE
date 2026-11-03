@@ -802,6 +802,59 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '415-e-university',
+    address: '415 E University Blvd',
+    city: 'Tucson, AZ 85705',
+    neighborhood: 'The Link at 4th Ave · near the University of Arizona',
+    crossStreets: 'University Blvd at 4th Avenue',
+    status: 'Residential',
+    uses: ['Residential'],
+    headline: '',
+    description:
+      'The Link at 4th Ave is a garden-style apartment community on University Boulevard, steps from ' +
+      'Fourth Avenue’s shops and restaurants and a short walk to the University of Arizona. White stucco ' +
+      'buildings with open walkways surround a fenced pool courtyard with a shaded ramada, lounge deck and ' +
+      'lawn, with renovated apartments and on-site parking.',
+    stats: [
+      { label: 'Property', value: 'The Link at 4th Ave' },
+      { label: 'Type', value: 'Garden apartments' },
+      { label: 'Buildings', value: '2–3 stories' },
+      { label: 'Market', value: 'Tucson, AZ' },
+    ],
+    highlights: [
+      'Steps from Fourth Avenue and the University of Arizona',
+      'Resort-style pool, ramada and lounge deck',
+      'Lawn with hammocks and outdoor seating',
+      'Renovated apartments with stainless appliances',
+    ],
+    tenants: [],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/415-e-university/pool.jpg', caption: 'Pool courtyard', focus: 'center 60%' },
+      { src: 'assets/properties/415-e-university/aerial.jpg', caption: 'Aerial view toward downtown Tucson' },
+      { src: 'assets/properties/415-e-university/living-room.jpg', caption: 'Renovated apartment' },
+      { src: 'assets/properties/415-e-university/sign.jpg', caption: 'Entrance on University Blvd' },
+    ],
+    cover: 'assets/properties/415-e-university/pool.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'garden', floors: 3, width: 64, depth: 52 },
+      site: { id: 'tucson-university', facing: 'north', suburban: true, desert: true },
+      tour: {
+        avenue: { label: 'Pool courtyard', pos: [26, 2.0, 9.5], target: [2, 3.5, -8], fov: 62 },
+        labels: { 'front-west': 'Entrance & parking', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'Rooftops & mountains' },
+        streetDist: 48,
+        radius: 75,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'pool', label: 'Pool courtyard', text: 'Fenced pool with lounge deck and a tiled ramada.', at: [0, 0, 'pool'] },
+        { id: 'sign', label: 'The Link at 4th Ave', text: 'Entrance and monument sign on University Blvd.', at: [0.44, 0.3, 'front'] },
+        { id: 'walkways', label: 'Apartments', text: 'Open walkways and stairs serve each building.', at: [0.3, 0.6, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {
