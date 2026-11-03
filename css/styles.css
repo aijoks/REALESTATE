@@ -129,7 +129,7 @@ nav a:hover { color: var(--ink); }
 .about p { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.75; margin: 0; }
 
 /* Portfolio tiles: two per row, edge to edge, address along the bottom. */
-.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #fff; }
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
 .tile { position: relative; display: block; aspect-ratio: 2.3 / 1; overflow: hidden; background: #222; }
 .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
 .tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.62)); transition: background 0.3s; }

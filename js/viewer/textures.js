@@ -313,6 +313,19 @@ export function facadeTexture(kind, seed = 1) {
         ctx.fillStyle = '#9aa1a8'; ctx.fillRect(x, 0, 14, size);
         for (let y = 0; y < size; y += 36) { ctx.fillStyle = r() < 0.12 ? '#e7d8b0' : '#3a4148'; ctx.fillRect(x + 2, y + 6, 10, 24); }
       }
+    } else if (kind === 'redtower') {
+      // Red-brick residential tower: punched windows + glass bay strips.
+      ctx.fillStyle = '#a4553d';
+      ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 64) {
+        ctx.fillStyle = '#c9b9a3'; ctx.fillRect(0, y + 54, size, 6);
+        for (let x = 0; x < size; x += 128) {
+          ctx.fillStyle = '#7f9bb0'; ctx.fillRect(x + 8, y + 12, 44, 40);
+          ctx.fillStyle = '#d7dde2'; ctx.fillRect(x + 8, y + 30, 44, 3);
+          ctx.fillStyle = r() < 0.2 ? '#e9d8b2' : '#4a5b6a'; ctx.fillRect(x + 70, y + 12, 26, 38);
+          ctx.fillStyle = '#9fb7c6'; ctx.fillRect(x + 104, y + 6, 22, 52);
+        }
+      }
     } else if (kind === 'whitegrid') {
       ctx.fillStyle = '#eef0f2';
       ctx.fillRect(0, 0, size, size);

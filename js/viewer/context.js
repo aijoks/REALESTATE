@@ -44,6 +44,7 @@ const TILES = {
   beaux: [10, 16.4],
   brickwall: [8, 12],
   esb: [10, 14],
+  redtower: [12, 14],
 };
 
 export function buildContext(scene, { W, D, site = {} }) {
@@ -53,8 +54,14 @@ export function buildContext(scene, { W, D, site = {} }) {
   const fadeables = [];
   const r = rand(56);
   const front = D / 2;
-  const walk = 4.5;
-  const road = 10.6;
+  const walk = site.walk ?? 4.5;
+  const road = site.road ?? 10.6;
+  // Mirrored sites (front facing south): the root group is flipped in x, so
+  // sign textures are flipped back to read correctly.
+  const unmirror = (tex) => {
+    if (site.mirror) { tex.wrapS = THREE.RepeatWrapping; tex.repeat.x = -1; tex.offset.x = 1; }
+    return tex;
+  };
   const farWalk = front + walk + road;
   const acrossZ = farWalk + walk;
   // The avenue runs along z; x grows westward. Park Ave: two roadways and a
@@ -63,8 +70,12 @@ export function buildContext(scene, { W, D, site = {} }) {
   const PK = av.kind === 'park'
     ? { eastLine: e, eastCurb: e + 5, median0: e + 17, median1: e + 23, westCurb: e + 35, westLine: e + 40, median: true,
       lanes: [e + 9, e + 13, e + 27, e + 31] }
-    : { eastLine: e, eastCurb: e + 6, westCurb: e + 24.5, westLine: e + 30.5, median: false,
-      lanes: [e + 9.7, e + 13.4, e + 17.1, e + 20.8] };
+    : av.kind === 'parkSouth'
+      // Park Avenue South: one two-way roadway, double yellow centre line.
+      ? { eastLine: e, eastCurb: e + 5, westCurb: e + 24, westLine: e + 29, median: false, twoWay: true,
+        lanes: [e + 9.75, e + 19.25], centre: e + 14.5 }
+      : { eastLine: e, eastCurb: e + 6, westCurb: e + 24.5, westLine: e + 30.5, median: false,
+        lanes: [e + 9.7, e + 13.4, e + 17.1, e + 20.8] };
   const avMid = (PK.eastLine + PK.westLine) / 2;
   const streetZ = (k) => front + walk + road / 2 + k * 80; // centre of our street (k=0), next street north (1), south (-1)...
 
@@ -127,6 +138,12 @@ export function buildContext(scene, { W, D, site = {} }) {
   for (const dz of [2.4, road - 2.4]) {
     for (const [x0, x1] of [[-260, PK.eastLine - 1], [PK.westLine + 1, 320]]) flat(lineMat, x0, x1, front + walk + dz - 0.06, front + walk + dz + 0.06, 0.02);
   }
+  const yellowLine = new THREE.MeshBasicMaterial({ color: '#e2b52c' });
+  if (site.streetTwoWay) {
+    for (const dz of [-0.12, 0.12]) {
+      for (const [x0, x1] of [[-260, PK.eastLine - 1], [PK.westLine + 1, 320]]) flat(yellowLine, x0, x1, front + walk + road / 2 + dz - 0.05, front + walk + road / 2 + dz + 0.05, 0.02);
+    }
+  }
 
   // ---------- the avenue ----------
   {
@@ -154,6 +171,7 @@ export function buildContext(scene, { W, D, site = {} }) {
       for (const x of PK.lanes) {
         for (let z = z0 + 6; z < z1 - 6; z += 9) flat(lineMat, x - 0.06, x + 0.06, z, z + 3, 0.02);
       }
+      if (PK.centre) for (const dx of [-0.12, 0.12]) flat(yellowLine, PK.centre + dx - 0.05, PK.centre + dx + 0.05, z0 + 1, z1 - 1, 0.02);
       if (!PK.median) continue;
       // Planted median, stopping short of the crosswalks, with yellow noses.
       const m0 = z0 + 3.6;
@@ -207,7 +225,8 @@ export function buildContext(scene, { W, D, site = {} }) {
       flat(zebra, PK.eastCurb, PK.median0, front - 0.6, front - 0.1, 0.021);
       flat(zebra, PK.median1, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021);
     } else {
-      flat(zebra, PK.eastCurb, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021); // southbound only
+      flat(zebra, PK.eastCurb, PK.westCurb, acrossZ + 0.1, acrossZ + 0.6, 0.021);
+      if (PK.twoWay) flat(zebra, PK.eastCurb, PK.westCurb, front - 0.6, front - 0.1, 0.021);
     }
 
     // Traffic signals, one-way and street-name signs.
@@ -276,14 +295,17 @@ export function buildContext(scene, { W, D, site = {} }) {
       ctx.fillText(txt, w / 2, h / 2 + 2);
     });
     const plate = (tex, w, h, x, y, z, ry) => {
+      unmirror(tex);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.6 }));
       m.position.set(x, y, z);
       m.rotation.y = ry;
       scene.add(m);
     };
     // One-way signs on our street at the avenue, plus street-name blades.
-    plate(oneWaySign(!east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, acrossZ - 0.62, 0);
-    plate(oneWaySign(east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, front + 0.98, Math.PI);
+    if (!site.streetTwoWay) {
+      plate(oneWaySign(!east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, acrossZ - 0.62, 0);
+      plate(oneWaySign(east), 1.2, 0.45, PK.eastCurb - 0.5, 3.4, front + 0.98, Math.PI);
+    }
     plate(blade(streetName), 1.3, 0.3, PK.eastCurb - 0.5, 5.45, front + 0.8, 0);
     plate(blade(av.name), 1.3, 0.3, PK.eastCurb - 0.5, 5.8, front + 0.8, Math.PI / 2);
     plate(blade(streetName), 1.3, 0.3, PK.westCurb + 0.5, 5.45, acrossZ - 0.8, 0);
@@ -419,6 +441,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'e23-parksouth') {
+    neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r });
   } else if (siteId === 'e38-fifth') {
     neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, acrossZ, streetZ, PK, slab, r });
   }
@@ -509,6 +533,13 @@ export function buildContext(scene, { W, D, site = {} }) {
     vehicle(PK.median1 + 6, acrossZ + 9, { ...cab, heading: Math.PI / 2 });
     vehicle(PK.median1 + 10, acrossZ + 24, { len: 7.5, ht: 3.4, body: white, cabin: 0.3, heading: Math.PI / 2 });
     vehicle(PK.median1 + 2, front - 30, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: Math.PI / 2 });
+  } else if (PK.twoWay) {
+    // Two-way avenue: northbound on the east half, southbound on the west half.
+    const bus = new THREE.MeshStandardMaterial({ color: '#1e5bb8', roughness: 0.35, metalness: 0.3 });
+    vehicle(PK.eastCurb + 2.5, front - 10, { ...cab, heading: -Math.PI / 2 });
+    vehicle(PK.eastCurb + 6.5, acrossZ + 12, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: -Math.PI / 2 });
+    vehicle(PK.westCurb - 2.5, acrossZ + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: Math.PI / 2 });
+    vehicle(PK.westCurb - 6.5, front - 26, { ...cab, heading: Math.PI / 2 });
   } else {
     // One-way avenue (Fifth): everything southbound, plus a city bus.
     const bus = new THREE.MeshStandardMaterial({ color: '#1e5bb8', roughness: 0.35, metalness: 0.3 });
@@ -717,5 +748,107 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
     const gl = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), globe);
     gl.position.set(x - 1.0, 6.1, front + walk - 0.5);
     for (const o of [p, arm, gl]) { o.castShadow = true; scene.add(o); }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 115 E 23rd St neighbours (north side of 23rd between Park Ave South and
+// Lexington; local +x = west, toward Park Ave South).
+function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r }) {
+  const zS = streetZ(-1) + road / 2 + walk; // building line on the next street north
+  const zN = streetZ(1) - road / 2 - walk; // building line across 23rd (south side)
+  const westX = W / 2 + 0.02;
+  const eastX = -W / 2 - 0.02;
+
+  // West: six-storey cream lofts with New York Sports Clubs at grade, then
+  // the corner building at Park Avenue South.
+  const loftA = block('prewar', westX, westX + 20, front - 26, front, 24);
+  const loftB = block('prewar', westX + 20.1, PK.eastLine - 8, front - 26, front, 26);
+  block('glass', PK.eastLine - 7.9, PK.eastLine, front - 26, front, 30);
+  const orange = new THREE.MeshStandardMaterial({ color: '#ef6a1f', roughness: 0.6 });
+  for (const x of [westX + 4, westX + 13, westX + 24, westX + 33]) {
+    const sgn = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.7, 0.25), orange);
+    sgn.position.set(x, 3.6, front + 0.15);
+    scene.add(sgn);
+  }
+  group([loftA, loftB]);
+
+  // Behind the lofts: the tall brick building with the shark mural.
+  const muralBldg = block('brickwall', westX + 1, westX + 24, front - 50, front - 26.2, 46);
+  {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 512;
+    const ctx = c.getContext('2d');
+    const g = ctx.createLinearGradient(0, 0, 0, 512);
+    g.addColorStop(0, '#eef3f6'); g.addColorStop(1, '#b9d2e4');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#5c7f99';
+    ctx.beginPath(); ctx.ellipse(300, 250, 170, 120, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a9343a';
+    ctx.beginPath(); ctx.ellipse(320, 290, 90, 50, -0.3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.moveTo(240 + i * 20, 255 + i * 4); ctx.lineTo(250 + i * 20, 280 + i * 4); ctx.lineTo(260 + i * 20, 258 + i * 4); ctx.fill(); }
+    ctx.font = '900 96px Impact, Arial Black, Arial'; ctx.textAlign = 'center'; ctx.fillText('SHARK', 256, 480);
+    const tex = unmirror(new THREE.CanvasTexture(c));
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const mural = new THREE.Mesh(new THREE.PlaneGeometry(22, 22), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, transparent: true, opacity: 1 }));
+    mural.position.set(westX + 12.5, 35, front - 26.1);
+    scene.add(mural);
+    group([muralBldg, mural]);
+  }
+  block('brickwall', westX + 24.1, westX + 40, front - 56, front - 30, 52);
+
+  // East: tall red-brick residential tower built against our east wall, on a
+  // stone retail podium, with street trees in front.
+  const podium = block('beaux', eastX - 34, eastX, front - 28, front, 9);
+  const tower = block('redtower', eastX - 34, eastX, front - 28, front - 0.8, 78, 9);
+  group([podium, tower]);
+  const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
+  const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
+  for (const x of [eastX - 7, eastX - 20, eastX - 31]) {
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 3.4, 8), trunk);
+    t.position.set(x, 1.7, front + walk - 1.1);
+    const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(2.6, 1), leaf);
+    crown.position.set(x, 5.6, front + walk - 1.1);
+    crown.scale.set(1.2, 1, 1.1);
+    for (const o of [t, crown]) { o.castShadow = true; scene.add(o); }
+  }
+
+  // Behind our lot (north) and further east.
+  block('banded', eastX - 34, westX + 1, zS, -D / 2 - 0.2, 62);
+  block('prewar', -104, eastX - 34.1, zS, front, 48, 0, { fade: false });
+  // Across 23rd Street.
+  block('glass', -70, -12, acrossZ, zN, 72);
+  block('prewar', -11.9, 24, acrossZ, zN, 40);
+  block('banded', 24.1, PK.eastLine, acrossZ, zN, 58);
+  // West of Park Avenue South.
+  block('banded', PK.westLine, PK.westLine + 50, zS, front, 92);
+  block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 110);
+
+  // MetLife clock tower (Madison Ave & 23rd–24th St), west beyond Park Ave S.
+  {
+    const cx = PK.westLine + 118;
+    const cz = front - 40;
+    const stone = new THREE.MeshStandardMaterial({ color: '#d8d2c4', roughness: 0.75 });
+    const add = (geo, mat, y, ry = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(cx, y, cz); m.rotation.y = ry; m.castShadow = true; scene.add(m); return m; };
+    const tex = new THREE.CanvasTexture((() => {
+      const c = document.createElement('canvas'); c.width = 128; c.height = 512; const k = c.getContext('2d');
+      k.fillStyle = '#d8d2c4'; k.fillRect(0, 0, 128, 512);
+      for (let y = 6; y < 512; y += 18) for (let x = 10; x < 128; x += 24) { k.fillStyle = '#4c535a'; k.fillRect(x, y, 10, 11); }
+      return c;
+    })());
+    tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(2, 6);
+    add(new THREE.BoxGeometry(30, 150, 26), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.75 }), 75);
+    add(new THREE.BoxGeometry(27, 24, 23), stone, 162);
+    const clock = new THREE.MeshStandardMaterial({ color: '#f1ede2', roughness: 0.5 });
+    for (const [dx, dz, ry] of [[0, 13.1, 0], [0, -13.1, Math.PI], [15.1, 0, Math.PI / 2], [-15.1, 0, -Math.PI / 2]]) {
+      const f = new THREE.Mesh(new THREE.CircleGeometry(4.6, 32), clock);
+      f.position.set(cx + dx, 128, cz + dz); f.rotation.y = ry; scene.add(f);
+    }
+    const roof = add(new THREE.ConeGeometry(19, 30, 4), new THREE.MeshStandardMaterial({ color: '#b9b6ad', roughness: 0.6 }), 189, Math.PI / 4);
+    roof.scale.set(1, 1, 0.86);
+    add(new THREE.CylinderGeometry(2.4, 3.2, 8, 12), stone, 206);
+    add(new THREE.SphereGeometry(2.2, 16, 12), new THREE.MeshStandardMaterial({ color: '#d4a63a', roughness: 0.25, metalness: 0.9 }), 212);
+    add(new THREE.CylinderGeometry(0.25, 0.25, 6, 6), new THREE.MeshStandardMaterial({ color: '#d4a63a', metalness: 0.9, roughness: 0.3 }), 217);
   }
 }

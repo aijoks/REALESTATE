@@ -4,8 +4,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { buildPrewarBrick } from './building.js';
 import { buildBuffLoft } from './loft.js';
+import { buildClassicOffice } from './classic.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 
@@ -50,7 +51,14 @@ export class BuildingViewer {
     this._setupSky();
     this._setupLights();
     this._loadModel().then(() => {
-      this.context = buildContext(this.scene, { W: this.model.width, D: this.model.depth, site: this.property.model.site });
+      // The streetscape is built with the front facing +z and the avenue at +x;
+      // for a building whose avenue is on the viewer's left it is mirrored.
+      const site = this.property.model.site ?? {};
+      const root = new THREE.Group();
+      if (site.mirror) root.scale.x = -1;
+      this.scene.add(root);
+      root.updateMatrixWorld(true);
+      this.context = buildContext(root, { W: this.model.width, D: this.model.depth, site });
       this.subjectBox = new THREE.Box3().setFromObject(this.model.group);
       this._setupHotspots();
       this._buildChapters();
@@ -187,7 +195,7 @@ export class BuildingViewer {
       { id: 'base', label: 'Storefronts & lobby', pos: new THREE.Vector3(4, 3.2, D / 2 + 13), target: look(4.2, D / 2, 0), fov: 50, hold: 2.5 },
       { id: 'front', label: 'Front facade', pos: new THREE.Vector3(0, H * 0.52, D / 2 + r * 1.3), target: mid, fov: 42, hold: 2.5 },
       { id: 'front-west', label: 'Northwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.6, D / 2 + r * 0.65), target: mid, fov: 40, hold: 1.5 },
-      { id: 'avenue', label: avenue.label, pos: vec(avenue.pos), target: vec(avenue.target), fov: avenue.fov ?? 62, hold: 3.5, fade: 'street' },
+      { id: 'avenue', label: avenue.label, pos: vec(avenue.pos), target: vec(avenue.target), fov: avenue.fov ?? 62, hold: 3.5, fade: 'street', targets: avenue.targets?.map(vec) },
       { id: 'west', label: tour.westLabel ?? 'West side', pos: new THREE.Vector3(r * 1.05, H * 0.5, 0), target: mid, fov: 40, hold: 2.5 },
       { id: 'rear-west', label: 'Southwest corner', pos: new THREE.Vector3(r * 0.75, H * 0.62, -D / 2 - r * 0.65), target: mid, fov: 40, hold: 1.5 },
       { id: 'back', label: 'Rear facade', pos: new THREE.Vector3(0, H * 0.5, -D / 2 - r), target: mid, fov: 40, hold: 2.5 },
@@ -195,7 +203,8 @@ export class BuildingViewer {
       ...(tour.extra ?? []).map((c) => ({ hold: 3, fov: 50, ...c, pos: vec(c.pos), target: vec(c.target), targets: c.targets?.map(vec) })),
       { id: 'roof', label: 'Roof & skyline', pos: new THREE.Vector3(-r * 0.7, H * 1.75, D / 2 + r * 0.6), target: look(H * 0.8), fov: 45, hold: 3 },
       { id: 'crown', label: tour.crownLabel ?? 'Crown & gable', pos: new THREE.Vector3(5, H - 2, D / 2 + 26), target: look(H - 6, D / 2 - 2), fov: 40, hold: 2.5 },
-    ].filter((c) => !(tour.omit ?? []).includes(c.id));
+    ].filter((c) => !(tour.omit ?? []).includes(c.id))
+      .map((c) => ({ ...c, label: tour.labels?.[c.id] ?? c.label }));
   }
 
   // Most stops ghost any neighbour in the foreground; street-level stops

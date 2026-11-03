@@ -192,6 +192,84 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '115-e-23rd',
+    address: '115 E 23rd Street',
+    city: 'New York, NY 10010',
+    neighborhood: 'Gramercy / Flatiron',
+    crossStreets: 'Between Park Ave South & Lexington Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: '',
+    description:
+      'A 12-story classical office building on East 23rd Street, steps from Park Avenue South and ' +
+      'Madison Square Park. A three-story limestone base with a full-height retail frontage supports ' +
+      'a cream-brick shaft of generous windows, crowned by a rosette frieze and cornice.',
+    // Public listings (LoopNet, CommercialSearch, LiquidSpace) give 12 stories, built 1913,
+    // ~160 ft tall; size is listed as 93,680 SF or 72,000 SF depending on the source.
+    stats: [
+      { label: 'Stories', value: '12' },
+      { label: 'Built', value: '1913' },
+      { label: 'Building size', value: '±93,680 SF' },
+      { label: 'Height', value: '±160 ft' },
+    ],
+    highlights: [
+      'Half a block from Park Avenue South and Madison Square Park',
+      'Full-width ground-floor retail frontage on East 23rd Street',
+      'Bright floors with windows across the full frontage',
+      'Furnished lounge and work café',
+    ],
+    tenants: [
+      { name: 'Professional Physical Therapy', floor: '2nd', kind: 'Medical' },
+      { name: 'Kung Fu Tea', floor: 'Ground', kind: 'Retail' },
+    ],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 1, suite: 'Retail', sf: 2287, use: 'Retail + basement', rent: 'Upon request' },
+      { floor: 6, suite: 'Full floor', sf: 7400, use: 'Office', rent: '$55 / SF' },
+      { floor: 9, suite: '9W', sf: 3600, use: 'Office', rent: '$56 / SF' },
+      { floor: 11, suite: 'Full floor', sf: 7400, use: 'Office', rent: '$58 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/115-e-23rd/facade.jpg', caption: 'Facade on East 23rd Street', focus: 'center 45%' },
+      { src: 'assets/properties/115-e-23rd/street-angle.jpg', caption: 'Looking northwest toward Madison Square' },
+      { src: 'assets/properties/115-e-23rd/lounge.jpg', caption: 'Furnished lounge and work café' },
+    ],
+    cover: 'assets/properties/115-e-23rd/facade.jpg',
+    model: {
+      glb: null,
+      procedural: {
+        generator: 'classicOffice',
+        floors: 12,
+        width: 21, // metres of street frontage (~70 ft)
+        depth: 30,
+        flag: ['OFFICE', 'SPACE', 'FOR LEASE'],
+      },
+      // Front faces south onto 23rd St, so the streetscape is mirrored to put
+      // Park Avenue South on the viewer's left. 23rd St is wide and two-way.
+      site: {
+        id: 'e23-parksouth', street: 'E 23 St', mirror: true, streetTwoWay: true, road: 17, walk: 5,
+        avenue: { kind: 'parkSouth', name: 'Park Av S', eastLine: 52 },
+      },
+      tour: {
+        avenue: {
+          label: 'From Park Avenue South', pos: [-66.5, 1.7, 28.5], target: [-4, 15, 17], fov: 62,
+          targets: [[-9.5, 8, 16], [-9.5, 24, 16], [-9.5, 40, 16]],
+        },
+        labels: {
+          'front-west': 'Southeast corner', west: 'East side', 'rear-west': 'Northeast corner',
+          east: 'West side', crown: 'Cornice & rosettes',
+        },
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Lobby entrance', text: 'Office lobby at No. 115, with a second entrance at No. 117.', at: [0.13, 0.06, 'front'] },
+        { id: 'retail', label: 'Street retail', text: '2,287 SF retail space plus basement, alongside Kung Fu Tea.', at: [0.51, 0.04, 'front'] },
+        { id: 'second', label: '2nd floor', text: 'Full-width glass on the 2nd floor (Professional Physical Therapy).', at: [0.5, 0.15, 'front'] },
+        { id: 'shaft', label: 'Office floors', text: 'Seven windows per floor across the cream-brick shaft.', at: [0.8, 0.55, 'front'] },
+        { id: 'crown', label: 'Rosette frieze', text: 'Classical frieze with six rosettes beneath the cornice.', at: [0.5, 0.97, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {
