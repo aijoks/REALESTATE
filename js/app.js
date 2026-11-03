@@ -72,7 +72,7 @@ function render(use = 'all') {
   observeReveals();
 }
 
-document.querySelector('[data-filters]').addEventListener('click', (e) => {
+document.querySelector('[data-filters]')?.addEventListener('click', (e) => {
   const b = e.target.closest('button[data-use]');
   if (!b) return;
   document.querySelectorAll('[data-filters] button').forEach((x) => x.classList.toggle('active', x === b));
@@ -88,4 +88,5 @@ function observeReveals() {
   document.querySelectorAll('.reveal:not(.in)').forEach((el) => io.observe(el));
 }
 
-render();
+if (grid) render();
+else observeReveals();

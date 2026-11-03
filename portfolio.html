@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Skyline & Co. — Portfolio</title>
+  <meta name="description" content="Browse Manhattan office, medical and retail space with interactive 360° 3D building tours." />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="index.html"><span class="mark"></span><span data-company></span></a>
+      <nav>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="index.html#how">3D Tours</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="section page-top" id="listings">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <h2>Portfolio</h2>
+          <p>Select a property to explore its 360° building tour.</p>
+        </div>
+        <div class="filters" data-filters>
+          <button class="btn small active" data-use="all">All</button>
+          <button class="btn small" data-use="Office">Office</button>
+          <button class="btn small" data-use="Medical">Medical</button>
+          <button class="btn small" data-use="Retail">Retail</button>
+        </div>
+      </div>
+      <div class="grid" data-grid></div>
+    </div>
+  </section>
+
+
+  <footer id="contact">
+    <div class="wrap">
+      <span>© <span data-company></span> · <span data-phone></span> · <span data-email></span></span>
+      <span>3D models are reconstructions for visualisation only; verify all figures with the leasing team.</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

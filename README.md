@@ -24,7 +24,8 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` / `js/app.js` | Landing page, listing grid, use filters |
+| `index.html` / `js/app.js` | Home page: hero + tenant logo strip |
+| `portfolio.html` / `js/app.js` | Portfolio grid with use filters |
 | `property.html` / `js/property.js` | Property page: 3D viewer HUD, availability table, photos, contact |
 | `js/data/properties.js` | **The catalogue.** Add a property object here to list a new building |
 | `js/viewer/viewer.js` | Three.js scene, guided 360° tour, hotspots, floor highlight |
