@@ -27,7 +27,6 @@ function card(p) {
       <button class="nav prev" type="button" aria-label="Previous photo">‹</button>
       <button class="nav next" type="button" aria-label="Next photo">›</button>
       <div class="dots">${p.photos.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}
-      <span class="badge">${p.status}</span>
       <span class="badge tour">360° 3D tour</span>
     </div>
     <div class="body">
