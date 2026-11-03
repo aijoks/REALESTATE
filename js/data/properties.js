@@ -391,6 +391,69 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '8-w-36th',
+    address: '8 W 36th Street',
+    city: 'New York, NY 10018',
+    neighborhood: 'Midtown South',
+    crossStreets: 'Between Fifth Ave & Sixth Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: '',
+    description:
+      'A 12-story boutique office building on West 36th Street, a few doors from Fifth Avenue and the ' +
+      'Gorham Building. Built in 1910 and renovated in 2022, its grey stone facade frames a wide bay of ' +
+      'black-framed windows on every floor, above a dark granite base with a restaurant at grade.',
+    // LoopNet: 12 stories, built 1910, renovated 2022, 35,000 SF, ~3,460 SF floors
+    // (PropertyShark lists 30,776 SF).
+    stats: [
+      { label: 'Stories', value: '12' },
+      { label: 'Built', value: '1910 · renovated 2022' },
+      { label: 'Building size', value: '±35,000 SF' },
+      { label: 'Typical floor', value: '±3,460 SF' },
+    ],
+    highlights: [
+      'Half a block from Fifth Avenue, near the Empire State Building',
+      'Four large windows across every floor',
+      'Renovated in 2022',
+      'Restaurant and lobby at street level',
+    ],
+    tenants: [],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 5, suite: 'Full floor', sf: 3460, use: 'Office', rent: '$52 / SF' },
+      { floor: 9, suite: 'Full floor', sf: 3460, use: 'Office', rent: '$54 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/8-w-36th/street.jpg', caption: 'West 36th Street, looking toward Fifth Avenue', focus: 'center 40%' },
+      { src: 'assets/properties/8-w-36th/lobby.jpg', caption: 'Ground-floor interior' },
+    ],
+    cover: 'assets/properties/8-w-36th/street.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'stoneBay', floors: 12, width: 10.5, depth: 30.5, garageH: 11 },
+      // Faces north onto 36th St with Fifth Avenue to the east (viewer's left),
+      // so the streetscape is mirrored.
+      site: {
+        id: 'w36-fifth', street: 'W 36 St', facing: 'north', mirror: true,
+        avenue: { kind: 'fifth', name: '5 Av', eastLine: 43 },
+      },
+      tour: {
+        avenue: {
+          label: 'From Fifth Avenue', pos: [-56, 1.7, 24.3], target: [-3, 16, 17], fov: 62,
+          targets: [[-4.2, 8, 16], [-4.2, 24, 16], [-4.2, 38, 16]],
+        },
+        westLabel: 'West side · banner',
+        crownLabel: 'Window bay & parapet',
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Lobby entrance', text: 'No. 8 entrance under a granite canopy.', at: [0.75, 0.06, 'front'] },
+        { id: 'retail', label: 'Restaurant', text: 'Restaurant behind the dark granite storefront.', at: [0.28, 0.05, 'front'] },
+        { id: 'bay', label: 'Window bay', text: 'Four black-framed windows across every office floor.', at: [0.5, 0.55, 'front'] },
+        { id: 'banner', label: 'First Pioneer banner', text: 'The west wall rises above the neighbouring garage.', at: [0.78, 0.5, 'right'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

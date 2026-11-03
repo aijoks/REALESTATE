@@ -443,6 +443,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'w36-fifth') {
+    neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w38-sixth') {
     neighbours102w38({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w21-sixth') {
@@ -471,8 +473,10 @@ export function buildContext(scene, { W, D, site = {} }) {
       if (k === -1 || k === 0) continue;
       const z0 = streetZ(k) + road / 2 + walk;
       const z1 = streetZ(k + 1) - road / 2 - walk;
-      block(kinds[n++ % kinds.length], 18, PK.eastLine, z0, z1, 55 + r() * 170, 0, { fade: false });
-      if (siteId === 'e38-fifth' && k === -5) { n++; continue; } // Empire State Building lot
+      // Leave the Empire State Building lot (33rd–34th, west side of Fifth) clear.
+      if (siteId === 'w36-fifth' && k === -3) n++;
+      else block(kinds[n++ % kinds.length], 18, PK.eastLine, z0, z1, 55 + r() * 170, 0, { fade: false });
+      if (siteId === 'e38-fifth' && k === -5) { n++; continue; }
       block(kinds[n++ % kinds.length], PK.westLine, PK.westLine + 50, z0, z1, 55 + r() * 190, 0, { fade: false });
     }
   }
@@ -669,36 +673,7 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
   block('banded', PK.westLine, PK.westLine + 50, zS, front, 96);
 
   // Empire State Building: west side of Fifth between 33rd and 34th St.
-  {
-    const z0 = streetZ(-5) + road / 2 + walk;
-    const z1 = streetZ(-4) - road / 2 - walk;
-    const cx = PK.westLine + 64;
-    const cz = (z0 + z1) / 2;
-    const tex = facadeTexture('esb', 3);
-    const tier = (w, d, y0, y1) => {
-      const g = new THREE.BoxGeometry(w, y1 - y0, d);
-      const uv = g.attributes.uv;
-      const dims = [[d, y1 - y0], [d, y1 - y0], [w, d], [w, d], [w, y1 - y0], [w, y1 - y0]];
-      for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, uv.getX(i) * dims[f][0] / 10, uv.getY(i) * dims[f][1] / 14); }
-      const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.15 }));
-      mesh.position.set(cx, (y0 + y1) / 2, cz);
-      mesh.castShadow = true;
-      scene.add(mesh);
-    };
-    tier(126, z1 - z0, 0, 25);
-    tier(96, 52, 25, 90);
-    tier(80, 46, 90, 125);
-    tier(58, 40, 125, 320);
-    tier(42, 30, 320, 345);
-    tier(24, 22, 345, 372);
-    tier(14, 14, 372, 381);
-    const mast = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 4.5, 40, 16), new THREE.MeshStandardMaterial({ color: '#d8d6d0', roughness: 0.4, metalness: 0.5 }));
-    mast.position.set(cx, 401, cz);
-    scene.add(mast);
-    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.2, 62, 8), new THREE.MeshStandardMaterial({ color: '#c9c9c9', roughness: 0.4, metalness: 0.7 }));
-    spire.position.set(cx, 452, cz);
-    scene.add(spire);
-  }
+  empireState(scene, PK.westLine + 64, streetZ(-5) + road / 2 + walk, streetZ(-4) - road / 2 - walk);
 
   // Green sidewalk shed along the frontage (and the netted building next door).
   {
@@ -947,4 +922,112 @@ function neighbours102w38({ scene, block, group, W, D, front, walk, road, across
   block('banded', 14.1, PK.eastLine, acrossZ, zN, 70);
   block('glass', PK.westLine, PK.westLine + 50, zS, front, 120);
   block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
+}
+
+// Empire State Building, stepped tiers + mast, centred at (cx, between z0..z1).
+function empireState(scene, cx, z0, z1) {
+  {
+    const cz = (z0 + z1) / 2;
+    const tex = facadeTexture('esb', 3);
+    const tier = (w, d, y0, y1) => {
+      const g = new THREE.BoxGeometry(w, y1 - y0, d);
+      const uv = g.attributes.uv;
+      const dims = [[d, y1 - y0], [d, y1 - y0], [w, d], [w, d], [w, y1 - y0], [w, y1 - y0]];
+      for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, uv.getX(i) * dims[f][0] / 10, uv.getY(i) * dims[f][1] / 14); }
+      const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.15 }));
+      mesh.position.set(cx, (y0 + y1) / 2, cz);
+      mesh.castShadow = true;
+      scene.add(mesh);
+    };
+    tier(126, z1 - z0, 0, 25);
+    tier(96, 52, 25, 90);
+    tier(80, 46, 90, 125);
+    tier(58, 40, 125, 320);
+    tier(42, 30, 320, 345);
+    tier(24, 22, 345, 372);
+    tier(14, 14, 372, 381);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 4.5, 40, 16), new THREE.MeshStandardMaterial({ color: '#d8d6d0', roughness: 0.4, metalness: 0.5 }));
+    mast.position.set(cx, 401, cz);
+    scene.add(mast);
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 1.2, 62, 8), new THREE.MeshStandardMaterial({ color: '#c9c9c9', roughness: 0.4, metalness: 0.7 }));
+    spire.position.set(cx, 452, cz);
+    scene.add(spire);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 8 W 36th St neighbours. Faces north; mirrored so local +x points east,
+// toward Fifth Avenue.
+function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const eastX = W / 2 + 0.02;
+  const westX = -W / 2 - 0.02;
+
+  // East: tall cream loft, then the Gorham Building on the Fifth Ave corner
+  // (white stone, arcaded base, green copper cornice).
+  block('beaux', eastX, eastX + 8, front - 24, front, 41);
+  const gx0 = eastX + 8.1;
+  const gx1 = PK.eastLine;
+  const gor = block('beaux', gx0, gx1, front - 40, front, 37);
+  const copper = new THREE.MeshStandardMaterial({ color: '#4f8a72', roughness: 0.6, metalness: 0.3, transparent: true, opacity: 1 });
+  const cor = new THREE.Mesh(new THREE.BoxGeometry(gx1 - gx0 + 1.2, 2.0, 2.4), copper);
+  cor.position.set((gx0 + gx1) / 2, 38, front + 0.6);
+  scene.add(cor);
+  const arcMat = new THREE.MeshStandardMaterial({ color: '#e8e2d4', roughness: 0.7, transparent: true, opacity: 1 });
+  const arcs = [];
+  for (let x = gx0 + 2.5; x < gx1 - 1; x += 4.2) {
+    const a = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.22, 6, 16, Math.PI), arcMat);
+    a.scale.z = 0.35;
+    a.position.set(x, 6.2, front + 0.06);
+    scene.add(a);
+    arcs.push(a);
+  }
+  group([gor, cor, ...arcs]);
+
+  // West: three-level open parking garage, then a tall grey stone loft.
+  const deck = new THREE.MeshStandardMaterial({ color: '#8d8b86', roughness: 0.9, transparent: true, opacity: 1 });
+  const steel = new THREE.MeshStandardMaterial({ color: '#2d3540', roughness: 0.5, metalness: 0.5, transparent: true, opacity: 1 });
+  const parts = [];
+  const gx = westX - 12;
+  for (const y of [0.1, 3.6, 7.1, 10.6]) {
+    const s = new THREE.Mesh(new THREE.BoxGeometry(24, 0.3, 26), deck);
+    s.position.set(gx, y, front - 13);
+    s.receiveShadow = true;
+    scene.add(s); parts.push(s);
+  }
+  for (let x = westX - 23; x < westX; x += 5.5) {
+    const c = new THREE.Mesh(new THREE.BoxGeometry(0.35, 11, 0.35), steel);
+    c.position.set(x, 5.5, front - 0.4);
+    scene.add(c); parts.push(c);
+  }
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(24, 0.9, 0.08), steel);
+  rail.position.set(gx, 11.5, front - 0.3);
+  scene.add(rail); parts.push(rail);
+  const carCols = ['#c9ccd0', '#2b2f36', '#8c1d1d', '#e5e5e2', '#4a5563'];
+  let ci = 0;
+  for (const y of [3.75, 7.25, 10.75]) {
+    for (let x = westX - 21; x < westX - 2; x += 3.2) {
+      const car = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.3, 4.4), new THREE.MeshStandardMaterial({ color: carCols[ci++ % carCols.length], roughness: 0.35, metalness: 0.5, transparent: true, opacity: 1 }));
+      car.position.set(x, y + 0.65, front - 3);
+      scene.add(car); parts.push(car);
+    }
+  }
+  group(parts);
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4.2, 0.8), new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.5 }));
+  sign.position.set(westX - 1.6, 8.0, front + 0.5);
+  scene.add(sign);
+  block('prewar', westX - 48, westX - 24.1, front - 26, front, 48);
+  block('banded', -120, westX - 48.1, zS, front, 44, 0, { fade: false });
+
+  // Behind and across West 36th Street.
+  block('prewar', westX - 48, PK.eastLine, zS, -D / 2 - 0.2, 52);
+  block('beaux', -60, -12, acrossZ, zN, 46);
+  block('prewar', -11.9, 18, acrossZ, zN, 58);
+  block('banded', 18.1, PK.eastLine, acrossZ, zN, 64);
+  block('glass', PK.westLine, PK.westLine + 50, zS, front, 110);
+  block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 80);
+
+  // Empire State Building two blocks south, on this (west) side of Fifth.
+  empireState(scene, PK.eastLine - 64, streetZ(-3) + road / 2 + walk, streetZ(-2) - road / 2 - walk);
 }

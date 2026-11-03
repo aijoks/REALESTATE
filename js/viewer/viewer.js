@@ -7,8 +7,9 @@ import { buildBuffLoft } from './loft.js';
 import { buildClassicOffice } from './classic.js';
 import { buildLadiesMile } from './mile.js';
 import { buildNarrowLoft } from './narrow.js';
+import { buildStoneBay } from './bay.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 

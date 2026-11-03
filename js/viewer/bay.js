@@ -1,0 +1,213 @@
+// Procedural model of a narrow grey stone loft with a dark metal window bay,
+// matched to photos of 8 W 36th St:
+//   - dark granite ground floor: restaurant with a gold mark, and the No. 8
+//     entrance under a small canopy; tall 2nd-floor window above
+//   - ten office floors: smooth grey stone piers framing a wide bay of four
+//     black-framed windows per floor with projecting dark metal spandrels
+//   - west side wall exposed above the neighbouring garage: grey render, a
+//     column of windows near the street and a tall First Pioneer banner
+//   - plain parapet, roof bulkhead and timber water tank, rear fire escape
+import * as THREE from 'three';
+import { grime, textTexture, rand } from './textures.js';
+import { V, C, face, piece, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
+
+// Vertical First Pioneer banner (white vinyl, staircase mark, rotated text).
+function bannerTexture() {
+  return textTexture({
+    width: 512, height: 1700, bg: '#f5f4f0',
+    draw(ctx, w, h) {
+      const s = 46;
+      for (let c = 0; c < 4; c++) {
+        for (let k = 0; k <= c; k++) {
+          ctx.fillStyle = k === c ? '#d4511e' : '#2a6fc4';
+          ctx.fillRect(90 + c * (s + 4), 330 - k * (s + 4), s, s);
+        }
+      }
+      ctx.save();
+      ctx.translate(w / 2 + 30, 420);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = '#2a6fc4';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = '400 170px "Libre Bodoni", "Times New Roman", Georgia, serif';
+      ctx.fillText('FIRST', 0, -95);
+      ctx.fillText('PIONEER', 0, 70);
+      ctx.font = '400 40px "Times New Roman", Georgia, serif';
+      ctx.fillText('P R O P E R T I E S ,   I N C .', 8, 190);
+      ctx.font = '600 26px Arial, sans-serif';
+      ctx.fillStyle = '#6b7c8f';
+      ctx.fillText('NEXT GENERATION REAL ESTATE', 8, -205);
+      ctx.restore();
+    },
+  });
+}
+
+export function buildStoneBay(params) {
+  const { width: W = 10.5, depth: D = 30.5, garageH = 11 } = params;
+
+  const r = rand(1910);
+  const g1 = 4.6;
+  const g2 = 4.2;
+  const baseH = g1 + g2;
+  const FH = 3.45;
+  const floors = 10;
+  const top = baseH + floors * FH + 1.0;
+
+  const g = new THREE.Group();
+  g.name = 'building';
+  const { matStone, matSteel, I, opening, add, stoneBox, finish } = createKit(g, r, { glass: 'sky' });
+  const matGrey = matStone.clone();
+  matGrey.map = matStone.map;
+  matGrey.color = new THREE.Color('#b9b6ae');
+  const renderGrey = new THREE.MeshStandardMaterial({ color: '#a7a49d', roughness: 0.95 });
+  const granite = new THREE.MeshStandardMaterial({ color: '#2b2a2a', roughness: 0.35, metalness: 0.2 });
+  const matCommon = (seed) => brickMaterial('common', grime(`baycommon${seed}`, { seed, streaks: 50, strength: 0.7 }));
+  const black = '#1d1f21';
+  const pier = 1.25;
+  const cw = W - 2 * pier;
+  const cx = [-1.5, -0.5, 0.5, 1.5].map((k) => W / 2 + k * (cw / 4));
+  const cww = cw / 4 - 0.18;
+  const skyTint = () => (r() < 0.25 ? '#3a434c' : r() < 0.6 ? '#b9c7d3' : '#d5dee6');
+
+  // =====================================================================
+  // GROUND + 2ND FLOOR
+  // =====================================================================
+  const Fb = face(0, -W / 2, 0, D / 2);
+  const baseHoles = [
+    { x: 2.9, y: 0.12 + 1.75, w: 4.6, h: 3.5, kind: 'grid', cols: 3, transom: 0.8, room: 'warm', blinds: false, frame: '#141414', reveal: '#2b2a2a', rd: 0.25, sill: false },
+    { x: 7.9, y: 0.12 + 1.5, w: 1.9, h: 3.0, kind: 'lobby', room: 'lobby', frame: '#141414', reveal: '#2b2a2a', rd: 0.5, sill: false, roomDepth: 4 },
+    { x: W / 2, y: g1 + g2 / 2 + 0.1, w: cw, h: 3.2, kind: 'grid', cols: 4, transom: 0.9, frame: black, reveal: '#3a3a3a', rd: 0.3, sill: false, tint: '#9fb0be' },
+  ];
+  add(wall(Fb, W, baseH, baseHoles, matGrey));
+  baseHoles.forEach((o) => opening(Fb, o));
+  // Dark granite cladding on the ground floor.
+  for (const [x0, x1] of [[0, 0.5], [5.25, 6.85], [8.9, W]]) {
+    I.trim.add(piece(Fb, (x0 + x1) / 2, g1 / 2, 0.05, x1 - x0, g1, 0.1), '#2b2a2a');
+  }
+  I.trim.add(piece(Fb, W / 2, g1 - 0.35, 0.06, W, 0.7, 0.12), '#2b2a2a');
+  {
+    // Gold restaurant mark, "8" and canopy at the entrance.
+    const mark = textTexture({
+      width: 256, height: 256, bg: '#2b2a2a',
+      draw(ctx, w, h) {
+        ctx.fillStyle = '#c9a54a';
+        for (let i = 0; i < 6; i++) {
+          ctx.save(); ctx.translate(w / 2, h / 2 + 10); ctx.rotate((i / 6) * Math.PI * 2);
+          ctx.beginPath(); ctx.ellipse(0, -46, 16, 40, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+        }
+      },
+    });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshStandardMaterial({ map: mark, roughness: 0.4, metalness: 0.5 }));
+    m.position.set(-W / 2 + 0.25 + 5.8, 3.1, D / 2 + 0.11);
+    add(m);
+    const num = textTexture({ text: '8', width: 128, height: 128, bg: '#2b2a2a', ink: '#e8e4da', font: '500 96px Georgia, serif' });
+    const n = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.45), new THREE.MeshStandardMaterial({ map: num, roughness: 0.5 }));
+    n.position.set(-W / 2 + 7.9, 3.75, D / 2 + 0.12);
+    add(n);
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.12, 1.3), granite);
+    canopy.position.set(-W / 2 + 7.9, 3.35, D / 2 + 0.65);
+    canopy.castShadow = true;
+    add(canopy);
+  }
+
+  // =====================================================================
+  // OFFICE FLOORS: grey stone piers + dark metal window bay
+  // =====================================================================
+  const Ft = face(0, -W / 2, baseH, D / 2);
+  const upperH = top - baseH;
+  const holes = [];
+  const wy = (f) => f * FH + 0.6 + 1.2;
+  for (let f = 0; f < floors; f++) {
+    for (const x of cx) holes.push({ x, y: wy(f), w: cww, h: 2.4, kind: 'dh', frame: black, reveal: '#2a2c2e', rd: 0.22, sill: false, tint: skyTint() });
+  }
+  add(wall(Ft, W, upperH, holes, matGrey));
+  holes.forEach((o) => opening(Ft, o));
+  // Black metal frame of the bay: mullions, spandrels and projecting ledges.
+  for (let f = 0; f < floors; f++) {
+    const y0 = f * FH;
+    I.trim.add(piece(Ft, W / 2, y0 + 0.3, 0.06, cw + 0.1, 0.62, 0.12), '#26282a');
+    I.trim.add(piece(Ft, W / 2, y0 + 0.62, 0.22, cw + 0.4, 0.12, 0.42), '#1b1c1e');
+    for (let k = 0; k < 4; k++) I.trim.add(piece(Ft, cx[k], y0 + 0.3, 0.13, cww - 0.1, 0.32, 0.03), '#34373a');
+    for (let k = 0; k <= 4; k++) {
+      const x = W / 2 + (k - 2) * (cw / 4);
+      I.trim.add(piece(Ft, x, y0 + FH / 2 + 0.3, 0.07, k === 0 || k === 4 ? 0.22 : 0.16, FH - 0.6, 0.12), '#1d1f21');
+    }
+  }
+  stoneBox(W + 0.15, 0.3, 0.35, 0, top - 0.15, D / 2 + 0.1);
+
+  // =====================================================================
+  // SIDE WALLS (west exposed above the garage), REAR, ROOF
+  // =====================================================================
+  const Fw = face(Math.PI / 2, W / 2, 0, D / 2);
+  const sideHoles = [];
+  for (let f = 1; f < floors; f++) {
+    const y = baseH + wy(f);
+    if (y < garageH + 1.5) continue;
+    sideHoles.push({ x: 2.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#7b7871', sillColor: '#9d998f', tint: skyTint() });
+    if (f >= floors - 3) sideHoles.push({ x: 4.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#7b7871', sillColor: '#9d998f', tint: skyTint() });
+  }
+  add(wall(Fw, D, top, sideHoles, renderGrey));
+  sideHoles.forEach((o) => opening(Fw, o));
+  {
+    const bh = 15;
+    const banner = new THREE.Mesh(new THREE.PlaneGeometry(4.4, bh), (() => { const t = bannerTexture(); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, emissive: '#ffffff', emissiveMap: t, emissiveIntensity: 0.35 }); })());
+    banner.rotation.y = Math.PI / 2;
+    banner.position.set(W / 2 + 0.06, garageH + 3 + bh / 2, D / 2 - 9.5);
+    banner.castShadow = true;
+    add(banner);
+  }
+  add(wall(face(-Math.PI / 2, -W / 2, 0, -D / 2), D, top, [], matCommon(2)));
+  const Fr = face(Math.PI, W / 2, 0, -D / 2);
+  const rear = [];
+  for (let f = 0; f < floors + 1; f++) for (const x of [2.0, 5.25, 8.5]) rear.push({ x, y: g1 + 1.8 + f * FH, w: 1.3, h: 2.2, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });
+  add(wall(Fr, W, top, rear, matCommon(3)));
+  rear.forEach((o) => opening(Fr, o));
+  addFireEscape(I, { x0: -W / 2 + 1.0, x1: -W / 2 + 6.2, z: -D / 2, levels: [...Array(floors + 1).keys()].map((f) => g1 + 0.7 + f * FH) });
+  {
+    const roof = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: '#4f4b48', roughness: 1 }));
+    roof.rotation.x = -Math.PI / 2;
+    roof.position.y = top - 0.6;
+    roof.receiveShadow = true;
+    add(roof);
+    const bulk = new THREE.Mesh(new THREE.BoxGeometry(4, 3.4, 5.5), renderGrey);
+    bulk.position.set(-W / 2 + 2.6, top + 1.1, -D / 2 + 6);
+    bulk.castShadow = true;
+    add(bulk);
+    const tank = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.85, 3.4, 24), new THREE.MeshStandardMaterial({ color: '#7a5a3e', roughness: 0.95 }));
+    body.position.y = 5.0;
+    const lid = new THREE.Mesh(new THREE.ConeGeometry(2.0, 1.1, 24), new THREE.MeshStandardMaterial({ color: '#33302d', roughness: 0.9 }));
+    lid.position.y = 7.25;
+    tank.add(body, lid);
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * Math.PI * 2;
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.3), matSteel);
+      leg.position.set(Math.cos(a) * 1.4, 1.65, Math.sin(a) * 1.4);
+      tank.add(leg);
+    }
+    tank.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    tank.position.set(W / 2 - 2.6, top - 0.6, -D / 2 + 10);
+    add(tank);
+  }
+
+  finish();
+
+  const floorRange = (n) => {
+    if (n <= 1) return [0, g1];
+    if (n === 2) return [g1, baseH];
+    const y0 = baseH + (n - 3) * FH;
+    return [y0, y0 + FH];
+  };
+  const hotspotPosition = ([u, v, faceName]) => {
+    const y = v * top;
+    switch (faceName) {
+      case 'front': return V((u - 0.5) * W, y, D / 2 + 1.0);
+      case 'back': return V((0.5 - u) * W, y, -D / 2 - 0.9);
+      case 'right': return V(W / 2 + 1.0, y, (0.5 - u) * D);
+      case 'roof': return V((u - 0.5) * W, y, 0);
+      default: return V(0, y, 0);
+    }
+  };
+
+  return { group: g, width: W, depth: D, height: top + 2, floorRange, hotspotPosition };
+}
