@@ -8,7 +8,7 @@ document.querySelectorAll('[data-email]').forEach((el) => (el.textContent = comp
 // can slide by exactly one set and loop seamlessly.
 const track = document.querySelector('[data-tenant-track]');
 if (track) {
-  const set = notableTenants.map((t) => `<img src="${t.logo}" alt="${t.name}" title="${t.name}" />`).join('');
+  const set = notableTenants.map((t) => `<img src="${t.logo}" alt="${t.name}" title="${t.name}"${t.size ? ` style="--s:${t.size}"` : ''} />`).join('');
   track.innerHTML = `<div class="tenant-set">${set}</div><div class="tenant-set" aria-hidden="true">${set}</div>`;
 }
 

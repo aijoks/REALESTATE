@@ -94,7 +94,7 @@ nav a:hover { color: var(--ink); }
 .tenant-track { flex: none; display: flex; width: max-content; animation: tenant-scroll 45s linear infinite; }
 .tenant-set { flex: none; display: flex; align-items: center; gap: 44px; padding-right: 44px; }
 .tenant-set img {
-  flex: none; height: 25px; width: auto; max-width: 99px; object-fit: contain;
+  flex: none; height: calc(25px * var(--s, 1)); width: auto; max-width: 99px; object-fit: contain;
   /* White silhouettes so every logo reads on the photo. */
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); opacity: 0.92;
 }
@@ -103,7 +103,7 @@ nav a:hover { color: var(--ink); }
 @media (max-width: 600px) {
   .tenant-band { height: 52px; }
   .tenant-band-label { display: none; }
-  .tenant-set { gap: 30px; padding-right: 30px; } .tenant-set img { height: 20px; }
+  .tenant-set { gap: 30px; padding-right: 30px; } .tenant-set img { height: calc(20px * var(--s, 1)); }
 }
 
 /* ---------- listing grid ---------- */

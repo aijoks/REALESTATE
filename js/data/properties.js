@@ -18,13 +18,15 @@ export const company = {
 };
 
 // Notable tenants shown in the scrolling logo band on the home page.
+// Round seals and stacked logos read small at strip height, so they get a boost.
+const LOGO_SIZE = { starbucks: 1.3, arizona: 1.3, sva: 1.55 };
 export const notableTenants = [
   ['lirr', 'MTA Long Island Rail Road'], ['walgreens', 'Walgreens'], ['calypso', 'Calypso St. Barth'],
   ['oberoi', 'The Oberoi Group'], ['leggiadro', 'Leggiadro'], ['dunkin', "Dunkin' Donuts"], ['subway', 'Subway'],
   ['starbucks', 'Starbucks Coffee'], ['frys', "Fry's Food Stores"], ['arizona', 'State of Arizona'],
   ['sva', 'School of Visual Arts'], ['nyc', 'The City of New York'], ['pomellato', 'Pomellato'],
   ['att', 'AT&T'], ['dermalogica', 'Dermalogica'],
-].map(([file, name]) => ({ name, logo: `assets/tenants/${file}.png` }));
+].map(([file, name]) => ({ name, logo: `assets/tenants/${file}.png`, size: LOGO_SIZE[file] }));
 
 export const properties = [
   {
