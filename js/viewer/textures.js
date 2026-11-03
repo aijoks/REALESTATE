@@ -138,6 +138,11 @@ export const BRICK = {
     palette: [[172, 156, 134], [160, 145, 124], [182, 167, 146], [150, 136, 117], [168, 150, 126]],
     mortar: '#a69c8c', clinker: 0.06, seed: 21,
   }),
+  // Pale glazed brick with dark joints (12 E 44th St).
+  glazed: () => brick('glazed', {
+    palette: [[240, 232, 216], [231, 223, 207], [246, 239, 225], [223, 215, 199], [236, 228, 212]],
+    mortar: '#b5ad9f', clinker: 0.02, seed: 44,
+  }),
   // Lighter, rougher common brick on the side and rear walls.
   common: () => brick('common', {
     palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],

@@ -454,6 +454,65 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '12-e-44th',
+    address: '12 E 44th Street',
+    city: 'New York, NY 10017',
+    neighborhood: 'Midtown · Grand Central',
+    crossStreets: 'Between Fifth Ave & Madison Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: '',
+    description:
+      'A seven-story loft building on East 44th Street, steps from Fifth Avenue and a short walk to Grand ' +
+      'Central. A grand arched storefront and carved stone second floor support five floors of pale glazed ' +
+      'brick with large windows, finished with a corbelled brick cornice.',
+    // Size from a PropertyShark neighbour table (unverified); storeys counted from the facade.
+    stats: [
+      { label: 'Stories', value: '7' },
+      { label: 'Building size', value: '±17,700 SF' },
+      { label: 'Typical floor', value: '±2,500 SF' },
+      { label: 'Style', value: 'Loft · arched base' },
+    ],
+    highlights: [
+      'Half a block from Fifth Avenue; short walk to Grand Central',
+      'Large windows across every floor',
+      'Arched double-height storefront',
+      'Bright open floors',
+    ],
+    tenants: [
+      { name: 'Delicacy', floor: 'Ground', kind: 'Retail' },
+      { name: 'Skin Spa New York', floor: '2nd', kind: 'Wellness' },
+    ],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 4, suite: 'Full floor', sf: 2500, use: 'Office', rent: '$56 / SF' },
+      { floor: 6, suite: 'Full floor', sf: 2500, use: 'Office', rent: '$58 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/12-e-44th/facade.jpg', caption: 'Facade on East 44th Street', focus: 'center 55%' },
+      { src: 'assets/properties/12-e-44th/interior.jpg', caption: 'Open floor with large street windows' },
+    ],
+    cover: 'assets/properties/12-e-44th/facade.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'archLoft', floors: 7, width: 7.6, depth: 31 },
+      // Faces north onto 44th St; Fifth Avenue is to the west, the
+      // streetscape's default orientation.
+      site: { id: 'e44-fifth', street: 'E 44 St', facing: 'north', avenue: { kind: 'fifth', name: '5 Av', eastLine: 42 } },
+      tour: {
+        avenue: { label: 'From Fifth Avenue', pos: [57, 1.7, 25.3], target: [4, 12, 18], fov: 62 },
+        crownLabel: 'Corbelled cornice',
+        streetDist: 36, // shorter building: start closer
+      },
+      hotspots: [
+        { id: 'arch', label: 'Arched storefront', text: 'Double-height arch with a gridded glass fan (Delicacy).', at: [0.5, 0.14, 'front'] },
+        { id: 'second', label: '2nd floor', text: 'Carved stone floor with three windows (Skin Spa).', at: [0.2, 0.34, 'front'] },
+        { id: 'floors', label: 'Office floors', text: 'Three large windows per floor in pale glazed brick.', at: [0.8, 0.65, 'front'] },
+        { id: 'cornice', label: 'Corbelled cornice', text: 'A row of small brick arches under a stone coping.', at: [0.5, 0.97, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

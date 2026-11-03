@@ -443,6 +443,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'e44-fifth') {
+    neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w36-fifth') {
     neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w38-sixth') {
@@ -1035,4 +1037,57 @@ function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ,
 
   // Empire State Building two blocks south, on this (west) side of Fifth.
   empireState(scene, PK.eastLine - 64, streetZ(-3) + road / 2 + walk, streetZ(-2) - road / 2 - walk);
+}
+
+// ---------------------------------------------------------------------------
+// 12 E 44th St neighbours. Faces north; local +x is west, toward Fifth Ave.
+function neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const eastX = -W / 2 - 0.02;
+  const westX = W / 2 + 0.02;
+
+  // East: five-storey building — red-brick base with arched windows and a
+  // black shop sign, grey-green painted upper floors with dark cornices —
+  // and a taller cream tower set back behind it.
+  const low = block('brickwall', eastX - 9, eastX, front - 24, front, 8);
+  const up = block('prewar', eastX - 9, eastX, front - 24, front, 10, 8);
+  up.material.color.set('#aab5a9');
+  const black = new THREE.MeshStandardMaterial({ color: '#141516', roughness: 0.5, transparent: true, opacity: 1 });
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.8, 0.2), black);
+  sign.position.set(eastX - 4.5, 3.9, front + 0.12);
+  scene.add(sign);
+  const cor = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.5, 0.7), black);
+  cor.position.set(eastX - 4.5, 18.2, front + 0.3);
+  scene.add(cor);
+  group([low, up, sign, cor]);
+  block('whitegrid', eastX - 30, eastX - 1, front - 50, front - 24.2, 70);
+  block('prewar', eastX - 30, eastX - 9.1, front - 24, front, 30);
+  block('banded', -120, eastX - 30.1, zS, front, 52, 0, { fade: false });
+
+  // West: white limestone nine-storey with an arched window bay and a white
+  // sidewalk shed, then a taller brown-brick building toward Fifth.
+  const white = block('beaux', westX, westX + 8.5, front - 26, front, 34);
+  white.material.color.set('#f2efe8');
+  const shedMat = new THREE.MeshStandardMaterial({ color: '#f1f1ee', roughness: 0.6, transparent: true, opacity: 1 });
+  const shed = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 3.2), shedMat);
+  shed.position.set(westX + 4.3, 3.6, front + 1.6);
+  scene.add(shed);
+  const posts = [];
+  for (const x of [westX + 0.3, westX + 4.3, westX + 8.3]) {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(0.15, 3.2, 0.15), shedMat);
+    p.position.set(x, 1.6, front + 3.1);
+    scene.add(p); posts.push(p);
+  }
+  group([white, shed, ...posts]);
+  block('darkgrid', westX + 8.6, westX + 19, front - 28, front, 44);
+  block('prewar', westX + 19.1, PK.eastLine, front - 30, front, 40);
+
+  // Behind and across East 44th Street.
+  block('glass', eastX - 30, PK.eastLine, zS, -D / 2 - 0.2, 95);
+  block('prewar', -60, -14, acrossZ, zN, 72);
+  block('glass', -13.9, 16, acrossZ, zN, 110);
+  block('beaux', 16.1, PK.eastLine, acrossZ, zN, 64);
+  block('glass', PK.westLine, PK.westLine + 50, zS, front, 130);
+  block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
 }
