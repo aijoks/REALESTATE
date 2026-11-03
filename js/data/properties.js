@@ -304,10 +304,10 @@ export const properties = [
       { floor: 11, suite: 'Full floor', sf: 9600, use: 'Office', rent: '$58 / SF' },
     ],
     photos: [
+      { src: 'assets/properties/133-w-21st/upper-facade.jpg', caption: 'Ornate upper floors and cornice', focus: 'center 40%' },
       { src: 'assets/properties/133-w-21st/street.jpg', caption: 'West 21st Street', focus: 'center 60%' },
-      { src: 'assets/properties/133-w-21st/upper-facade.jpg', caption: 'Ornate upper floors and cornice' },
     ],
-    cover: 'assets/properties/133-w-21st/street.jpg',
+    cover: 'assets/properties/133-w-21st/upper-facade.jpg',
     model: {
       glb: null,
       procedural: { generator: 'ladiesMile', floors: 12, width: 30, depth: 29, banner: ['SVA', 'NYC'] },
