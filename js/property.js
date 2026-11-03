@@ -25,7 +25,7 @@ tenantsEl.innerHTML = (p.tenants ?? [])
   .map((t) => `<div class="tenant"><b>${t.name}</b><span>${t.floor} · ${t.kind}</span></div>`).join('');
 tenantsEl.closest('.panel').hidden = !p.tenants?.length;
 document.querySelector('[data-gallery]').innerHTML = p.photos
-  .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" /><figcaption>${ph.caption}</figcaption></figure>`).join('');
+  .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /><figcaption>${ph.caption}</figcaption></figure>`).join('');
 
 const tbody = document.querySelector('[data-availability]');
 tbody.innerHTML = p.availability

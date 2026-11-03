@@ -13,7 +13,7 @@ function card(p) {
   a.innerHTML = `
     <div class="media" data-carousel>
       <div class="slides">
-        ${p.photos.map((ph, i) => `<img src="${ph.src}" alt="${ph.caption}" ${i ? 'loading="lazy"' : ''} />`).join('')}
+        ${p.photos.map((ph, i) => `<img src="${ph.src}" alt="${ph.caption}" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} ${i ? 'loading="lazy"' : ''} />`).join('')}
       </div>
       ${p.photos.length > 1 ? `
       <button class="nav prev" type="button" aria-label="Previous photo">‹</button>
