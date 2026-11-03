@@ -753,6 +753,55 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '7877-e-snyder',
+    address: '7877 E Snyder Rd',
+    city: 'Tucson, AZ 85750',
+    neighborhood: 'Catalina Foothills',
+    crossStreets: 'Snyder Rd · Tucson, Arizona',
+    status: 'Net Lease',
+    uses: ['Net Lease', 'Retail'],
+    headline: '',
+    description:
+      'A free-standing single-tenant Walgreens in the Catalina Foothills of northeast Tucson, beneath the ' +
+      'Santa Catalina Mountains. A corner entrance tower, tile-roofed arcades on both frontages and a ' +
+      'surrounding parking field make this a classic net-leased pharmacy property.',
+    stats: [
+      { label: 'Lease type', value: 'Net lease' },
+      { label: 'Tenant', value: 'Walgreens' },
+      { label: 'Use', value: 'Pharmacy retail' },
+      { label: 'Market', value: 'Tucson, AZ' },
+    ],
+    highlights: [
+      'Single-tenant net-leased Walgreens',
+      'Free-standing corner building with an entrance tower',
+      'On-site parking wrapping the store',
+      'Catalina Foothills, northeast Tucson',
+    ],
+    tenants: [{ name: 'Walgreens', floor: 'Ground', kind: 'Pharmacy' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/7877-e-snyder/front.jpg', caption: 'Corner entrance and arcades', focus: 'center 55%' },
+    ],
+    cover: 'assets/properties/7877-e-snyder/front.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'drugstore', floors: 1, width: 40, depth: 32 },
+      site: { id: 'tucson-snyder', facing: 'north', suburban: true, desert: true },
+      tour: {
+        avenue: { label: 'Corner entrance', pos: [42, 2.5, 46], target: [14, 5, 10], fov: 55 },
+        labels: { 'front-west': 'Corner entrance tower', west: 'East side arcade', east: 'West side', crown: 'Entrance tower' },
+        streetDist: 46,
+        radius: 58,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Entrance tower', text: 'Arched corner entrance under the red W window.', at: [0.5, 0.5, 'corner'] },
+        { id: 'arcade', label: 'Arcade', text: 'Tile-roofed arcade shading the storefront windows.', at: [0.3, 0.35, 'front'] },
+        { id: 'pharmacy', label: 'Pharmacy', text: 'Pharmacy and 1-hour photo along the side arcade.', at: [0.4, 0.45, 'right'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

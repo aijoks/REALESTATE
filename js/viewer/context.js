@@ -1300,7 +1300,8 @@ function buildSuburban(scene, { W, D, site }) {
     m.receiveShadow = true;
     return add(m);
   };
-  const grass = new THREE.MeshStandardMaterial({ color: '#6f9a45', roughness: 1 });
+  const desert = !!site.desert;
+  const grass = new THREE.MeshStandardMaterial({ color: desert ? '#c7b08a' : '#6f9a45', roughness: 1 });
   const asphalt = new THREE.MeshStandardMaterial({ color: '#3b3c3e', roughness: 0.95 });
   const white = new THREE.MeshBasicMaterial({ color: '#e9e7e0' });
   const yellow = new THREE.MeshBasicMaterial({ color: '#e6be2e' });
@@ -1327,7 +1328,7 @@ function buildSuburban(scene, { W, D, site }) {
   const kerb = add(new THREE.Mesh(new THREE.TorusGeometry(9, 0.18, 6, 24, Math.PI / 2), kerbMat));
   kerb.rotation.x = -Math.PI / 2;
   kerb.position.set(W / 2 + 6, 0.12, front + 18);
-  flat(grass, W / 2 + 1, W / 2 + 40, -front, front + 1, 0.011);
+  if (!desert) flat(grass, W / 2 + 1, W / 2 + 40, -front, front + 1, 0.011);
 
   // Chain-link fence around the side yard.
   const fence = new THREE.MeshStandardMaterial({ color: '#9aa0a5', roughness: 0.5, metalness: 0.6, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
@@ -1347,8 +1348,13 @@ function buildSuburban(scene, { W, D, site }) {
     top.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
     top.position.set((x0 + x1) / 2, 2.45, (z0 + z1) / 2);
   };
-  fenceRun(lotX0 + 2, front - 2, -W / 2 - 1, front - 2);
-  fenceRun(lotX0 + 2, front - 2, lotX0 + 2, -front);
+  if (!desert) {
+    fenceRun(lotX0 + 2, front - 2, -W / 2 - 1, front - 2);
+    fenceRun(lotX0 + 2, front - 2, lotX0 + 2, -front);
+  } else {
+    // Store sites wrap the lot around the corner: pave the +x side too.
+    flat(asphalt, W / 2, W / 2 + 34, -front - 10, front + 1, 0.04);
+  }
 
   // Parked cars.
   const carCols = ['#e8e8e6', '#8e9aa6', '#7a1d22', '#c9c3b5', '#2c3440', '#b8bcc2'];
@@ -1366,7 +1372,7 @@ function buildSuburban(scene, { W, D, site }) {
     add(g);
   };
   for (let x = lotX0 + 4.4; x < -W / 2 - 4; x += 2.8) if (r() < 0.75) car(x, front + 6, Math.PI / 2);
-  for (let z = -front + 2; z < front - 6; z += 2.8) if (r() < 0.6) car(lotX0 + 6, z, 0);
+  for (let z = -front + 2; z < front - 6; z += 2.8) if (r() < (desert ? 0.25 : 0.6)) car(lotX0 + 6, z, 0);
   for (let x = -W / 2 + 5; x < W / 2 + 10; x += 2.8) if (r() < 0.35) car(x + 1.4, front + 25, Math.PI / 2);
 
   // Three-headed light poles.
@@ -1387,7 +1393,9 @@ function buildSuburban(scene, { W, D, site }) {
   }
 
   // Live oaks and shrubs beside the office front.
-  const leaf = [new THREE.MeshStandardMaterial({ color: '#3f6b2c', roughness: 1 }), new THREE.MeshStandardMaterial({ color: '#4d7d33', roughness: 1 })];
+  const leaf = desert
+    ? [new THREE.MeshStandardMaterial({ color: '#8fa45a', roughness: 1 }), new THREE.MeshStandardMaterial({ color: '#a3b46b', roughness: 1 })] // palo verde
+    : [new THREE.MeshStandardMaterial({ color: '#3f6b2c', roughness: 1 }), new THREE.MeshStandardMaterial({ color: '#4d7d33', roughness: 1 })];
   const trunk = new THREE.MeshStandardMaterial({ color: '#4b3d30', roughness: 1 });
   const oak = (x, z, s) => {
     const t = add(new THREE.Mesh(new THREE.CylinderGeometry(0.25 * s, 0.4 * s, 4 * s, 8), trunk));
@@ -1398,7 +1406,58 @@ function buildSuburban(scene, { W, D, site }) {
       c.castShadow = true;
     }
   };
-  for (const [x, z, s] of [[W / 2 + 4, front - 4, 1.3], [W / 2 + 10, front - 18, 1.5], [W / 2 + 6, front - 40, 1.2], [W / 2 + 24, front + 10, 1.1], [-W / 2 - 50, front + 40, 1.0]]) oak(x, z, s);
+  const treeSpots = desert
+    ? [[W / 2 + 36, front - 4, 0.9], [W / 2 + 38, -front + 6, 1.0], [-W / 2 - 50, front + 40, 0.9], [W / 2 + 20, front + 38, 0.8]]
+    : [[W / 2 + 4, front - 4, 1.3], [W / 2 + 10, front - 18, 1.5], [W / 2 + 6, front - 40, 1.2], [W / 2 + 24, front + 10, 1.1], [-W / 2 - 50, front + 40, 1.0]];
+  for (const [x, z, s] of treeSpots) oak(x, z, s);
+  if (desert) {
+    // Agaves in gravel planters, saguaros, and the Santa Catalina foothills.
+    const agaveMat = new THREE.MeshStandardMaterial({ color: '#9fb3a6', roughness: 0.7 });
+    const agave = (x, z, s) => {
+      const bed = add(new THREE.Mesh(new THREE.CylinderGeometry(2.2 * s, 2.2 * s, 0.25, 20), new THREE.MeshStandardMaterial({ color: '#8d7a66', roughness: 1 })));
+      bed.position.set(x, 0.12, z);
+      for (let k = 0; k < 14; k++) {
+        const a = (k / 14) * Math.PI * 2;
+        const lf = add(new THREE.Mesh(new THREE.ConeGeometry(0.16 * s, 1.9 * s, 4), agaveMat));
+        lf.position.set(x + Math.cos(a) * 0.35 * s, 0.9 * s, z + Math.sin(a) * 0.35 * s);
+        lf.rotation.set(Math.sin(a) * 0.8, 0, -Math.cos(a) * 0.8);
+      }
+    };
+    agave(W / 2 + 12, front + 16, 1.2);
+    agave(-W / 2 - 4, front + 12, 1);
+    const cactus = new THREE.MeshStandardMaterial({ color: '#4f6b3a', roughness: 0.9 });
+    const saguaro = (x, z, h) => {
+      const t = add(new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, h, 10), cactus));
+      t.position.set(x, h / 2, z);
+      for (const sx of [-1, 1]) {
+        const arm = add(new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, h * 0.35, 8), cactus));
+        arm.position.set(x + sx * 0.8, h * 0.62, z);
+        const el = add(new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.8, 8), cactus));
+        el.rotation.z = Math.PI / 2;
+        el.position.set(x + sx * 0.45, h * 0.45, z);
+      }
+    };
+    for (const [x, z, h] of [[-90, front + 20, 7], [W / 2 + 60, -30, 8], [70, front + 80, 6.5], [-70, -front - 40, 7.5]]) saguaro(x, z, h);
+    // Santa Catalina foothills: a jagged, hazy ridge line far behind the site.
+    const rock = new THREE.MeshStandardMaterial({ color: '#8d7a69', roughness: 1, flatShading: true });
+    for (let k = 0; k < 9; k++) {
+      const rr = 150 + r() * 120;
+      const h = 110 + r() * 120;
+      const geo = new THREE.ConeGeometry(rr, h, 9, 3);
+      const pos = geo.attributes.position;
+      for (let i = 0; i < pos.count; i++) {
+        if (pos.getY(i) > -h / 2 + 1) {
+          pos.setX(i, pos.getX(i) * (0.8 + r() * 0.4));
+          pos.setZ(i, pos.getZ(i) * (0.8 + r() * 0.4));
+          pos.setY(i, pos.getY(i) + (r() - 0.5) * h * 0.18);
+        }
+      }
+      geo.computeVertexNormals();
+      const m = add(new THREE.Mesh(geo, rock));
+      m.scale.set(1.6, 1, 0.8);
+      m.position.set(-700 + k * 190 + (r() - 0.5) * 80, h / 2 - 12, -760 - r() * 120);
+    }
+  }
   for (let x = W / 2 - 10; x < W / 2 + 2; x += 2) {
     const b = add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), leaf[1]));
     b.position.set(x, 0.7, front + 0.9);
@@ -1416,6 +1475,5 @@ function buildSuburban(scene, { W, D, site }) {
   shed(-120, -20, front + 64, front + 130, 7.5, '#cfc4ae');
   shed(10, 120, front + 64, front + 140, 9, '#e6e1d6');
   shed(-60, 60, -front - 90, -front - 25, 10, '#ddd4c2');
-  void site;
   return { fadeables: [] };
 }
