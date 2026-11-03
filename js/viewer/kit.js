@@ -105,13 +105,26 @@ export function wall(F, w, h, holes, material) {
 }
 
 
-export function createKit(g, r) {
+// Glass looks: 'dark' shows the room behind (pre-war sash windows); 'sky'
+// reads as bright, sky-reflecting modern glazing. Instance tint sets the hue.
+const GLASS = {
+  dark: { color: '#1b2128', opacity: 0.58, envMapIntensity: 2.4 },
+  sky: { color: '#ffffff', opacity: 0.86, envMapIntensity: 1.6 },
+};
+
+export function createKit(g, r, { glass = 'dark' } = {}) {
+  const gl = GLASS[glass] ?? GLASS.dark;
   const matStone = new THREE.MeshStandardMaterial({ map: stone(), roughness: 0.82, color: '#efe6d4' });
   const matTrim = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.85 });
   const matFrame = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.45, metalness: 0.35 });
   const matGlass = new THREE.MeshPhysicalMaterial({
-    color: '#1b2128', roughness: 0.03, metalness: 0.0, transparent: true, opacity: 0.58,
-    envMapIntensity: 2.4, specularIntensity: 1, depthWrite: false,
+    color: gl.color, roughness: 0.03, metalness: 0.0, transparent: true, opacity: gl.opacity,
+    envMapIntensity: gl.envMapIntensity, specularIntensity: 1, depthWrite: false,
+  });
+  // Shopfronts and lobbies always use clear glass so their lit interiors show.
+  const matGlassClear = new THREE.MeshPhysicalMaterial({
+    color: GLASS.dark.color, roughness: 0.03, metalness: 0.0, transparent: true, opacity: GLASS.dark.opacity,
+    envMapIntensity: GLASS.dark.envMapIntensity, specularIntensity: 1, depthWrite: false,
   });
   const roomGeo = new THREE.BoxGeometry(1, 1, 1);
   {
@@ -126,7 +139,7 @@ export function createKit(g, r) {
   const matSteel = new THREE.MeshStandardMaterial({ color: '#232323', roughness: 0.55, metalness: 0.6 });
 
   const I = {
-    trim: new Instancer(), frame: new Instancer(), glass: new Instancer(),
+    trim: new Instancer(), frame: new Instancer(), glass: new Instancer(), clear: new Instancer(),
     room: new Instancer(), blind: new Instancer(), steel: new Instancer(),
   };
 
@@ -170,7 +183,7 @@ export function createKit(g, r) {
         }
         default: break;
       }
-      I.glass.add(P(0, 0, zf, w - 0.02, h - 0.02, 1), o.tint ?? '#e8eef4');
+      (o.room ? I.clear : I.glass).add(P(0, 0, zf, w - 0.02, h - 0.02, 1), o.room ? '#e8eef4' : o.tint ?? '#e8eef4');
 
       // Interior: lit or dim office, warm shops, bright lobby.
       let room;
@@ -228,7 +241,39 @@ export function createKit(g, r) {
     add(I.steel.build(new THREE.BoxGeometry(1, 1, 1), matSteel, { cast: true }));
     const glass = add(I.glass.build(new THREE.PlaneGeometry(1, 1), matGlass));
     glass.renderOrder = 2;
+    const clear = add(I.clear.build(new THREE.PlaneGeometry(1, 1), matGlassClear));
+    clear.renderOrder = 2;
   };
 
   return { matStone, matTrim, matFrame, matGlass, matRoom, matBlind, matSteel, I, opening, add, stoneBox, brickBox, finish };
+}
+
+// Steel fire escape on a rear wall facing -z at `z`: a landing per level from
+// x0 to x1, railings, brackets and zig-zag stairs between landings.
+export function addFireEscape(I, { x0, x1, z, levels, depth = 1.2 }) {
+  const wid = x1 - x0;
+  const S = (x, y, zz, sx, sy, sz, q) => I.steel.add(piece(new THREE.Matrix4(), x, y, zz, sx, sy, sz, q));
+  const brace = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.8, 0, 0));
+  levels.forEach((y, i) => {
+    S((x0 + x1) / 2, y, z - depth / 2, wid, 0.06, depth);
+    S((x0 + x1) / 2, y + 0.95, z - depth, wid, 0.04, 0.04);
+    S(x0, y + 0.95, z - depth / 2, 0.04, 0.04, depth);
+    S(x1, y + 0.95, z - depth / 2, 0.04, 0.04, depth);
+    for (let x = x0; x <= x1 + 0.001; x += 0.16) S(x, y + 0.48, z - depth, 0.018, 0.95, 0.018);
+    for (let k = 0.16; k < depth; k += 0.16) { S(x0, y + 0.48, z - k, 0.018, 0.95, 0.018); S(x1, y + 0.48, z - k, 0.018, 0.95, 0.018); }
+    for (const x of [x0 + 0.3, x1 - 0.3]) S(x, y - 0.45, z - 0.4, 0.05, 0.9, 0.05, brace);
+    if (i < levels.length - 1) {
+      const y2 = levels[i + 1];
+      const dir = i % 2 ? 1 : -1;
+      const xa = dir > 0 ? x0 + 0.6 : x1 - 0.6;
+      const xb = xa + dir * Math.min(3.4, wid - 1.2);
+      const len = Math.hypot(xb - xa, y2 - y);
+      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, Math.atan2(y2 - y, xb - xa)));
+      for (const dz of [0.12, 0.72]) S((xa + xb) / 2, (y + y2) / 2, z - dz, len, 0.12, 0.03, q);
+      for (let k = 1; k < 13; k++) {
+        const t = k / 13;
+        S(xa + (xb - xa) * t, y + (y2 - y) * t, z - 0.42, 0.24, 0.025, 0.6);
+      }
+    }
+  });
 }

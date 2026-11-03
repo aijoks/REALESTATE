@@ -11,7 +11,7 @@
 // interior, so the model reads correctly from any angle.
 import * as THREE from 'three';
 import { grime, textTexture, stripedAwning, leaseBannerTexture, rand } from './textures.js';
-import { V, C, face, piece, boxGeo, brickMaterial, wall, createKit } from './kit.js';
+import { V, C, face, piece, boxGeo, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
 
 export function buildPrewarBrick(params) {
   const {
@@ -359,37 +359,7 @@ export function buildPrewarBrick(params) {
     }
 
     // Fire escape on the rear wall.
-    const fx0 = -1.2;
-    const fx1 = 4.8;
-    const fwid = fx1 - fx0;
-    const fdep = 1.2;
-    const zr = -D / 2;
-    const levels = [groundH + 0.85, ...floorsList.map((f) => baseH + f * FH + 0.82)];
-    const S = (x, y, z, sx, sy, sz, q) => I.steel.add(piece(new THREE.Matrix4(), x, y, z, sx, sy, sz, q));
-    levels.forEach((y, i) => {
-      S((fx0 + fx1) / 2, y, zr - fdep / 2, fwid, 0.06, fdep);
-      S((fx0 + fx1) / 2, y + 0.95, zr - fdep, fwid, 0.04, 0.04);
-      S(fx0, y + 0.95, zr - fdep / 2, 0.04, 0.04, fdep);
-      S(fx1, y + 0.95, zr - fdep / 2, 0.04, 0.04, fdep);
-      for (let x = fx0; x <= fx1 + 0.001; x += 0.16) S(x, y + 0.48, zr - fdep, 0.018, 0.95, 0.018);
-      for (let z = 0.16; z < fdep; z += 0.16) { S(fx0, y + 0.48, zr - z, 0.018, 0.95, 0.018); S(fx1, y + 0.48, zr - z, 0.018, 0.95, 0.018); }
-      for (const x of [fx0 + 0.3, fx1 - 0.3]) S(x, y - 0.45, zr - 0.4, 0.05, 0.9, 0.05, new THREE.Quaternion().setFromEuler(new THREE.Euler(0.8, 0, 0)));
-      if (i < levels.length - 1) {
-        const y2 = levels[i + 1];
-        const dir = i % 2 ? 1 : -1;
-        const xa = dir > 0 ? fx0 + 0.6 : fx1 - 0.6;
-        const xb = xa + dir * 3.4;
-        const len = Math.hypot(xb - xa, y2 - y);
-        const ang = Math.atan2(y2 - y, xb - xa);
-        const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, ang));
-        for (const dz of [0.12, 0.72]) S((xa + xb) / 2, (y + y2) / 2, zr - dz, len, 0.12, 0.03, q);
-        const steps = 13;
-        for (let k = 1; k < steps; k++) {
-          const t = k / steps;
-          S(xa + (xb - xa) * t, y + (y2 - y) * t, zr - 0.42, 0.24, 0.025, 0.6);
-        }
-      }
-    });
+    addFireEscape(I, { x0: -1.2, x1: 4.8, z: -D / 2, levels: [groundH + 0.85, ...floorsList.map((f) => baseH + f * FH + 0.82)] });
   }
 
   // =====================================================================

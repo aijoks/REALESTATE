@@ -10,7 +10,7 @@
 //     umbrellas, blue bistro sets, planters, metal-clad bulkhead + water tank
 import * as THREE from 'three';
 import { grime, textTexture, rand } from './textures.js';
-import { V, C, face, piece, brickMaterial, wall, createKit } from './kit.js';
+import { V, C, face, piece, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
 
 export function buildBuffLoft(params) {
   const {
@@ -32,14 +32,14 @@ export function buildBuffLoft(params) {
 
   const g = new THREE.Group();
   g.name = 'building';
-  const { matStone, matSteel, I, opening, add, stoneBox, brickBox, finish } = createKit(g, r);
+  const { matStone, matSteel, I, opening, add, stoneBox, brickBox, finish } = createKit(g, r, { glass: 'sky' });
 
-  const matBuff = brickMaterial('buff', grime('buff', { seed: 4, streaks: 30, strength: 0.35 }));
+  const matBuff = brickMaterial('buff', grime('buff', { seed: 4, streaks: 18, strength: 0.18 }));
   const matCommon = (seed) => brickMaterial('common', grime(`loftcommon${seed}`, { seed, streaks: 60, strength: 0.8 }));
   const matBaseStone = matStone.clone();
   matBaseStone.color = new THREE.Color('#e4e3de');
-  const frameGrey = '#3a3d41';
-  const revealBuff = '#a38f72';
+  const frameGrey = '#5d6166';
+  const revealBuff = '#8f8d88';
 
   // Window centres across the front: 3 | 5 | 3 with wider piers between groups.
   const steps = [1.41, 1.41, 1.88, 1.41, 1.41, 1.41, 1.41, 1.88, 1.41, 1.41];
@@ -127,22 +127,29 @@ export function buildBuffLoft(params) {
   const Ft = face(0, -W / 2, baseH, D / 2);
   const holes = [];
   for (let f = 0; f < towerFloors; f++) {
-    for (const x of xs) holes.push({ x, y: winY(f), w: WW, h: WH, kind: 'dh', reveal: revealBuff, frame: frameGrey, sillColor: '#d8d2c4', header: '#9b8566' });
+    for (const x of xs) holes.push({ x, y: winY(f), w: WW, h: WH, kind: 'dh', reveal: revealBuff, frame: frameGrey, sillColor: '#cfccc4', header: '#8e8c87', tint: r() < 0.12 ? '#6f7a84' : '#dfe6ec' });
   }
   add(wall(Ft, W, towerWallH, holes, matBuff));
   holes.forEach((o) => opening(Ft, o));
   // Pier relief between the window groups and at the corners.
   for (const x of [(xs[2] + xs[3]) / 2, (xs[7] + xs[8]) / 2, 0.35, W - 0.35]) {
-    I.trim.add(piece(Ft, x, towerWallH / 2, 0.04, x < 1 || x > W - 1 ? 0.7 : 0.62, towerWallH, 0.08), '#c9b89a');
+    I.trim.add(piece(Ft, x, towerWallH / 2, 0.05, x < 1 || x > W - 1 ? 0.7 : 0.62, towerWallH, 0.1), '#a9a7a1');
+  }
+  // Narrow grey mullion strips between neighbouring windows in each group.
+  for (let k = 0; k < xs.length - 1; k++) {
+    if (k === 2 || k === 7) continue;
+    I.trim.add(piece(Ft, (xs[k] + xs[k + 1]) / 2, towerWallH / 2 - parapet / 2, 0.03, 0.2, towerWallH - parapet, 0.06), '#a3a19b');
   }
   // Darker spandrel bands across each group, under the sills and over the heads.
+  // Spandrels: lighter stack-bond brick panels between each head and the sill above.
   for (let f = 0; f < towerFloors; f++) {
-    for (const grp of groups) {
-      const x0 = grp[0] - WW / 2 - 0.15;
-      const x1 = grp[grp.length - 1] + WW / 2 + 0.15;
-      for (const y of [winY(f) - WH / 2 - 0.45, winY(f) + WH / 2 + 0.38]) {
-        I.trim.add(piece(Ft, (x0 + x1) / 2, y, 0.015, x1 - x0, 0.2, 0.03), '#a89474');
-      }
+    const y0 = winY(f) + WH / 2 + 0.12;
+    const y1 = (f + 1 < towerFloors ? winY(f + 1) : towerTop - baseH + 0.6) - WH / 2 - 0.12;
+    if (y1 - y0 < 0.2) continue;
+    for (const x of xs) {
+      I.trim.add(piece(Ft, x, (y0 + y1) / 2, 0.012, WW + 0.1, y1 - y0, 0.02), '#dedbd3');
+      for (let k = -4; k <= 4; k++) I.trim.add(piece(Ft, x + k * 0.12, (y0 + y1) / 2, 0.024, 0.012, y1 - y0, 0.004), '#bcb8ae');
+      for (let y = y0 + 0.09; y < y1; y += 0.09) I.trim.add(piece(Ft, x, y, 0.024, WW + 0.1, 0.01, 0.004), '#c9c5bc');
     }
   }
   // Simple stone cornice band + parapet coping.
@@ -165,6 +172,7 @@ export function buildBuffLoft(params) {
   }
   add(wall(Fr, W, sideH, rear, matCommon(3)));
   rear.forEach((o) => opening(Fr, o));
+  addFireEscape(I, { x0: -W / 2 + 1.0, x1: -W / 2 + 7.2, z: -D / 2, levels: [groundH + 0.9, ...[...Array(towerFloors).keys()].map((f) => baseH + f * FH + 0.75)] });
 
   // =====================================================================
   // ROOF + TERRACE

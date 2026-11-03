@@ -8,7 +8,7 @@
 //   - two ornate top floors: pier capitals, terracotta frieze, deep cornice
 import * as THREE from 'three';
 import { grime, textTexture, rand } from './textures.js';
-import { V, C, face, piece, brickMaterial, wall, createKit } from './kit.js';
+import { V, C, face, piece, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
 
 export function buildLadiesMile(params) {
   const { width: W = 30, depth: D = 29, banner = ['SVA', 'NYC'] } = params;
@@ -28,7 +28,8 @@ export function buildLadiesMile(params) {
 
   const g = new THREE.Group();
   g.name = 'building';
-  const { matStone, matSteel, I, opening, add, stoneBox, brickBox, finish } = createKit(g, r);
+  const { matStone, matSteel, I, opening, add, stoneBox, brickBox, finish } = createKit(g, r, { glass: 'sky' });
+  const skyTint = () => (r() < 0.3 ? '#2f3a44' : r() < 0.6 ? '#9db3c6' : '#c4d3df');
   const matTan = brickMaterial('tan', grime('mile', { seed: 21, streaks: 40, strength: 0.5 }));
   const matTanPlain = brickMaterial('tan');
   const matCommon = (seed) => brickMaterial('common', grime(`milecommon${seed}`, { seed, streaks: 50, strength: 0.7 }));
@@ -129,7 +130,7 @@ export function buildLadiesMile(params) {
   const holes = [];
   const wy = (f) => (f < shaftFloors ? f * FH : shaftFloors * FH + (f - shaftFloors) * TFH) + 0.7 + 1.25;
   for (let f = 0; f < shaftFloors + topFloors; f++) {
-    for (let i = 0; i < 4; i++) for (const x of winXs(i)) holes.push({ x, y: wy(f), w: ww, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d1c6b1' });
+    for (let i = 0; i < 4; i++) for (const x of winXs(i)) holes.push({ x, y: wy(f), w: ww, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d1c6b1', tint: skyTint() });
   }
   add(wall(Ft, W, upperH, holes, matTan));
   holes.forEach((o) => opening(Ft, o));
@@ -178,6 +179,7 @@ export function buildLadiesMile(params) {
   }
   add(wall(Fr, W, top, rear, matCommon(3)));
   rear.forEach((o) => opening(Fr, o));
+  addFireEscape(I, { x0: -W / 2 + 2.0, x1: -W / 2 + 8.4, z: -D / 2, levels: [...Array(shaftFloors + topFloors + 2).keys()].map((f) => g1 + 0.75 + f * FH) });
   {
     const roof = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: '#4f4b48', roughness: 1 }));
     roof.rotation.x = -Math.PI / 2;

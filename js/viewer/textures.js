@@ -124,8 +124,14 @@ export const BRICK = {
   }),
   // Buff / cream face brick of 1910s loft buildings (10 E 38th St).
   buff: () => brick('buff', {
-    palette: [[214, 198, 172], [202, 186, 160], [222, 208, 184], [192, 176, 150], [208, 192, 164], [198, 178, 148]],
-    mortar: '#c3bcae', clinker: 0.05, seed: 38,
+    // 10 E 38th: cool light grey-buff face brick.
+    palette: [[212, 205, 191], [202, 195, 181], [219, 213, 200], [194, 187, 173], [207, 199, 184]],
+    mortar: '#cdc6b8', clinker: 0.03, seed: 38,
+  }),
+  // 115 E 23rd: warm cream glazed-look brick.
+  cream: () => brick('cream', {
+    palette: [[222, 206, 180], [214, 198, 172], [228, 214, 190], [206, 190, 164], [218, 203, 176]],
+    mortar: '#d6cab4', clinker: 0.02, seed: 23,
   }),
   // Grey-tan face brick of the Ladies' Mile lofts (133 W 21st St).
   tan: () => brick('tan', {

@@ -9,7 +9,7 @@
 //   - blank party walls (both neighbours abut it), rear windows, roof plant
 import * as THREE from 'three';
 import { grime, textTexture, rand } from './textures.js';
-import { V, C, face, piece, brickMaterial, wall, createKit } from './kit.js';
+import { V, C, face, piece, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
 
 export function buildClassicOffice(params) {
   const {
@@ -33,9 +33,10 @@ export function buildClassicOffice(params) {
 
   const g = new THREE.Group();
   g.name = 'building';
-  const { matStone, matSteel, I, opening, add, stoneBox, finish } = createKit(g, r);
+  const { matStone, matSteel, I, opening, add, stoneBox, finish } = createKit(g, r, { glass: 'sky' });
 
-  const matBuff = brickMaterial('buff', grime('classic', { seed: 23, streaks: 25, strength: 0.3 }));
+  const matBuff = brickMaterial('cream', grime('classic', { seed: 23, streaks: 14, strength: 0.15 }));
+  const skyTint = () => (r() < 0.15 ? '#3f4c5a' : r() < 0.5 ? '#7fa9d8' : '#94bce6');
   const matCommon = (seed) => brickMaterial('common', grime(`classiccommon${seed}`, { seed, streaks: 50, strength: 0.7 }));
   const matBase = matStone.clone();
   matBase.color = new THREE.Color('#dcd8cf');
@@ -127,8 +128,8 @@ export function buildClassicOffice(params) {
   const holes = [];
   const wy = (f) => f * FH + 0.6 + 1.25;
   for (let f = 0; f < shaftFloors; f++) {
-    for (const x of [0.133, 0.867]) holes.push({ x: X(x), y: wy(f), w: 1.55, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d6cfbf' });
-    for (const x of centre) holes.push({ x: X(x), y: wy(f), w: 1.7, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d6cfbf' });
+    for (const x of [0.133, 0.867]) holes.push({ x: X(x), y: wy(f), w: 1.55, h: 2.5, kind: 'dh', reveal, frame, rd: 0.42, sillColor: '#d6cfbf', tint: skyTint() });
+    for (const x of centre) holes.push({ x: X(x), y: wy(f), w: 1.7, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d6cfbf', tint: skyTint() });
   }
   for (const x of [0.13, 0.31, 0.5, 0.69, 0.87]) {
     holes.push({ x: X(x), y: shaftFloors * FH + atticH / 2, w: 2.1, h: 2.3, kind: 'dh2', reveal, frame, sillColor: '#d6cfbf' });
@@ -143,10 +144,12 @@ export function buildClassicOffice(params) {
   I.trim.add(piece(Ft, fx0, shaftH / 2, 0.05, 0.42, shaftH, 0.1), '#d3c7ad');
   I.trim.add(piece(Ft, fx1, shaftH / 2, 0.05, 0.42, shaftH, 0.1), '#d3c7ad');
   for (let f = 0; f < shaftFloors; f++) {
-    I.trim.add(piece(Ft, (fx0 + fx1) / 2, f * FH + 0.32, 0.03, fx1 - fx0, 0.5, 0.06), '#a7987d');
+    // Patterned brick spandrel panel under each row of the centre grid.
+    I.trim.add(piece(Ft, (fx0 + fx1) / 2, f * FH + 0.32, 0.03, fx1 - fx0, 0.62, 0.06), '#d2c3a6');
+    for (let x = fx0 + 0.15; x < fx1; x += 0.24) I.trim.add(piece(Ft, x, f * FH + 0.32, 0.065, 0.012, 0.56, 0.004), '#bfae8f');
     for (let k = 0; k < centre.length - 1; k++) {
       const x = X((centre[k] + centre[k + 1]) / 2);
-      I.trim.add(piece(Ft, x, f * FH + FH / 2 + 0.3, 0.025, 0.28, FH - 0.6, 0.05), '#c8bb9f');
+      I.trim.add(piece(Ft, x, f * FH + FH / 2 + 0.3, 0.07, 0.34, FH - 0.6, 0.14), '#bfae8f');
     }
   }
   I.trim.add(piece(Ft, (fx0 + fx1) / 2, shaftH - 0.15, 0.05, fx1 - fx0 + 0.42, 0.3, 0.1), '#d3c7ad');
@@ -180,6 +183,7 @@ export function buildClassicOffice(params) {
   }
   add(wall(Fr, W, top, rear, matCommon(3)));
   rear.forEach((o) => opening(Fr, o));
+  addFireEscape(I, { x0: W / 2 - 7.4, x1: W / 2 - 1.2, z: -D / 2, levels: [...Array(shaftFloors + 2).keys()].map((f) => g1 + 0.75 + f * FH) });
   {
     const roof = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: '#4f4b48', roughness: 1 }));
     roof.rotation.x = -Math.PI / 2;
