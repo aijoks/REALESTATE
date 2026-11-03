@@ -47,7 +47,7 @@ nav a:hover { color: var(--ink); }
   position: relative; min-height: 78vh; display: grid; place-items: end start;
   color: #fff; overflow: hidden; isolation: isolate;
 }
-.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(0,0,0,0.05) 20%, rgba(10,14,20,0.85)); }
 .hero .wrap { padding: 60px 0 56px; }
 .hero h1 { font-size: clamp(36px, 6vw, 72px); line-height: 1.02; margin: 0 0 14px; letter-spacing: -0.02em; max-width: 20ch; }
@@ -74,6 +74,31 @@ nav a:hover { color: var(--ink); }
 .hero .serif-title span { display: block; }
 .hero .serif-title small { font-size: 0.6em; text-transform: none; }
 .hero .serif-title em { display: block; font-style: italic; text-transform: none; font-size: 0.62em; margin: 0.22em 0 0.12em; }
+
+/* Scrolling band of notable-tenant logos along the bottom of the hero. */
+.hero:has(.tenant-band) { padding-bottom: 104px; }
+.tenant-band {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 104px; z-index: 1;
+  background: #fff; display: flex; align-items: center; overflow: hidden;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.18);
+}
+.tenant-band-label {
+  flex: none; align-self: stretch; display: flex; align-items: center; padding: 0 22px; z-index: 1;
+  background: #fff; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; border-right: 1px solid var(--line);
+}
+.tenant-track { flex: none; display: flex; width: max-content; animation: tenant-scroll 45s linear infinite; }
+.tenant-band:hover .tenant-track { animation-play-state: paused; }
+.tenant-set { flex: none; display: flex; align-items: center; gap: 64px; padding-right: 64px; }
+.tenant-set img { flex: none; height: 58px; width: auto; max-width: 190px; object-fit: contain; }
+@keyframes tenant-scroll { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .tenant-track { animation-duration: 180s; } }
+@media (max-width: 600px) {
+  .tenant-band, .hero:has(.tenant-band) { height: auto; }
+  .tenant-band { height: 84px; } .hero:has(.tenant-band) { padding-bottom: 84px; }
+  .tenant-band-label { display: none; }
+  .tenant-set { gap: 40px; padding-right: 40px; } .tenant-set img { height: 44px; }
+}
 
 /* ---------- listing grid ---------- */
 .section { padding: 64px 0; }

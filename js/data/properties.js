@@ -17,6 +17,15 @@ export const company = {
   email: 'leasing@example.com', // SAMPLE
 };
 
+// Notable tenants shown in the scrolling logo band on the home page.
+export const notableTenants = [
+  ['lirr', 'MTA Long Island Rail Road'], ['walgreens', 'Walgreens'], ['calypso', 'Calypso St. Barth'],
+  ['oberoi', 'The Oberoi Group'], ['leggiadro', 'Leggiadro'], ['dunkin', "Dunkin' Donuts"], ['subway', 'Subway'],
+  ['starbucks', 'Starbucks Coffee'], ['frys', "Fry's Food Stores"], ['arizona', 'State of Arizona'],
+  ['sva', 'School of Visual Arts'], ['nyc', 'The City of New York'], ['pomellato', 'Pomellato'],
+  ['att', 'AT&T'], ['dermalogica', 'Dermalogica'],
+].map(([file, name]) => ({ name, logo: `assets/tenants/${file}.png` }));
+
 export const properties = [
   {
     id: '120-e-56th',
