@@ -40,6 +40,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/walkup.js` | `walkup` generator (370 W 51st St, corner) |
 | `js/viewer/industrial.js` | `industrial` generator (34-09 Queens Blvd, block-long + rear warehouse) |
 | `js/viewer/pavilion.js` | `pavilion` generator (250 Canal St, one-storey corner + billboard) |
+| `js/viewer/flex.js` | `flex` generator (2100 Directors Row, Orlando: warehouse + front office) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |

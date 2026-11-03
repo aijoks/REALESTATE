@@ -701,6 +701,58 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '2100-directors-row',
+    address: '2100 Directors Row',
+    city: 'Orlando, FL 32809',
+    neighborhood: 'Orlando Central Park',
+    crossStreets: 'South Orlando industrial district',
+    status: 'Net Lease',
+    uses: ['Net Lease', 'Industrial', 'Office'],
+    headline: '',
+    description:
+      'A single-tenant net-leased distribution facility in Orlando Central Park, south Orlando’s established ' +
+      'industrial district. A long single-storey warehouse with loading docks and a fenced yard is fronted by ' +
+      'a two-storey office with a glass entrance, on a site with generous surface parking.',
+    // No public size record found for this address; figures intentionally omitted.
+    stats: [
+      { label: 'Lease type', value: 'Net lease' },
+      { label: 'Use', value: 'Distribution + office' },
+      { label: 'Market', value: 'Orlando, FL' },
+      { label: 'Submarket', value: 'Orlando Central Park' },
+    ],
+    highlights: [
+      'Single-tenant net lease',
+      'Warehouse with loading docks and a fenced yard',
+      'Two-storey front office with a glass entrance',
+      'Ample on-site parking in an established industrial park',
+    ],
+    tenants: [{ name: 'AmerisourceBergen', floor: '—', kind: 'Distribution' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/2100-directors-row/front.jpg', caption: 'Office entrance and warehouse', focus: 'center 60%' },
+    ],
+    cover: 'assets/properties/2100-directors-row/front.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'flex', floors: 2, width: 32, depth: 110, tenant: 'AmerisourceBergen', number: '2100' },
+      // Suburban business park: parking lots, fenced yard and low warehouses
+      // instead of a city street grid.
+      site: { id: 'orlando-central-park', facing: 'north', suburban: true },
+      tour: {
+        avenue: { label: 'Entrance & parking', pos: [-34, 2.2, 92], target: [0, 5, 50], fov: 55 },
+        labels: { 'front-west': 'Office corner', west: 'Landscaped side', east: 'Loading docks & yard', 'rear-west': 'Rear corner', crown: 'Office entrance' },
+        streetDist: 55,
+        radius: 70, // long, low building: keep corner views close
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Office entrance', text: 'Two-storey glass entry with a blue awning (No. 2100).', at: [0.62, 0.5, 'front'] },
+        { id: 'docks', label: 'Loading docks', text: 'Covered dock doors along the fenced side yard.', at: [0.7, 0.4, 'left'] },
+        { id: 'warehouse', label: 'Warehouse', text: 'Long single-storey distribution space with high windows.', at: [0.35, 0.8, 'left'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

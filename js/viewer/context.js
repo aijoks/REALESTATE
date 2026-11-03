@@ -52,6 +52,7 @@ const TILES = {
 };
 
 export function buildContext(scene, { W, D, site = {} }) {
+  if (site.suburban) return buildSuburban(scene, { W, D, site });
   const siteId = site.id ?? 'e56-park';
   const av = site.avenue ?? { kind: 'park', name: 'Park Av', eastLine: 56 };
   const streetName = site.street ?? 'E 56 St';
@@ -1282,4 +1283,139 @@ function neighbours250canal({ scene, block, group, W, D, front, walk, road, acro
   stand.position.set(-1, 1.4, front + walk - 1.4);
   stand.castShadow = true;
   scene.add(stand);
+}
+
+// ---------------------------------------------------------------------------
+// Suburban business park (e.g. Orlando Central Park): lawn, parking lots,
+// a fenced side yard, light poles, live oaks and low warehouses. The front of
+// the building faces +z onto the lot; the side lot is along -x.
+function buildSuburban(scene, { W, D, site }) {
+  const r = rand(2100);
+  const front = D / 2;
+  const add = (m) => { scene.add(m); return m; };
+  const flat = (mat, x0, x1, z0, z1, y = 0.01) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0), mat);
+    m.rotation.x = -Math.PI / 2;
+    m.position.set((x0 + x1) / 2, y, (z0 + z1) / 2);
+    m.receiveShadow = true;
+    return add(m);
+  };
+  const grass = new THREE.MeshStandardMaterial({ color: '#6f9a45', roughness: 1 });
+  const asphalt = new THREE.MeshStandardMaterial({ color: '#3b3c3e', roughness: 0.95 });
+  const white = new THREE.MeshBasicMaterial({ color: '#e9e7e0' });
+  const yellow = new THREE.MeshBasicMaterial({ color: '#e6be2e' });
+  const kerbMat = new THREE.MeshStandardMaterial({ color: '#d4d0c7', roughness: 0.9 });
+  flat(grass, -800, 800, -800, 800, 0);
+
+  // Lots: front (+z) and along the long side (-x), plus the access road.
+  const lotX0 = -W / 2 - 46;
+  flat(asphalt, lotX0, W / 2 + 18, front + 1, front + 34, 0.04);
+  flat(asphalt, lotX0, -W / 2, -front - 10, front + 1, 0.04);
+  flat(asphalt, -400, 400, front + 44, front + 56, 0.04); // Directors Row
+  for (const dz of [-0.12, 0.12]) flat(yellow, -400, 400, front + 50 + dz - 0.05, front + 50 + dz + 0.05, 0.07);
+  flat(asphalt, W / 2 - 10, W / 2 + 2, front + 33, front + 45, 0.045); // driveway
+  // Striped bays and wheel stops.
+  for (let x = lotX0 + 3; x < W / 2 + 14; x += 2.8) {
+    flat(white, x - 0.06, x + 0.06, front + 3, front + 9, 0.07);
+    flat(white, x - 0.06, x + 0.06, front + 22, front + 28, 0.07);
+    if (x > -W / 2 + 2) add(new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 0.3), yellow)).position.set(x + 1.4, 0.08, front + 3.4);
+  }
+  for (let z = -front; z < front - 4; z += 2.8) flat(white, lotX0 + 3, lotX0 + 9, z - 0.06, z + 0.06, 0.07);
+  // Grass island with a curved kerb at the front corner of the lot.
+  const island = add(new THREE.Mesh(new THREE.CylinderGeometry(9, 9, 0.2, 32, 1, false, 0, Math.PI / 2), grass));
+  island.position.set(W / 2 + 6, 0.1, front + 18);
+  const kerb = add(new THREE.Mesh(new THREE.TorusGeometry(9, 0.18, 6, 24, Math.PI / 2), kerbMat));
+  kerb.rotation.x = -Math.PI / 2;
+  kerb.position.set(W / 2 + 6, 0.12, front + 18);
+  flat(grass, W / 2 + 1, W / 2 + 40, -front, front + 1, 0.011);
+
+  // Chain-link fence around the side yard.
+  const fence = new THREE.MeshStandardMaterial({ color: '#9aa0a5', roughness: 0.5, metalness: 0.6, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+  const post = new THREE.MeshStandardMaterial({ color: '#8b9196', roughness: 0.4, metalness: 0.7 });
+  const fenceRun = (x0, z0, x1, z1) => {
+    const len = Math.hypot(x1 - x0, z1 - z0);
+    const m = add(new THREE.Mesh(new THREE.PlaneGeometry(len, 2.4), fence));
+    m.position.set((x0 + x1) / 2, 1.2, (z0 + z1) / 2);
+    m.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
+    const n = Math.ceil(len / 3);
+    for (let k = 0; k <= n; k++) {
+      const p = add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6), post));
+      p.position.set(x0 + ((x1 - x0) * k) / n, 1.3, z0 + ((z1 - z0) * k) / n);
+    }
+    const top = add(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, len, 6), post));
+    top.rotation.z = Math.PI / 2;
+    top.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
+    top.position.set((x0 + x1) / 2, 2.45, (z0 + z1) / 2);
+  };
+  fenceRun(lotX0 + 2, front - 2, -W / 2 - 1, front - 2);
+  fenceRun(lotX0 + 2, front - 2, lotX0 + 2, -front);
+
+  // Parked cars.
+  const carCols = ['#e8e8e6', '#8e9aa6', '#7a1d22', '#c9c3b5', '#2c3440', '#b8bcc2'];
+  const car = (x, z, ry) => {
+    const g = new THREE.Group();
+    const col = new THREE.MeshStandardMaterial({ color: carCols[Math.floor(r() * carCols.length)], roughness: 0.3, metalness: 0.5 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.8, 1.85), col);
+    body.position.y = 0.65;
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1.7), new THREE.MeshStandardMaterial({ color: '#22272d', roughness: 0.2, metalness: 0.6 }));
+    cab.position.set(-0.2, 1.3, 0);
+    g.add(body, cab);
+    g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    g.position.set(x, 0, z);
+    g.rotation.y = ry;
+    add(g);
+  };
+  for (let x = lotX0 + 4.4; x < -W / 2 - 4; x += 2.8) if (r() < 0.75) car(x, front + 6, Math.PI / 2);
+  for (let z = -front + 2; z < front - 6; z += 2.8) if (r() < 0.6) car(lotX0 + 6, z, 0);
+  for (let x = -W / 2 + 5; x < W / 2 + 10; x += 2.8) if (r() < 0.35) car(x + 1.4, front + 25, Math.PI / 2);
+
+  // Three-headed light poles.
+  const poleMat = new THREE.MeshStandardMaterial({ color: '#b9bcbf', roughness: 0.4, metalness: 0.7 });
+  const headMat = new THREE.MeshStandardMaterial({ color: '#dcdedf', roughness: 0.3, metalness: 0.4, emissive: '#fff4d6', emissiveIntensity: 0.15 });
+  for (const [x, z] of [[lotX0 + 18, front + 2], [lotX0 + 18, -10], [-6, front + 16], [W / 2 + 14, front + 30]]) {
+    const p = add(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.2, 11, 10), poleMat));
+    p.position.set(x, 5.5, z);
+    p.castShadow = true;
+    for (let k = 0; k < 3; k++) {
+      const a = (k / 3) * Math.PI * 2;
+      const arm = add(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.6, 6), poleMat));
+      arm.position.set(x + Math.cos(a) * 0.7, 11.2, z + Math.sin(a) * 0.7);
+      arm.rotation.set(Math.sin(a) * 1.0, 0, -Math.cos(a) * 1.0);
+      const head = add(new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.35, 0.25, 12), headMat));
+      head.position.set(x + Math.cos(a) * 1.4, 11.7, z + Math.sin(a) * 1.4);
+    }
+  }
+
+  // Live oaks and shrubs beside the office front.
+  const leaf = [new THREE.MeshStandardMaterial({ color: '#3f6b2c', roughness: 1 }), new THREE.MeshStandardMaterial({ color: '#4d7d33', roughness: 1 })];
+  const trunk = new THREE.MeshStandardMaterial({ color: '#4b3d30', roughness: 1 });
+  const oak = (x, z, s) => {
+    const t = add(new THREE.Mesh(new THREE.CylinderGeometry(0.25 * s, 0.4 * s, 4 * s, 8), trunk));
+    t.position.set(x, 2 * s, z);
+    for (let k = 0; k < 5; k++) {
+      const c = add(new THREE.Mesh(new THREE.IcosahedronGeometry((2.2 + r() * 1.4) * s, 1), leaf[k % 2]));
+      c.position.set(x + (r() - 0.5) * 4 * s, (5 + r() * 3) * s, z + (r() - 0.5) * 4 * s);
+      c.castShadow = true;
+    }
+  };
+  for (const [x, z, s] of [[W / 2 + 4, front - 4, 1.3], [W / 2 + 10, front - 18, 1.5], [W / 2 + 6, front - 40, 1.2], [W / 2 + 24, front + 10, 1.1], [-W / 2 - 50, front + 40, 1.0]]) oak(x, z, s);
+  for (let x = W / 2 - 10; x < W / 2 + 2; x += 2) {
+    const b = add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), leaf[1]));
+    b.position.set(x, 0.7, front + 0.9);
+    b.scale.y = 0.7;
+  }
+
+  // Low warehouses around the park.
+  const shed = (x0, x1, z0, z1, h, c) => {
+    const m = add(new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, h, z1 - z0), new THREE.MeshStandardMaterial({ color: c, roughness: 0.9 })));
+    m.position.set((x0 + x1) / 2, h / 2, (z0 + z1) / 2);
+    m.castShadow = m.receiveShadow = true;
+  };
+  shed(lotX0 - 70, lotX0 - 6, -60, 20, 8, '#d8cdb6');
+  shed(W / 2 + 46, W / 2 + 130, -90, 10, 9, '#e3ddd0');
+  shed(-120, -20, front + 64, front + 130, 7.5, '#cfc4ae');
+  shed(10, 120, front + 64, front + 140, 9, '#e6e1d6');
+  shed(-60, 60, -front - 90, -front - 25, 10, '#ddd4c2');
+  void site;
+  return { fadeables: [] };
 }

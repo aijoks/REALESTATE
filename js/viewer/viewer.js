@@ -12,8 +12,9 @@ import { buildArchLoft } from './arch.js';
 import { buildWalkup } from './walkup.js';
 import { buildIndustrial } from './industrial.js';
 import { buildPavilion } from './pavilion.js';
+import { buildFlex } from './flex.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
@@ -217,7 +218,7 @@ export class BuildingViewer {
   // The guided 360° tour: a loop of camera stops around the building.
   _buildChapters() {
     const { width: W, depth: D, height: H } = this.model;
-    const r = Math.max(H * 1.25, D * 1.3);
+    const r = this.property.model.tour?.radius ?? Math.max(H * 1.25, D * 1.3);
     const mid = new THREE.Vector3(0, H * 0.48, 0);
     const look = (y, z = 0, x = 0) => new THREE.Vector3(x, y, z);
     // Front faces +z (north, onto E 56th St); +x is west, -x is east.
