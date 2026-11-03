@@ -128,6 +128,21 @@ nav a:hover { color: var(--ink); }
 .about h2 { font-weight: 400; text-transform: uppercase; font-size: clamp(30px, 4vw, 48px); letter-spacing: 0.01em; line-height: 1.1; margin: 0 0 32px; }
 .about p { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.75; margin: 0; }
 
+/* Portfolio tiles: two per row, edge to edge, address along the bottom. */
+.tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #fff; }
+.tile { position: relative; display: block; aspect-ratio: 2.3 / 1; overflow: hidden; background: #222; }
+.tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; }
+.tile::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.62)); transition: background 0.3s; }
+.tile:hover img { transform: scale(1.04); }
+.tile:hover::after { background: linear-gradient(180deg, rgba(0, 0, 0, 0.08) 40%, rgba(0, 0, 0, 0.7)); }
+.tile-label {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: 0 24px 26px; text-align: center;
+  color: #fff; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif;
+  font-size: clamp(20px, 2.3vw, 34px); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+@media (max-width: 700px) { .tiles { grid-template-columns: 1fr; } .tile { aspect-ratio: 16 / 9; } }
+
 /* ---------- listing grid ---------- */
 .section.page-top { padding-top: 48px; min-height: 60vh; }
 .section { padding: 64px 0; }
