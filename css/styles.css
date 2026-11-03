@@ -78,7 +78,7 @@ nav a:hover { color: var(--ink); }
 /* Notable-tenant logos looping directly over the bottom of the hero photo,
    shown as white silhouettes so every logo reads on the image. */
 .tenant-band {
-  position: absolute; left: 0; right: 0; bottom: 0; height: 64px; z-index: 1;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 68px; z-index: 1;
   display: flex; align-items: center; overflow: hidden;
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.45));
 }
@@ -95,15 +95,16 @@ nav a:hover { color: var(--ink); }
 .tenant-band:hover .tenant-track { animation-play-state: paused; }
 .tenant-set { flex: none; display: flex; align-items: center; gap: 44px; padding-right: 44px; }
 .tenant-set img {
-  flex: none; height: 23px; width: auto; max-width: 92px; object-fit: contain;
-  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); opacity: 0.92;
+  flex: none; height: 28px; width: auto; max-width: 110px; object-fit: contain;
+  /* Brand colours; a soft white glow keeps dark logos readable on the photo. */
+  filter: drop-shadow(0 0 0.6px #fff) drop-shadow(0 0 0.6px #fff) drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.7));
 }
 @keyframes tenant-scroll { to { transform: translateX(-50%); } }
 @media (prefers-reduced-motion: reduce) { .tenant-track { animation-duration: 180s; } }
 @media (max-width: 600px) {
   .tenant-band { height: 52px; }
   .tenant-band-label { display: none; }
-  .tenant-set { gap: 30px; padding-right: 30px; } .tenant-set img { height: 18px; }
+  .tenant-set { gap: 30px; padding-right: 30px; } .tenant-set img { height: 22px; }
 }
 
 /* ---------- listing grid ---------- */
