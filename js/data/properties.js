@@ -855,6 +855,61 @@ export const properties = [
       ],
     },
   },
+  {
+    id: 'saguaro-vista',
+    address: 'Saguaro Vista Shopping Center',
+    city: 'Tucson, AZ',
+    neighborhood: 'Northeast Tucson · Catalina Foothills',
+    crossStreets: 'Grocery-anchored neighbourhood center',
+    status: 'Retail',
+    uses: ['Retail'],
+    headline: '',
+    description:
+      'A grocery-anchored neighbourhood shopping center in northeast Tucson, beneath the Santa Catalina ' +
+      'Mountains. Fry’s Food & Drug anchors the center, with a pharmacy, bakery-deli and in-store services, ' +
+      'complemented by a free-standing restaurant pad (Potosino Mexican Food, No. 7865) and a large surface ' +
+      'parking field.',
+    stats: [
+      { label: 'Type', value: 'Grocery-anchored center' },
+      { label: 'Anchor', value: 'Fry’s Food & Drug' },
+      { label: 'Pad', value: 'Potosino · No. 7865' },
+      { label: 'Market', value: 'Tucson, AZ' },
+    ],
+    highlights: [
+      'Anchored by Fry’s Food & Drug (Kroger)',
+      'Free-standing restaurant pad with drive-by visibility',
+      'Large surface parking field',
+      'Santa Catalina Mountain views',
+    ],
+    tenants: [
+      { name: 'Fry’s Food & Drug', floor: 'Anchor', kind: 'Grocery' },
+      { name: 'Potosino Mexican Food', floor: 'Pad', kind: 'Restaurant' },
+    ],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/saguaro-vista/frys.jpg', caption: 'Fry’s Food & Drug anchor', focus: 'center 45%' },
+      { src: 'assets/properties/saguaro-vista/potosino-pad.jpg', caption: 'Potosino Mexican Food pad (No. 7865)' },
+      { src: 'assets/properties/saguaro-vista/frys-night.jpg', caption: 'Fry’s entrance at night' },
+    ],
+    cover: 'assets/properties/saguaro-vista/frys.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'center', floors: 1, width: 110, depth: 55 },
+      site: { id: 'tucson-saguaro-vista', facing: 'north', suburban: true, desert: true },
+      tour: {
+        avenue: { label: 'Potosino pad', pos: [-56, 2.0, 70], target: [-77, 4, 47], fov: 55 },
+        labels: { 'front-west': 'Fry’s entrance', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'Fry’s gable' },
+        streetDist: 62,
+        radius: 95,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'frys', label: 'Fry’s Food & Drug', text: 'Grocery anchor with pharmacy and bakery-deli.', at: [0.5, 0.75, 'front'] },
+        { id: 'pad', label: 'Potosino pad', text: 'Free-standing restaurant pad, No. 7865.', at: [0, 0, 'pad'] },
+        { id: 'deli', label: 'Bakery-Deli', text: 'Bakery and deli department on the east wing.', at: [0.72, 0.5, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {
