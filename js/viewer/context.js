@@ -441,6 +441,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'w21-sixth') {
+    neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'e23-parksouth') {
     neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r });
   } else if (siteId === 'e38-fifth') {
@@ -851,4 +853,55 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
     add(new THREE.SphereGeometry(2.2, 16, 12), new THREE.MeshStandardMaterial({ color: '#d4a63a', roughness: 0.25, metalness: 0.9 }), 212);
     add(new THREE.CylinderGeometry(0.25, 0.25, 6, 6), new THREE.MeshStandardMaterial({ color: '#d4a63a', metalness: 0.9, roughness: 0.3 }), 217);
   }
+}
+
+// ---------------------------------------------------------------------------
+// 133 W 21st St neighbours (north side of 21st, Sixth Avenue to the east;
+// here local +x is east, toward the avenue).
+function neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const westX = -W / 2 - 0.02;
+  const eastX = W / 2 + 0.02;
+
+  // West: five-storey tan-brick loft, with a taller dark-brick building behind.
+  block('prewar', westX - 24, westX, front - 28, front, 21);
+  block('brickwall', westX - 28, westX - 1, front - 52, front - 28.2, 46);
+  block('banded', -120, westX - 24.1, zS, front, 40, 0, { fade: false });
+
+  // East, toward Sixth Avenue: narrow ornate building, a modern grey
+  // residential block with roof planting, an older building with a dark
+  // cornice, then the corner.
+  block('beaux', eastX, eastX + 7.5, front - 26, front, 24);
+  const modern = block('whitegrid', eastX + 7.6, eastX + 30, front - 26, front, 40);
+  const green = new THREE.MeshStandardMaterial({ color: '#4c7f36', roughness: 1, transparent: true, opacity: 1 });
+  const planting = new THREE.Mesh(new THREE.BoxGeometry(20, 1.4, 3), green);
+  planting.position.set(eastX + 18.8, 40.7, front - 2);
+  scene.add(planting);
+  group([modern, planting]);
+  const older = block('beaux', eastX + 30.1, eastX + 52, front - 26, front, 30);
+  const cor = new THREE.Mesh(new THREE.BoxGeometry(22.4, 1.6, 1.4), new THREE.MeshStandardMaterial({ color: '#2b3a36', roughness: 0.7, transparent: true, opacity: 1 }));
+  cor.position.set(eastX + 41, 30.4, front + 0.4);
+  scene.add(cor);
+  group([older, cor]);
+  if (PK.eastLine > eastX + 52.2) block('prewar', eastX + 52.1, PK.eastLine, front - 26, front, 28);
+  // Street trees along the east sidewalk.
+  const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
+  const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
+  for (const x of [eastX + 14, eastX + 22, eastX + 30]) {
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 3, 8), trunk);
+    t.position.set(x, 1.5, front + walk - 1);
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(1.7, 1), leaf);
+    c.position.set(x, 4.4, front + walk - 1);
+    c.scale.set(0.9, 1.3, 0.9);
+    for (const o of [t, c]) { o.castShadow = true; scene.add(o); }
+  }
+
+  // Behind (north) and across 21st Street.
+  block('banded', westX - 24, PK.eastLine, zS, -D / 2 - 0.2, 58);
+  block('prewar', -70, -20, acrossZ, zN, 32);
+  block('whitegrid', -19.9, 18, acrossZ, zN, 48);
+  block('beaux', 18.1, PK.eastLine, acrossZ, zN, 30);
+  block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 80);
+  block('prewar', PK.westLine, PK.westLine + 50, zS, front, 36);
 }

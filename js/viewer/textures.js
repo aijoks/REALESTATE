@@ -127,6 +127,11 @@ export const BRICK = {
     palette: [[214, 198, 172], [202, 186, 160], [222, 208, 184], [192, 176, 150], [208, 192, 164], [198, 178, 148]],
     mortar: '#c3bcae', clinker: 0.05, seed: 38,
   }),
+  // Grey-tan face brick of the Ladies' Mile lofts (133 W 21st St).
+  tan: () => brick('tan', {
+    palette: [[172, 156, 134], [160, 145, 124], [182, 167, 146], [150, 136, 117], [168, 150, 126]],
+    mortar: '#a69c8c', clinker: 0.06, seed: 21,
+  }),
   // Lighter, rougher common brick on the side and rear walls.
   common: () => brick('common', {
     palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],

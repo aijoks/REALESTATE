@@ -270,6 +270,66 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '133-w-21st',
+    address: '133 W 21st Street',
+    city: 'New York, NY 10011',
+    neighborhood: 'Chelsea / Flatiron',
+    crossStreets: 'Between Sixth Ave & Seventh Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: '',
+    description:
+      'A turn-of-the-century loft building on West 21st Street, a short walk from Sixth Avenue. A rusticated ' +
+      'stone base with a carved entrance and corbelled cornice supports a grey-tan brick shaft of four wide ' +
+      'bays, each with four windows per floor, finished with ornamented capitals and a deep cornice.',
+    // Stories counted from the facade; size from a PropertyShark neighbour table (unverified).
+    stats: [
+      { label: 'Stories', value: '12' },
+      { label: 'Building size', value: '±115,900 SF' },
+      { label: 'Frontage', value: '4 bays · ±100 ft' },
+      { label: 'Style', value: 'Loft · stone base' },
+    ],
+    highlights: [
+      'Short walk to Sixth Avenue and the 23rd Street subway',
+      'Sixteen windows across every floor',
+      'Rusticated stone base with carved entrance',
+      'Neighbours include the School of Visual Arts',
+    ],
+    tenants: [{ name: 'School of Visual Arts', floor: '—', kind: 'Education' }],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 5, suite: 'Full floor', sf: 9600, use: 'Office', rent: '$54 / SF' },
+      { floor: 8, suite: '8E', sf: 4800, use: 'Office', rent: '$55 / SF' },
+      { floor: 11, suite: 'Full floor', sf: 9600, use: 'Office', rent: '$58 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/133-w-21st/street.jpg', caption: 'West 21st Street', focus: 'center 60%' },
+      { src: 'assets/properties/133-w-21st/upper-facade.jpg', caption: 'Ornate upper floors and cornice' },
+    ],
+    cover: 'assets/properties/133-w-21st/street.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'ladiesMile', floors: 12, width: 30, depth: 29, banner: ['SVA', 'NYC'] },
+      // Faces south onto 21st St with Sixth Avenue to the east (viewer's right),
+      // which is the streetscape's default orientation, so no mirroring.
+      site: { id: 'w21-sixth', street: 'W 21 St', avenue: { kind: 'fifth', name: '6 Av', eastLine: 75 } },
+      tour: {
+        avenue: { label: 'From Sixth Avenue', pos: [87, 1.7, 24.3], target: [12, 16, 17], fov: 62 },
+        labels: {
+          'front-west': 'Southeast corner', west: 'East side', 'rear-west': 'Northeast corner',
+          east: 'West side', crown: 'Capitals & cornice',
+        },
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Lobby entrance', text: 'Carved stone entrance in the west bay.', at: [0.14, 0.06, 'front'] },
+        { id: 'retail', label: 'Street retail', text: 'Shopfronts across three bays of the stone base.', at: [0.6, 0.05, 'front'] },
+        { id: 'cornice', label: 'Corbelled cornice', text: 'Brackets and lion-head bosses crown the three-storey base.', at: [0.38, 0.29, 'front'] },
+        { id: 'floors', label: 'Office floors', text: 'Four wide bays, four windows each, on every floor.', at: [0.8, 0.55, 'front'] },
+        { id: 'crown', label: 'Capitals & cornice', text: 'Ornamented pier capitals and a deep cornice on the top floors.', at: [0.5, 0.95, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {
