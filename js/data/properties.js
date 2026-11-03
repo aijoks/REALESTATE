@@ -37,12 +37,13 @@ export const properties = [
     crossStreets: 'Between Park Ave & Lexington Ave',
     status: 'For Lease',
     uses: ['Office', 'Medical', 'Retail'],
-    headline: 'Pre-war brick office tower steps from Park Avenue',
+    headline: '',
     description:
-      'A 1926 Rosario Candela-designed, 15-story red-brick building on East 56th Street with ' +
-      'projecting corner pavilions, a limestone-trimmed Flemish-gable crown and a two-storey retail base. ' +
-      'Light-filled floors suit boutique office and medical users, with street-level ' +
-      'retail in one of Midtown’s most trafficked blocks.',
+      'An approximately 86,000 square foot office building located in Manhattan’s plaza district. ' +
+      'Impressive turn-key offices with beautiful terraces and fantastic views. Amenities include ' +
+      'renovated lobby, modernized elevators, flexible lease terms, operable windows, usable terraces, ' +
+      '24/7 access, concierge attended lobby, and direct electric. Notable tenants include Truman’s ' +
+      'Gentleman’s Groomers, Montebello Italian Restaurant, and Pomellato.',
     // Public listings (Metro Manhattan, Showcase, Compass) report 1926, Rosario Candela,
     // ~86,000 SF; story count is listed as 15 or 16 depending on the source.
     stats: [

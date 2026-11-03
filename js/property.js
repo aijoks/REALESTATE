@@ -15,6 +15,7 @@ fill('[data-address]', p.address);
 fill('[data-location]', `${p.city} · ${p.neighborhood} · ${p.crossStreets}`);
 fill('[data-status]', p.status);
 fill('[data-headline]', p.headline);
+document.querySelectorAll('[data-headline]').forEach((el) => (el.hidden = !p.headline));
 fill('[data-description]', p.description);
 
 document.querySelector('[data-stats]').innerHTML = p.stats
