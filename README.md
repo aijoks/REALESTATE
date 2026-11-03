@@ -1,4 +1,4 @@
-# Skyline & Co. — interactive real estate site
+# First Pioneer Properties — portfolio site
 
 Static site (no build step) with an interactive 3D building tour per property.
 First property: **120 E 56th Street, New York**.

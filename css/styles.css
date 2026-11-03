@@ -23,10 +23,10 @@ button { font: inherit; cursor: pointer; }
 .site-header {
   position: sticky; top: 0; z-index: 20;
   backdrop-filter: blur(12px);
-  background: rgba(247, 248, 250, 0.82);
+  background: rgba(255, 255, 255, 0.94);
   border-bottom: 1px solid var(--line);
 }
-.site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.site-header .wrap { display: flex; align-items: center; justify-content: space-between; height: 96px; }
 .brand { font-weight: 700; letter-spacing: 0.02em; display: flex; gap: 10px; align-items: center; }
 .brand .mark { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), #6aa9ff); }
 nav a { margin-left: 22px; color: var(--muted); font-size: 14px; font-weight: 500; }
@@ -41,6 +41,24 @@ nav a:hover { color: var(--ink); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn.small { padding: 7px 12px; font-size: 13px; }
 .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* Brand logo + serif nav (Portfolio · Services · About Us | Contact Us). */
+.brand img { display: block; height: 66px; width: auto; }
+.main-nav { display: flex; align-items: center; gap: 22px; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; }
+.main-nav a { margin: 0; color: #163f8f; font-size: 17px; font-weight: 400; text-transform: uppercase; letter-spacing: 0.02em; }
+.main-nav a:hover { color: #0c2a63; }
+.main-nav .sep { width: 4px; height: 4px; background: #163f8f; }
+.main-nav .nav-cta { margin-left: 22px; padding: 8px 18px; border: 1px solid #d24f22; color: #d24f22; }
+.main-nav .nav-cta:hover { background: #d24f22; color: #fff; }
+@media (max-width: 760px) {
+  .site-header .wrap { height: 72px; }
+  .brand img { height: 46px; }
+  .main-nav { gap: 10px; }
+  .main-nav a { font-size: 12px; }
+  .main-nav .sep, .main-nav a[href$="#about"]:first-of-type + .sep { display: none; }
+  .main-nav .nav-cta { margin-left: 4px; padding: 5px 8px; }
+}
+@media (max-width: 480px) { .main-nav a:not(.nav-cta):not([href="portfolio.html"]) { display: none; } }
 
 /* ---------- hero ---------- */
 .hero {
@@ -57,7 +75,7 @@ nav a:hover { color: var(--ink); }
 .hero .btn.primary { background: #fff; color: var(--ink); border-color: #fff; }
 
 /* Serif, all-caps, centred headline with a small "&" and italic "for the". */
-.hero:has(.serif-title) { place-items: center; text-align: center; min-height: calc(100vh - 64px); }
+.hero:has(.serif-title) { place-items: center; text-align: center; min-height: calc(100vh - 96px); }
 .hero:has(.serif-title)::after { background: rgba(18, 18, 18, 0.08); }
 /* Translucent dark diamond behind the headline. */
 .hero:has(.serif-title)::before {
@@ -240,7 +258,7 @@ form.contact { display: grid; gap: 10px; }
 form.contact input, form.contact textarea { font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
 form.contact textarea { min-height: 90px; resize: vertical; }
 .contact-note { font-size: 12px; color: var(--muted); }
-.sticky { position: sticky; top: 84px; }
+.sticky { position: sticky; top: 116px; }
 
 footer { border-top: 1px solid var(--line); padding: 30px 0; color: var(--muted); font-size: 13px; }
 footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }

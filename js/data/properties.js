@@ -11,7 +11,7 @@
 // numbers from the landlord / leasing team before going live.
 
 export const company = {
-  name: 'Skyline & Co.',
+  name: 'First Pioneer Properties',
   tagline: 'Manhattan commercial space, seen from every angle.',
   phone: '(212) 555-0142', // SAMPLE
   email: 'leasing@example.com', // SAMPLE
