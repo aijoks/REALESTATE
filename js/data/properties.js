@@ -644,6 +644,63 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '250-canal',
+    address: '250 Canal Street',
+    city: 'New York, NY 10013',
+    neighborhood: 'Chinatown / SoHo',
+    crossStreets: 'Southwest corner of Lafayette Street',
+    status: 'Leased',
+    uses: ['Retail'],
+    headline: '',
+    description:
+      'A one-story corner retail pavilion at Canal and Lafayette Streets, leased to TD Bank. Full-height ' +
+      'glass on both street frontages, a wraparound signage band and a rooftop billboard give it some of ' +
+      'the highest visibility on Canal Street, steps from the Canal Street subway station.',
+    // Traded.co loan record: 4,144 SF (TD Bank refinance, 2023); one storey per photos.
+    stats: [
+      { label: 'Stories', value: '1' },
+      { label: 'Building size', value: '±4,100 SF' },
+      { label: 'Frontage', value: 'Canal & Lafayette corner' },
+      { label: 'Tenant', value: 'TD Bank' },
+    ],
+    highlights: [
+      'Prominent corner of Canal Street and Lafayette Street',
+      'Full-height glass on two street frontages',
+      'Rooftop billboard over one of downtown’s busiest intersections',
+      'At the Canal Street subway station (J/Z/N/Q/R/W/6)',
+    ],
+    tenants: [{ name: 'TD Bank', floor: 'Ground', kind: 'Bank' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/250-canal/corner.jpg', caption: 'Canal Street at Lafayette Street', focus: 'center 45%' },
+      { src: 'assets/properties/250-canal/banking-hall.jpg', caption: 'Banking hall' },
+    ],
+    cover: 'assets/properties/250-canal/corner.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'pavilion', floors: 1, width: 21, depth: 19 },
+      // Faces north onto Canal St; Lafayette St (one-way north) runs along the
+      // east wall, so the streetscape is mirrored.
+      site: {
+        id: 'canal-lafayette', street: 'Canal St', facing: 'north', mirror: true, streetTwoWay: true, road: 18, walk: 5, lowRise: true,
+        avenue: { kind: 'fifth', name: 'Lafayette St', eastLine: 10.52, heading: -Math.PI / 2 },
+      },
+      tour: {
+        avenue: {
+          label: 'Canal & Lafayette corner', pos: [-31, 1.7, 31], target: [-6, 7, 6], fov: 60,
+          targets: [[-10, 4, 10], [-6, 4, 10], [-10, 4, 4], [-4, 14, 4]],
+        },
+        labels: { east: 'Lafayette Street side', crown: 'Rooftop billboard' },
+        streetDist: 34,
+      },
+      hotspots: [
+        { id: 'bank', label: 'TD Bank', text: 'Full-service TD Bank branch, open 7 days.', at: [0.6, 0.3, 'front'] },
+        { id: 'corner', label: 'Corner frontage', text: 'Glass and green signage wrap the Canal & Lafayette corner.', at: [0.05, 0.6, 'front'] },
+        { id: 'billboard', label: 'Rooftop billboard', text: 'Billboard structure facing the intersection.', at: [0.4, 1.7, 'roof'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

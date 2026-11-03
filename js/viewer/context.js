@@ -451,6 +451,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'canal-lafayette') {
+    neighbours250canal({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r });
   } else if (siteId === 'qb-34-35') {
     neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, flat, asphaltMat, slab });
   } else if (siteId === 'w51-ninth') {
@@ -1215,4 +1217,69 @@ function neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, ac
   block('tenement', -14.9, 22, acrossZ, zN, 16);
   block('prewar', 22.1, PK.eastLine, acrossZ, zN, 10);
   block('glass', PK.westLine, PK.westLine + 40, acrossZ, zN, 60);
+}
+
+// ---------------------------------------------------------------------------
+// 250 Canal St (SW corner of Canal & Lafayette). Faces north; mirrored, so
+// local +x is east toward Lafayette St. The bank is one storey, so the
+// neighbours' graffitied walls show above its roof.
+function neighbours250canal({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const westX = -W / 2 - 0.02;
+
+  const graffiti = (w, h) => {
+    const c = document.createElement('canvas');
+    c.width = 1024; c.height = 256;
+    const ctx = c.getContext('2d');
+    const cols = ['#c8312b', '#e7e7e7', '#7fa6d8', '#202020', '#e3c54a'];
+    for (let k = 0; k < 9; k++) {
+      ctx.strokeStyle = cols[k % cols.length]; ctx.lineWidth = 14 + r() * 18; ctx.lineJoin = 'round'; ctx.beginPath();
+      let x = 40 + k * 105; let y = 60 + r() * 140; ctx.moveTo(x, y);
+      for (let j = 0; j < 5; j++) { x += (r() - 0.3) * 60; y = 40 + r() * 180; ctx.lineTo(x, y); }
+      ctx.stroke();
+    }
+    const t = unmirror(new THREE.CanvasTexture(c));
+    t.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.9 }));
+  };
+
+  // Behind the bank along Lafayette: grey-painted brick five-storey with
+  // graffiti on the wall that faces Canal above the bank's roof.
+  const back = block('prewar', -W / 2 + 4, W / 2, zS + 20, -D / 2 - 0.02, 18);
+  back.material.color.set('#b8b4ad');
+  const gB = graffiti(14, 3.2);
+  gB.position.set(3, 10.6, -D / 2 + 0.03);
+  scene.add(gB);
+  group([back, gB]);
+  // West along Canal: tall white-painted loft with AC units and graffiti,
+  // Popeyes at its corner further west.
+  const west = block('prewar', westX - 16, westX, front - 26, front, 30);
+  west.material.color.set('#e6e4df');
+  const gW = graffiti(12, 3.5);
+  gW.position.set(westX - 6, 10.5, front + 0.03);
+  scene.add(gW);
+  group([west, gW]);
+  const pop = new THREE.Mesh(new THREE.BoxGeometry(5, 1.0, 0.25), new THREE.MeshStandardMaterial({ color: '#e35a1f', roughness: 0.5 }));
+  pop.position.set(westX - 13.5, 4.4, front + 0.15);
+  scene.add(pop);
+  block('tenement', westX - 40, westX - 16.1, front - 24, front, 20);
+  block('prewar', -110, westX - 40.1, zS, front, 24, 0, { fade: false });
+  block('tenement', westX - 40, -W / 2 + 3.9, zS, front - 24.1, 22);
+
+  // Across Canal Street and across Lafayette (Chinatown / SoHo edge).
+  block('tenement', -70, -20, acrossZ, zN, 22);
+  block('redtenement', -19.9, PK.eastLine, acrossZ, zN, 26);
+  block('prewar', PK.westLine, PK.westLine + 34, zS, front, 30);
+  block('beaux', PK.westLine, PK.westLine + 34, acrossZ, zN, 34);
+
+  // Canal St subway entrance and a newsstand on the bank's sidewalk.
+  const steel = new THREE.MeshStandardMaterial({ color: '#2f4a3b', roughness: 0.5, metalness: 0.5 });
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.1, 2.2), steel);
+  rail.position.set(-W / 2 + 5, 0.55, front + walk - 1.6);
+  scene.add(rail);
+  const stand = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.8, 1.8), new THREE.MeshStandardMaterial({ color: '#9a9c9e', roughness: 0.4, metalness: 0.6 }));
+  stand.position.set(-1, 1.4, front + walk - 1.4);
+  stand.castShadow = true;
+  scene.add(stand);
 }
