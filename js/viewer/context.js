@@ -585,6 +585,7 @@ const frustum = new THREE.Frustum();
 const pv = new THREE.Matrix4();
 const targets = [new THREE.Vector3(0, 6, 0), new THREE.Vector3(0, 26, 0), new THREE.Vector3(0, 48, 0)];
 export function updateFades(fadeables, camera, dt, subject, { foreground = true, targets: tg = targets } = {}) {
+  let changed = false;
   camera.updateMatrixWorld();
   pv.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
   frustum.setFromProjectionMatrix(pv);
@@ -601,13 +602,17 @@ export function updateFades(fadeables, camera, dt, subject, { foreground = true,
       for (const bx of f.boxes) if (ray.intersectBox(bx, hit) && hit.distanceTo(camera.position) < dist) { blocks = true; break; }
     }
     const goal = blocks ? 0.07 : 1;
-    f.opacity += (goal - f.opacity) * Math.min(1, dt * 5);
+    if (Math.abs(goal - f.opacity) < 0.002) continue;
+    changed = true;
+    f.opacity += (goal - f.opacity) * Math.min(1, dt * 4);
+    if (Math.abs(goal - f.opacity) < 0.003) f.opacity = goal;
     for (const m of f.mats) {
       m.opacity = f.opacity;
       m.depthWrite = f.opacity > 0.98;
     }
     f.mesh.castShadow = true;
   }
+  return changed;
 }
 
 // ---------------------------------------------------------------------------

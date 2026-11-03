@@ -12,6 +12,7 @@ import { buildStoneBay } from './bay.js';
 const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
+import { mergeStatic } from './optimize.js';
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -23,9 +24,16 @@ export class BuildingViewer {
     this.onChapter = onChapter;
     this.onProgress = onProgress;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Logarithmic depth keeps distant kerbs, road markings and trim from
+    // flickering (z-fighting); pixel ratio is capped and lowered further if
+    // the device can't keep up.
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, logarithmicDepthBuffer: true, powerPreference: 'high-performance' });
+    this.coarse = matchMedia('(pointer: coarse)').matches;
+    this.maxDpr = Math.min(window.devicePixelRatio, this.coarse ? 1.5 : 1.75);
+    this.renderer.setPixelRatio(this.maxDpr);
     this.renderer.shadowMap.enabled = true;
+    // The scene is static, so shadows are rendered once instead of every frame.
+    this.renderer.shadowMap.autoUpdate = false;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
@@ -63,6 +71,11 @@ export class BuildingViewer {
       root.updateMatrixWorld(true);
       this.context = buildContext(root, { W: this.model.width, D: this.model.depth, site });
       this.subjectBox = new THREE.Box3().setFromObject(this.model.group);
+      // Bake static scenery into a few meshes (hundreds fewer draw calls).
+      mergeStatic(this.model.group, { into: this.scene });
+      mergeStatic(root, { into: this.scene });
+      this.renderer.shadowMap.needsUpdate = true;
+      this._dirty = true;
       this._setupHotspots();
       this._buildChapters();
       this.goToChapter(0, true);
@@ -73,13 +86,29 @@ export class BuildingViewer {
     const stop = () => this.pause();
     this.renderer.domElement.addEventListener('pointerdown', stop);
     this.renderer.domElement.addEventListener('wheel', stop, { passive: true });
+    // Scrolling the page over the 3D view scrolls the page; zoom needs
+    // Ctrl/⌘ + scroll (trackpad pinch sends Ctrl automatically). On touch
+    // screens one finger scrolls the page and two fingers move the model.
+    container.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) return;
+      e.stopImmediatePropagation();
+      this.onScrollHint?.();
+    }, { capture: true, passive: true });
+    this.controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE };
+    this.renderer.domElement.style.touchAction = 'pan-y';
+    this.controls.addEventListener('change', () => { this._dirty = true; });
+    // Only render while the viewer is on screen and the tab is visible.
+    this._onScreen = true;
+    new IntersectionObserver(([en]) => { this._onScreen = en.isIntersecting; this._syncLoop(); }, { threshold: 0.01 }).observe(container);
+    this._onVis = () => this._syncLoop();
+    document.addEventListener('visibilitychange', this._onVis);
     this.renderer.domElement.addEventListener('click', (e) => this._onClick(e));
     this.renderer.domElement.addEventListener('pointermove', (e) => this._onMove(e));
 
     this._resize = () => this.resize();
     window.addEventListener('resize', this._resize);
     this.resize();
-    this.renderer.setAnimationLoop(() => this._frame());
+    this._syncLoop();
   }
 
   // ---------- scene setup ----------
@@ -135,7 +164,7 @@ export class BuildingViewer {
     const sun = new THREE.DirectionalLight('#fff1dc', 2.6);
     sun.position.set(-45, 95, 80);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(4096, 4096);
+    sun.shadow.mapSize.set(this.coarse ? 2048 : 4096, this.coarse ? 2048 : 4096);
     const s = 60;
     Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 10, far: 320 });
     sun.shadow.bias = -0.0004;
@@ -311,8 +340,18 @@ export class BuildingViewer {
     if (this._fov) this._setFov(this._fov);
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h, false);
+    this._dirty = true;
   }
+  _syncLoop() {
+    const run = this._onScreen && !document.hidden;
+    if (run === this._running) return;
+    this._running = run;
+    if (run) { this.clock.getDelta(); this._dirty = true; }
+    this.renderer.setAnimationLoop(run ? () => this._frame() : null);
+  }
+
   dispose() {
+    document.removeEventListener('visibilitychange', this._onVis);
     this.renderer.setAnimationLoop(null);
     window.removeEventListener('resize', this._resize);
     this.renderer.dispose();
@@ -321,7 +360,10 @@ export class BuildingViewer {
   // ---------- per-frame ----------
   _frame() {
     const dt = Math.min(this.clock.getDelta(), 0.1);
+    let active = this._dirty;
+    this._dirty = false;
     if (this.fly) {
+      active = true;
       const f = this.fly;
       f.t += dt / f.duration;
       const k = easeInOut(Math.min(f.t, 1));
@@ -330,12 +372,16 @@ export class BuildingViewer {
       this._setFov(f.from.fov + (f.to.fov - f.from.fov) * k);
       if (f.t >= 1) this.fly = null;
     } else if (this.tour.playing && this.chapters) {
+      active = true;
       this._stepTour(dt);
     }
     if (this.fadeOpts?.pos && !this.fly && !this.tour.playing && this.camera.position.distanceTo(this.fadeOpts.pos) > 25) this.fadeOpts = {};
-    if (this.context) updateFades(this.context.fadeables, this.camera, dt, this.subjectBox, this.fadeOpts);
-    // Gentle pulse on hotspots; markers fade out when the camera is right on top
-    // of them so they never fill the frame.
+    if (this.controls.update()) active = true;
+    if (this.camera.position.y < 0.8) this.camera.position.y = 0.8;
+    if (this.context && updateFades(this.context.fadeables, this.camera, dt, this.subjectBox, this.fadeOpts)) active = true;
+    // Nothing moved: skip the frame entirely (keeps scrolling smooth and
+    // laptops cool). Hotspot markers only pulse while the view is moving.
+    if (!active) return;
     const pulse = 2 + Math.sin(performance.now() / 350) * 0.15;
     for (const s of this.hotspots) {
       s.scale.set(pulse, pulse, 1);
@@ -343,10 +389,21 @@ export class BuildingViewer {
       s.material.opacity = o;
       s.visible = o > 0.02;
     }
-    this.controls.update();
-    if (this.camera.position.y < 0.8) this.camera.position.y = 0.8;
     this.renderer.render(this.scene, this.camera);
+    this._adaptQuality(dt);
   }
+
+  // If frames are consistently slow, drop the render resolution one step.
+  _adaptQuality(dt) {
+    this._ft = (this._ft ?? 0.016) * 0.95 + dt * 0.05;
+    this._ftN = (this._ftN ?? 0) + 1;
+    if (this._ftN > 90 && this._ft > 0.034 && this.renderer.getPixelRatio() > 1) {
+      this.renderer.setPixelRatio(Math.max(1, this.renderer.getPixelRatio() - 0.5));
+      this.resize();
+      this._ftN = 0;
+    }
+  }
+
 
   _stepTour(dt) {
     const t = this.tour;

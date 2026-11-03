@@ -85,7 +85,23 @@ function syncState() {
 playBtn.addEventListener('click', () => { viewer.toggle(); syncState(); });
 document.getElementById('btn-next').addEventListener('click', () => { viewer.next(); syncState(); });
 document.getElementById('btn-prev').addEventListener('click', () => { viewer.prev(); syncState(); });
-el.addEventListener('pointerdown', () => { syncState(); hint.style.display = 'none'; }, { once: false });
+el.addEventListener('pointerdown', () => { syncState(); hint.classList.add('gone'); });
+
+// Interaction hint: device-appropriate, and re-shown briefly when someone
+// scrolls over the view without the zoom modifier.
+const touch = matchMedia('(pointer: coarse)').matches;
+const zoomKey = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
+hint.textContent = touch
+  ? 'Two fingers to rotate & zoom · Tap a marker for details'
+  : `Drag to orbit · ${zoomKey} + scroll to zoom · Click a marker for details`;
+let hintTimer;
+viewer.onScrollHint = () => {
+  hint.textContent = `Hold ${zoomKey} and scroll to zoom the 3D view`;
+  hint.classList.remove('gone');
+  hint.classList.add('flash');
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => { hint.classList.remove('flash'); hint.classList.add('gone'); }, 1400);
+};
 document.getElementById('tooltip-close').addEventListener('click', () => { tooltip.hidden = true; activeHotspot = null; });
 
 // Keep the tooltip pinned to its 3D marker while the camera moves.
