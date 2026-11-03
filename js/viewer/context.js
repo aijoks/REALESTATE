@@ -45,6 +45,8 @@ const TILES = {
   brickwall: [8, 12],
   esb: [10, 14],
   redtower: [12, 14],
+  stucco: [8, 10],
+  darkgrid: [8, 9.2],
 };
 
 export function buildContext(scene, { W, D, site = {} }) {
@@ -441,6 +443,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'w38-sixth') {
+    neighbours102w38({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w21-sixth') {
     neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'e23-parksouth') {
@@ -543,13 +547,14 @@ export function buildContext(scene, { W, D, site = {} }) {
     vehicle(PK.westCurb - 2.5, acrossZ + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: Math.PI / 2 });
     vehicle(PK.westCurb - 6.5, front - 26, { ...cab, heading: Math.PI / 2 });
   } else {
-    // One-way avenue (Fifth): everything southbound, plus a city bus.
+    // One-way avenue: Fifth runs south; `heading` overrides (e.g. Sixth runs north).
+    const oneWay = av.heading ?? Math.PI / 2;
     const bus = new THREE.MeshStandardMaterial({ color: '#1e5bb8', roughness: 0.35, metalness: 0.3 });
-    vehicle(PK.eastCurb + 3, acrossZ + 14, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: Math.PI / 2 });
-    vehicle(PK.eastCurb + 8, acrossZ + 6, { ...cab, heading: Math.PI / 2 });
-    vehicle(PK.eastCurb + 12, front - 12, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: Math.PI / 2 });
-    vehicle(PK.eastCurb + 16, acrossZ + 30, { ...cab, heading: Math.PI / 2 });
-    vehicle(PK.eastCurb + 8, front - 34, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: Math.PI / 2 });
+    vehicle(PK.eastCurb + 3, acrossZ + 14, { len: 12, ht: 3.2, body: bus, cabin: 0.35, heading: oneWay });
+    vehicle(PK.eastCurb + 8, acrossZ + 6, { ...cab, heading: oneWay });
+    vehicle(PK.eastCurb + 12, front - 12, { len: 4.9, ht: 1.7, body: black, cabin: 0.5, heading: oneWay });
+    vehicle(PK.eastCurb + 16, acrossZ + 30, { ...cab, heading: oneWay });
+    vehicle(PK.eastCurb + 8, front - 34, { len: 4.7, ht: 1.5, body: grey, cabin: 0.5, heading: oneWay });
   }
   vehicle(PK.eastLine - 9, front + walk + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5 });
 
@@ -904,4 +909,42 @@ function neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ,
   block('beaux', 18.1, PK.eastLine, acrossZ, zN, 30);
   block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 80);
   block('prewar', PK.westLine, PK.westLine + 50, zS, front, 36);
+}
+
+// ---------------------------------------------------------------------------
+// 102 W 38th St neighbours. The building faces north and the site is
+// mirrored, so local +x points east toward Sixth Avenue.
+function neighbours102w38({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const eastX = W / 2 + 0.02;
+  const westX = -W / 2 - 0.02;
+
+  // East: pink four-storey walk-up with a black-awninged shop (Polish Me),
+  // a tall dark-brick tower rising behind it, then the corner at Sixth.
+  const pink = block('stucco', eastX, eastX + 8, front - 20, front, 15);
+  const awnMat = new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.6, transparent: true, opacity: 1 });
+  const awn = new THREE.Mesh(new THREE.BoxGeometry(7.6, 1.0, 1.4), awnMat);
+  awn.position.set(eastX + 4, 3.6, front + 0.6);
+  scene.add(awn);
+  group([pink, awn]);
+  block('darkgrid', eastX + 0.5, eastX + 24, front - 46, front - 20.2, 92);
+  if (PK.eastLine > eastX + 8.2) block('prewar', eastX + 8.1, PK.eastLine, front - 22, front, 26);
+
+  // West: tall buff ornate loft with dark louvred windows, and its stepped
+  // tower rising behind with a crowning lantern.
+  const loft = block('beaux', westX - 26, westX, front - 24, front, 56);
+  const t1 = block('prewar', westX - 24, westX - 2, front - 40, front - 24.2, 72);
+  const t2 = block('prewar', westX - 21, westX - 5, front - 37, front - 27, 84);
+  const lantern = block('beaux', westX - 16, westX - 10, front - 35, front - 29, 92);
+  group([loft, t1, t2, lantern]);
+  block('banded', -110, westX - 26.1, zS, front, 60, 0, { fade: false });
+
+  // Behind and across West 38th Street (garment district lofts).
+  block('prewar', westX - 26, PK.eastLine, zS, -D / 2 - 0.2, 64);
+  block('beaux', -60, -14, acrossZ, zN, 58);
+  block('prewar', -13.9, 14, acrossZ, zN, 44);
+  block('banded', 14.1, PK.eastLine, acrossZ, zN, 70);
+  block('glass', PK.westLine, PK.westLine + 50, zS, front, 120);
+  block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
 }

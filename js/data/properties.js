@@ -330,6 +330,67 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '102-w-38th',
+    address: '102 W 38th Street',
+    city: 'New York, NY 10018',
+    neighborhood: 'Garment District',
+    crossStreets: 'Between Sixth Ave & Seventh Ave',
+    status: 'For Lease',
+    uses: ['Office', 'Retail'],
+    headline: '',
+    description:
+      'A Beaux-Arts loft building on West 38th Street, steps from Sixth Avenue and Bryant Park. A limestone ' +
+      'base with a carved entrance carries a recessed bronze-brown centre bay of wide windows between light ' +
+      'stone piers, topped by arched attic windows and a deep bracketed cornice. Managed by First Pioneer Properties.',
+    // Size from a CommercialSearch listing (42,000 SF); storeys counted from the facade.
+    stats: [
+      { label: 'Stories', value: '10' },
+      { label: 'Building size', value: '±42,000 SF' },
+      { label: 'Typical floor', value: '±4,200 SF' },
+      { label: 'Style', value: 'Beaux-Arts loft' },
+    ],
+    highlights: [
+      'Steps from Sixth Avenue, Bryant Park and Herald Square',
+      'Four wide windows per floor in the centre bay',
+      'Limestone entrance with carved brackets',
+      'Street-level retail on West 38th Street',
+    ],
+    tenants: [{ name: 'B&Q Trimmings', floor: 'Ground', kind: 'Retail' }],
+    // SAMPLE availability — floor numbers match the 3D model's floors.
+    availability: [
+      { floor: 4, suite: 'Full floor', sf: 4200, use: 'Office', rent: '$48 / SF' },
+      { floor: 7, suite: 'Full floor', sf: 4200, use: 'Office', rent: '$50 / SF' },
+    ],
+    photos: [
+      { src: 'assets/properties/102-w-38th/facade.jpg', caption: 'Facade on West 38th Street', focus: 'center 62%' },
+      { src: 'assets/properties/102-w-38th/plaque.jpg', caption: 'Managed by First Pioneer Properties' },
+    ],
+    cover: 'assets/properties/102-w-38th/facade.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'narrowLoft', floors: 10, width: 12.5, depth: 30 },
+      // Faces north onto 38th St with Sixth Avenue to the east (viewer's left),
+      // so the streetscape is mirrored; Sixth Avenue traffic runs north.
+      site: {
+        id: 'w38-sixth', street: 'W 38 St', facing: 'north', mirror: true,
+        avenue: { kind: 'fifth', name: '6 Av', eastLine: 26, heading: -Math.PI / 2 },
+      },
+      tour: {
+        avenue: {
+          label: 'From Sixth Avenue', pos: [-38, 1.7, 24.3], target: [-3, 15, 17], fov: 62,
+          targets: [[-5.2, 8, 16], [-5.2, 22, 16], [-5.2, 34, 16]],
+        },
+        crownLabel: 'Attic & cornice',
+      },
+      hotspots: [
+        { id: 'entrance', label: 'Lobby entrance', text: 'No. 102 entrance with carved console brackets and pediment.', at: [0.1, 0.07, 'front'] },
+        { id: 'retail', label: 'Street retail', text: 'B&Q Trimmings — trims, rhinestones, feathers and beads.', at: [0.68, 0.06, 'front'] },
+        { id: 'bay', label: 'Centre bay', text: 'Recessed bronze-brown bay with four windows on every floor.', at: [0.5, 0.5, 'front'] },
+        { id: 'cornice', label: 'Attic & cornice', text: 'Arched attic windows under a deep bracketed cornice.', at: [0.5, 0.96, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

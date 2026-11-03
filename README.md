@@ -34,6 +34,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/loft.js` | `buffLoft` generator (10 E 38th St), incl. roof terrace |
 | `js/viewer/classic.js` | `classicOffice` generator (115 E 23rd St) |
 | `js/viewer/mile.js` | `ladiesMile` generator (133 W 21st St) |
+| `js/viewer/narrow.js` | `narrowLoft` generator (102 W 38th St) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |

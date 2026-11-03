@@ -337,6 +337,22 @@ export function facadeTexture(kind, seed = 1) {
           ctx.fillStyle = '#9fb7c6'; ctx.fillRect(x + 104, y + 6, 22, 52);
         }
       }
+    } else if (kind === 'stucco') {
+      // Pink painted stucco walk-up with stone-framed windows.
+      ctx.fillStyle = '#d99f8c'; ctx.fillRect(0, 0, size, size);
+      for (let i = 0; i < 2000; i++) { ctx.fillStyle = `rgba(90,50,40,${r() * 0.05})`; ctx.fillRect(r() * size, r() * size, 3, 3); }
+      for (let y = 0; y < size; y += 128) for (let x = 0; x < size; x += 128) {
+        ctx.fillStyle = '#e7ddcf'; ctx.fillRect(x + 36, y + 22, 56, 88);
+        ctx.fillStyle = r() < 0.25 ? '#cdb58e' : '#3f4650'; ctx.fillRect(x + 42, y + 28, 44, 76);
+        ctx.fillStyle = '#e7ddcf'; ctx.fillRect(x + 42, y + 64, 44, 4);
+      }
+    } else if (kind === 'darkgrid') {
+      // Dark grey-brown brick tower with punched windows.
+      ctx.fillStyle = '#5c5550'; ctx.fillRect(0, 0, size, size);
+      for (let y = 0; y < size; y += 43) for (let x = 0; x < size; x += 43) {
+        ctx.fillStyle = '#e1ddd4'; ctx.fillRect(x + 12, y + 8, 22, 28);
+        ctx.fillStyle = r() < 0.2 ? '#cbb68e' : '#5a6f86'; ctx.fillRect(x + 14, y + 10, 18, 24);
+      }
     } else if (kind === 'whitegrid') {
       ctx.fillStyle = '#eef0f2';
       ctx.fillRect(0, 0, size, size);
