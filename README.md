@@ -14,6 +14,12 @@ python3 -m http.server 8080
 Then open http://localhost:8080 and click the property, or go straight to
 http://localhost:8080/property.html#120-e-56th (or `#10-e-38th`).
 
+## Deploy on Vercel
+
+It's a static site: no build step, no framework. In Vercel choose **Add New → Project**,
+import this GitHub repo, set **Framework Preset: Other**, leave the build command and
+output directory empty, and deploy. `vercel.json` only adds cache headers.
+
 ## What's inside
 
 | Path | Purpose |
