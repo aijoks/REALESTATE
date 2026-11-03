@@ -143,6 +143,11 @@ export const BRICK = {
     palette: [[240, 232, 216], [231, 223, 207], [246, 239, 225], [223, 215, 199], [236, 228, 212]],
     mortar: '#b5ad9f', clinker: 0.02, seed: 44,
   }),
+  // Tan-brown face brick of Hell's Kitchen walk-ups (370 W 51st St).
+  walkup: () => brick('walkup', {
+    palette: [[156, 128, 98], [145, 118, 90], [166, 138, 106], [134, 110, 84], [152, 124, 94]],
+    mortar: '#ab9d88', clinker: 0.07, seed: 51,
+  }),
   // Lighter, rougher common brick on the side and rear walls.
   common: () => brick('common', {
     palette: [[142, 80, 60], [128, 72, 56], [150, 92, 70], [118, 70, 58], [136, 98, 82]],
@@ -357,6 +362,20 @@ export function facadeTexture(kind, seed = 1) {
       for (let y = 0; y < size; y += 43) for (let x = 0; x < size; x += 43) {
         ctx.fillStyle = '#e1ddd4'; ctx.fillRect(x + 12, y + 8, 22, 28);
         ctx.fillStyle = r() < 0.2 ? '#cbb68e' : '#5a6f86'; ctx.fillRect(x + 14, y + 10, 18, 24);
+      }
+    } else if (kind === 'tenement' || kind === 'redtenement') {
+      // Walk-up: brick, stone-linteled windows, fire escapes on the front.
+      const red = kind === 'redtenement';
+      ctx.fillStyle = red ? '#8a4a38' : '#9b8467'; ctx.fillRect(0, 0, size, size);
+      for (let i = 0; i < 3000; i++) { ctx.fillStyle = `rgba(0,0,0,${r() * 0.07})`; ctx.fillRect(r() * size, r() * size, 4, 2); }
+      for (let y = 0; y < size; y += 64) for (let x = 0; x < size; x += 64) {
+        ctx.fillStyle = '#d8cdb8'; ctx.fillRect(x + 18, y + 10, 30, 5); ctx.fillRect(x + 18, y + 54, 30, 4);
+        ctx.fillStyle = r() < 0.2 ? '#cdb58e' : '#36404a'; ctx.fillRect(x + 21, y + 15, 24, 39);
+      }
+      ctx.strokeStyle = '#1f2224'; ctx.lineWidth = 3;
+      for (let y = 0; y < size; y += 64) {
+        ctx.beginPath(); ctx.moveTo(0, y + 58); ctx.lineTo(size * 0.5, y + 58); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(10, y + 58); ctx.lineTo(size * 0.45, y + 2); ctx.stroke();
       }
     } else if (kind === 'whitegrid') {
       ctx.fillStyle = '#eef0f2';

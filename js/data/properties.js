@@ -513,6 +513,65 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '370-w-51st',
+    address: '370 W 51st Street',
+    city: 'New York, NY 10019',
+    neighborhood: "Hell's Kitchen",
+    crossStreets: 'Corner of Ninth Avenue',
+    status: 'Residential',
+    uses: ['Residential', 'Retail'],
+    headline: '',
+    description:
+      "A six-story pre-war walk-up on the corner of West 51st Street and Ninth Avenue in Hell's Kitchen, " +
+      'built in 1920. Twenty-five rental apartments sit above ground-floor retail that wraps the corner, ' +
+      'a short walk from the Theater District and Restaurant Row.',
+    // CityRealty / Corcoran: 1920, 6 floors, 25 rental units; PropertyShark: 12,432 SF
+    // (Compass lists 5 stories / 26 units).
+    stats: [
+      { label: 'Stories', value: '6' },
+      { label: 'Built', value: '1920' },
+      { label: 'Apartments', value: '25 rentals' },
+      { label: 'Building size', value: '±12,400 SF' },
+    ],
+    highlights: [
+      'Corner of West 51st Street and Ninth Avenue',
+      'Twenty-five rental apartments over ground-floor retail',
+      'Retail frontage on both 51st Street and Ninth Avenue',
+      "Steps from the Theater District and Hell's Kitchen dining",
+    ],
+    tenants: [{ name: 'GQ Sushi', floor: 'Ground', kind: 'Restaurant' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/370-w-51st/corner.jpg', caption: 'Corner of West 51st Street and Ninth Avenue', focus: 'center 45%' },
+    ],
+    cover: 'assets/properties/370-w-51st/corner.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'walkup', floors: 6, width: 12, depth: 17 },
+      // Faces north onto 51st St; Ninth Avenue (one-way south) runs along the
+      // building's west wall. Low-rise neighbourhood.
+      site: {
+        id: 'w51-ninth', street: 'W 51 St', facing: 'north', streetDir: 'west', lowRise: true,
+        avenue: { kind: 'fifth', name: '9 Av', eastLine: 6.02 },
+      },
+      tour: {
+        avenue: {
+          label: 'From Ninth Avenue', pos: [19, 1.7, -21], target: [6, 10, 2], fov: 62,
+          targets: [[6.3, 5, 0], [6.3, 13, 0]],
+        },
+        westLabel: 'Ninth Avenue side',
+        crownLabel: 'Parapet & fire escapes',
+        streetDist: 40,
+      },
+      hotspots: [
+        { id: 'retail', label: 'Corner retail', text: 'GQ Sushi wraps the corner of 51st Street and Ninth Avenue.', at: [0.8, 0.12, 'front'] },
+        { id: 'entrance', label: 'Residential entrance', text: 'Entrance to the 25 apartments upstairs, on 51st Street.', at: [0.1, 0.08, 'front'] },
+        { id: 'avenue', label: 'Ninth Avenue side', text: 'Fire escapes and the vertical NETWORK sign on the avenue.', at: [0.25, 0.55, 'right'] },
+        { id: 'floors', label: 'Apartments', text: 'Five residential floors above the shops.', at: [0.4, 0.6, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

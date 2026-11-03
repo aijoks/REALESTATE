@@ -250,9 +250,11 @@ export function createKit(g, r, { glass = 'dark' } = {}) {
 
 // Steel fire escape on a rear wall facing -z at `z`: a landing per level from
 // x0 to x1, railings, brackets and zig-zag stairs between landings.
-export function addFireEscape(I, { x0, x1, z, levels, depth = 1.2 }) {
+// `frame` (optional Matrix4) re-orients it, e.g. rotationY(-π/2) puts it on a
+// +x-facing wall (world x = -z, world z = x).
+export function addFireEscape(I, { x0, x1, z, levels, depth = 1.2, frame = null }) {
   const wid = x1 - x0;
-  const S = (x, y, zz, sx, sy, sz, q) => I.steel.add(piece(new THREE.Matrix4(), x, y, zz, sx, sy, sz, q));
+  const S = (x, y, zz, sx, sy, sz, q) => I.steel.add(piece(frame ?? new THREE.Matrix4(), x, y, zz, sx, sy, sz, q));
   const brace = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.8, 0, 0));
   levels.forEach((y, i) => {
     S((x0 + x1) / 2, y, z - depth / 2, wid, 0.06, depth);

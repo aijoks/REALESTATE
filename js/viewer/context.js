@@ -45,6 +45,8 @@ const TILES = {
   brickwall: [8, 12],
   esb: [10, 14],
   redtower: [12, 14],
+  tenement: [8, 8],
+  redtenement: [8, 8],
   stucco: [8, 10],
   darkgrid: [8, 9.2],
 };
@@ -443,6 +445,8 @@ export function buildContext(scene, { W, D, site = {} }) {
     block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
   }
 
+  } else if (siteId === 'w51-ninth') {
+    neighbours370w51({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'e44-fifth') {
     neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK });
   } else if (siteId === 'w36-fifth') {
@@ -457,13 +461,19 @@ export function buildContext(scene, { W, D, site = {} }) {
     neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, acrossZ, streetZ, PK, slab, r });
   }
 
+  // Low-rise neighbourhoods (e.g. Hell's Kitchen) get walk-ups instead of
+  // Midtown towers. Each call still draws exactly one random number, so the
+  // other sites' layouts are unchanged.
+  const lineH = (base, span) => (site.lowRise ? 15 + r() * 14 : base + r() * span);
+  const lowKinds = ['tenement', 'redtenement', 'prewar', 'tenement'];
+
   // Further along the street, to make the canyon.
   for (const side of [-1, 1]) {
     for (let i = 0; i < 5; i++) {
       const x0 = side > 0 ? PK.westLine + 56 + i * 34 : -70 - (i + 1) * 34;
-      const kinds = ['glass', 'prewar', 'banded', 'whitegrid'];
-      block(kinds[(i + (side > 0 ? 1 : 0)) % 4], x0, x0 + 32, streetZ(-1) + road / 2 + walk, front - 1, 40 + r() * 110, 0, { fade: false });
-      block(kinds[(i + 2) % 4], x0, x0 + 32, acrossZ, streetZ(1) - road / 2 - walk, 40 + r() * 120, 0, { fade: false });
+      const kinds = site.lowRise ? lowKinds : ['glass', 'prewar', 'banded', 'whitegrid'];
+      block(kinds[(i + (side > 0 ? 1 : 0)) % 4], x0, x0 + 32, streetZ(-1) + road / 2 + walk, front - 1, lineH(40, 110), 0, { fade: false });
+      block(kinds[(i + 2) % 4], x0, x0 + 32, acrossZ, streetZ(1) - road / 2 - walk, lineH(40, 120), 0, { fade: false });
     }
   }
 
@@ -477,9 +487,11 @@ export function buildContext(scene, { W, D, site = {} }) {
       const z1 = streetZ(k + 1) - road / 2 - walk;
       // Leave the Empire State Building lot (33rd–34th, west side of Fifth) clear.
       if (siteId === 'w36-fifth' && k === -3) n++;
-      else block(kinds[n++ % kinds.length], 18, PK.eastLine, z0, z1, 55 + r() * 170, 0, { fade: false });
+      // Corner sites put the avenue right at the building, so the east-side
+      // blocks start further east.
+      else block(site.lowRise ? lowKinds[n++ % 4] : kinds[n++ % kinds.length], PK.eastLine - 18 < 6 ? PK.eastLine - 28 : 18, PK.eastLine, z0, z1, lineH(55, 170), 0, { fade: false });
       if (siteId === 'e38-fifth' && k === -5) { n++; continue; }
-      block(kinds[n++ % kinds.length], PK.westLine, PK.westLine + 50, z0, z1, 55 + r() * 190, 0, { fade: false });
+      block(site.lowRise ? lowKinds[n++ % 4] : kinds[n++ % kinds.length], PK.westLine, PK.westLine + 50, z0, z1, lineH(55, 190), 0, { fade: false });
     }
   }
 
@@ -531,7 +543,7 @@ export function buildContext(scene, { W, D, site = {} }) {
   vehicle(-14, lane);
   vehicle(-4, lane, { len: 5.4, ht: 2.3 });
   vehicle(7, lane);
-  vehicle(16, lane, { len: 4.6, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#d7d9db', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
+  if (16 < PK.eastLine - 3) vehicle(16, lane, { len: 4.6, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#d7d9db', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
   vehicle(2, front + walk + 5.2, { len: 4.8, ht: 1.6, body: yellow, cabin: 0.5 });
   vehicle(-30, farWalk - 1.2, { len: 4.7, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#2b3a4f', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
 
@@ -565,7 +577,7 @@ export function buildContext(scene, { W, D, site = {} }) {
   vehicle(PK.eastLine - 9, front + walk + 6, { len: 4.9, ht: 1.7, body: black, cabin: 0.5 });
 
   const pole = new THREE.MeshStandardMaterial({ color: '#2e3134', roughness: 0.5, metalness: 0.6 });
-  for (const x of [-22, 24]) {
+  for (const x of [-22, 24].filter((x) => x < PK.eastLine - 1 || x > PK.westLine + 1)) {
     const p = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.14, 8.5, 12), pole);
     p.position.set(x, 4.25, front + walk - 0.5);
     const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.6, 8), pole);
@@ -1090,4 +1102,56 @@ function neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ
   block('beaux', 16.1, PK.eastLine, acrossZ, zN, 64);
   block('glass', PK.westLine, PK.westLine + 50, zS, front, 130);
   block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
+}
+
+// ---------------------------------------------------------------------------
+// 370 W 51st St neighbours: corner of Ninth Avenue (local +x = west, the
+// avenue starts at the building's west wall). Hell's Kitchen walk-ups.
+function neighbours370w51({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  const zS = streetZ(-1) + road / 2 + walk;
+  const zN = streetZ(1) - road / 2 - walk;
+  const eastX = -W / 2 - 0.02;
+
+  // East along 51st: the six-storey walk-up with fire escapes and the green
+  // Cleaners/Tailors awning, then more walk-ups.
+  block('tenement', eastX - 15, eastX, front - 17, front, 19);
+  const green = new THREE.MeshStandardMaterial({ color: '#1f5a3a', roughness: 0.6, transparent: true, opacity: 1 });
+  const awn = new THREE.Mesh(new THREE.BoxGeometry(13, 0.9, 1.3), green);
+  awn.position.set(eastX - 7.5, 3.4, front + 0.65);
+  awn.rotation.x = 0.25;
+  scene.add(awn);
+  block('redtenement', eastX - 30, eastX - 15.1, front - 17, front, 17);
+  block('tenement', eastX - 46, eastX - 30.1, front - 17, front, 21);
+  block('prewar', -120, eastX - 46.1, zS, front, 24, 0, { fade: false });
+  // South along Ninth Avenue: red-brick walk-ups with fire escapes and
+  // colourful shop awnings.
+  const awnCols = ['#2b6fd0', '#d23a2a', '#f0b429', '#2b6fd0'];
+  let k = 0;
+  for (let z = -D / 2 - 0.02; z > zS + 4; z -= 9) {
+    const z0 = Math.max(zS, z - 8.9);
+    block(k % 2 ? 'tenement' : 'redtenement', W / 2 - 16, W / 2, z0, z, 16 + (k % 3) * 2.5);
+    const a = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.7, z - z0 - 1), new THREE.MeshStandardMaterial({ color: awnCols[k % 4], roughness: 0.6 }));
+    a.position.set(W / 2 + 0.6, 3.3, (z + z0) / 2);
+    scene.add(a);
+    k++;
+  }
+  block('tenement', eastX - 46, W / 2 - 16.1, zS, -D / 2 - 0.2, 20);
+
+  // Across 51st Street and across Ninth Avenue.
+  block('tenement', -60, -14, acrossZ, zN, 19);
+  block('redtenement', -13.9, PK.eastLine, acrossZ, zN, 22);
+  block('tenement', PK.westLine, PK.westLine + 40, zS, front, 18);
+  block('redtenement', PK.westLine, PK.westLine + 40, acrossZ, zN, 20);
+
+  // Street trees on 51st.
+  const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
+  const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
+  for (const x of [eastX - 4, eastX - 18, eastX - 32]) {
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, 4, 8), trunk);
+    t.position.set(x, 2, front + walk - 1);
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(3.2, 1), leaf);
+    c.position.set(x, 7, front + walk - 1);
+    c.scale.set(1.1, 1, 1.1);
+    for (const o of [t, c]) { o.castShadow = true; scene.add(o); }
+  }
 }

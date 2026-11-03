@@ -29,7 +29,12 @@ document.querySelector('[data-gallery]').innerHTML = p.photos
   .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /><figcaption>${ph.caption}</figcaption></figure>`).join('');
 
 const tbody = document.querySelector('[data-availability]');
-tbody.innerHTML = p.availability
+// Hide the availability table (and its button) when a property lists none.
+if (!p.availability?.length) {
+  document.getElementById('availability').hidden = true;
+  document.querySelector('a[href="#availability"]')?.setAttribute('hidden', '');
+}
+tbody.innerHTML = (p.availability ?? [])
   .map((a) => `<tr data-floor="${a.floor}"><td>${a.floor}</td><td>${a.suite}</td><td>${a.sf.toLocaleString()} SF</td><td>${a.use}</td><td>${a.rent}</td></tr>`)
   .join('');
 

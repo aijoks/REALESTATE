@@ -9,8 +9,9 @@ import { buildLadiesMile } from './mile.js';
 import { buildNarrowLoft } from './narrow.js';
 import { buildStoneBay } from './bay.js';
 import { buildArchLoft } from './arch.js';
+import { buildWalkup } from './walkup.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
