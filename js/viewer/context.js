@@ -17,6 +17,7 @@
 //   Fifth Avenue (+x, ~30 m west): one-way southbound, Empire State Building 4
 //   blocks south; green sidewalk shed along the frontage
 // Neighbours fade out whenever they block the view of the subject building.
+import { SITE_EXTRAS } from './sites/index.js';
 import * as THREE from 'three';
 import { facadeTexture, textTexture, rand } from './textures.js';
 
@@ -1472,10 +1473,20 @@ function buildSuburban(scene, { W, D, site }) {
     m.position.set((x0 + x1) / 2, h / 2, (z0 + z1) / 2);
     m.castShadow = m.receiveShadow = true;
   };
-  shed(lotX0 - 70, lotX0 - 6, -60, 20, 8, '#d8cdb6');
-  shed(W / 2 + 46, W / 2 + 130, -90, 10, 9, '#e3ddd0');
-  shed(-150, -40, front + 64, front + 130, 7.5, '#cfc4ae');
-  shed(40, 150, front + 64, front + 140, 9, '#e6e1d6');
-  shed(-60, 60, -front - 90, -front - 25, 10, '#ddd4c2');
+  if (!site.noSheds) {
+    shed(lotX0 - 70, lotX0 - 6, -60, 20, 8, '#d8cdb6');
+    shed(W / 2 + 46, W / 2 + 130, -90, 10, 9, '#e3ddd0');
+    shed(-150, -40, front + 64, front + 130, 7.5, '#cfc4ae');
+    shed(40, 150, front + 64, front + 140, 9, '#e6e1d6');
+    shed(-60, 60, -front - 90, -front - 25, 10, '#ddd4c2');
+  }
+  // Site-specific real surroundings (js/viewer/sites/<site.id>.js).
+  const box = (w, h, d, x, y, z, mat) => {
+    const m = add(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat));
+    m.position.set(x, y, z);
+    m.castShadow = m.receiveShadow = true;
+    return m;
+  };
+  SITE_EXTRAS[site.id]?.({ THREE, scene, add, flat, box, W, D, front, site, r, mats: { grass, asphalt, white, yellow, kerbMat } });
   return { fadeables: [] };
 }
