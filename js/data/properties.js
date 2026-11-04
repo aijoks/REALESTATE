@@ -1022,6 +1022,55 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '7225-n-mona-lisa',
+    address: '7225 N Mona Lisa Rd',
+    city: 'Tucson, AZ 85741',
+    neighborhood: 'Mona Lisa Plaza · Northwest Tucson',
+    crossStreets: 'NW corner of Mona Lisa Rd & Ina Rd',
+    status: 'For Lease',
+    uses: ['Office', 'Medical'],
+    headline: '',
+    description:
+      'Mona Lisa Plaza is a two-story mission-revival office building at the northwest corner of Mona Lisa ' +
+      'and Ina Roads, one block west of the Foothills Mall. A curved parapet, deep arched entrances and a ' +
+      'shaded ground-floor arcade front professional and medical suites, with surface parking around the building.',
+    stats: [
+      { label: 'Stories', value: '2' },
+      { label: 'Type', value: 'Office / medical' },
+      { label: 'Location', value: 'Mona Lisa & Ina Rd' },
+      { label: 'Market', value: 'Tucson, AZ' },
+    ],
+    highlights: [
+      'One block west of the Foothills Mall',
+      'Professional and medical office suites',
+      'Arched entrances and shaded arcade',
+      'Surface parking on site',
+    ],
+    tenants: [{ name: 'Gentle Dental', floor: '—', kind: 'Medical' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/7225-n-mona-lisa/corner.jpg', caption: 'Mona Lisa Plaza', focus: 'center 50%' },
+    ],
+    cover: 'assets/properties/7225-n-mona-lisa/corner.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'monalisa', floors: 2, width: 46, depth: 30, tenantSign: 'gentle dental', number: '7225' },
+      site: { id: 'tucson-mona-lisa', facing: 'north', suburban: true, noFence: true, trees: false },
+      tour: {
+        avenue: { label: 'Corner view', pos: [38, 1.7, 36], target: [6, 5.5, 6], fov: 60 },
+        labels: { 'front-west': 'Corner entrance', west: 'East side arcade', east: 'West wing', 'rear-west': 'Rear corner', crown: 'Mission parapet' },
+        streetDist: 46,
+        radius: 52,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'parapet', label: 'Mission parapet', text: 'Curved parapet with red coping and the Gentle Dental sign.', at: [0.45, 0.95, 'front'] },
+        { id: 'entry', label: 'Arched entrance', text: 'Two-story arched entry recess with upper glazing.', at: [0.72, 0.45, 'front'] },
+        { id: 'arcade', label: 'Arcade', text: 'Shaded ground-floor arcade along the suites.', at: [0.6, 0.18, 'right'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

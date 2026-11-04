@@ -1411,7 +1411,7 @@ function buildSuburban(scene, { W, D, site }) {
   const treeSpots = desert
     ? [[W / 2 + 36, front - 4, 0.9], [W / 2 + 38, -front + 6, 1.0], [-W / 2 - 50, front + 40, 0.9], [W / 2 + 20, front + 38, 0.8]]
     : [[W / 2 + 4, front - 4, 1.3], [W / 2 + 10, front - 18, 1.5], [W / 2 + 6, front - 40, 1.2], [W / 2 + 24, front + 10, 1.1], [-W / 2 - 50, front + 40, 1.0]];
-  for (const [x, z, s] of treeSpots) oak(x, z, s);
+  if (site.trees !== false) for (const [x, z, s] of treeSpots) oak(x, z, s);
   if (desert) {
     // Agaves in gravel planters, saguaros, and the Santa Catalina foothills.
     const agaveMat = new THREE.MeshStandardMaterial({ color: '#9fb3a6', roughness: 0.7 });

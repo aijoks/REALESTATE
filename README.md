@@ -46,6 +46,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/center.js` | `center` generator (Saguaro Vista Shopping Center: Fry's anchor + Potosino pad) |
 | `js/viewer/labflex.js` | `labflex` generator (1 Parrott Drive, Shelton CT: flex office/industrial) |
 | `js/viewer/mission.js` | `mission` generator (El Dorado Square, Tucson: Spanish Colonial office campus) |
+| `js/viewer/monalisa.js` | `monalisa` generator (7225 N Mona Lisa Rd, Tucson: mission-revival office) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |
