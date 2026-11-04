@@ -1351,6 +1351,13 @@ export const soldProperties = [
     uses: ['Office'],
     photo: 'assets/properties/615-w-131st/facade.jpg',
   },
+  {
+    id: '33-02-skillman',
+    address: '33-02 Skillman Avenue',
+    city: 'Long Island City, NY 11101',
+    uses: ['Office'],
+    photo: 'assets/properties/33-02-skillman/facade.jpg',
+  },
 ];
 
 export function getProperty(id) {
