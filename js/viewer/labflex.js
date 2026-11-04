@@ -1,18 +1,21 @@
-// Procedural model of a single-storey flex office / lab building, matched to
-// photos of 1 Parrott Drive, Shelton, CT:
-//   - long cream metal-panel facade with a raised parapet band, large glass
-//     curtain-wall bays between round white pilasters, rows of round gold
-//     disc ornaments, "CARA" letters over the glazed entrance
-//   - stone retaining-wall planters with railings, a circular drop-off drive
-//     around a grass island, lawn and evergreens
-//   - at the far end a wing of white split-face block with a grey ribbed
-//     metal fascia over a ribbon of tall windows and a stepped entrance
+// Procedural model of the single-storey flex office / lab building at
+// 1 Parrott Drive, Shelton, CT (former Pitney Bowes plant, 1976, renovated
+// 2002), traced from satellite imagery / OSM and matched to the photos.
+// Real footprint ~168 m x 72 m in three stepped blocks along a NNE-SSW axis:
+//   - north block (industrial): white split-face block, truck doors
+//   - middle block: on its west face, a grey ribbed metal fascia over a ribbon
+//     of tall windows (industrial wing entrance with steps), then the long
+//     cream metal-panel office facade with glass curtain-wall bays between
+//     round white pilasters and gold disc ornaments, rounded at its south end
+//   - south block: the glazed CARA lobby behind stone planters, facing the
+//     circular drop-off drive
+// Local axes: +z = real WNW (the front), +x = along the building toward SSW.
 import * as THREE from 'three';
 import { textTexture, rand } from './textures.js';
 import { V, piece, createKit } from './kit.js';
 
 export function buildLabFlex(params) {
-  const { width: W = 120, depth: D = 75, sign = 'CARA' } = params;
+  const { width: W = 168, depth: D = 72, sign = 'CARA', tenants = [] } = params;
   const front = D / 2;
   const r = rand(1976);
   const H = 6.5;
@@ -26,9 +29,9 @@ export function buildLabFlex(params) {
     draw(ctx, w, h) { ctx.strokeStyle = '#c9cdd1'; ctx.lineWidth = 3; for (let y = 0; y <= h; y += 32) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); } for (let y = 0; y < h; y += 32) for (let x = (y / 32) % 2 ? 16 : 0; x <= w; x += 32) { ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 32); ctx.stroke(); } },
   });
   blockTex.wrapS = blockTex.wrapT = THREE.RepeatWrapping;
-  blockTex.repeat.set(6, 2);
+  blockTex.repeat.set(18, 2);
   const blockMat = new THREE.MeshStandardMaterial({ map: blockTex, roughness: 0.9 });
-  const ribTex = textTexture({ width: 256, height: 64, bg: '#9da3a8', draw(ctx, w, h) { for (let x = 0; x < w; x += 8) { ctx.fillStyle = x % 16 ? '#aeb4b9' : '#8b9196'; ctx.fillRect(x, 0, 6, h); } } });
+  const ribTex = textTexture({ width: 256, height: 64, bg: '#9da3a8', draw(ctx, w) { for (let x = 0; x < w; x += 8) { ctx.fillStyle = x % 16 ? '#aeb4b9' : '#8b9196'; ctx.fillRect(x, 0, 6, 64); } } });
   ribTex.wrapS = THREE.RepeatWrapping;
   ribTex.repeat.set(12, 1);
   const rib = new THREE.MeshStandardMaterial({ map: ribTex, roughness: 0.5, metalness: 0.4 });
@@ -46,140 +49,169 @@ export function buildLabFlex(params) {
     return add(m);
   };
   const M0 = new THREE.Matrix4();
-  const glassBay = (x0, x1, z, h) => {
+  const RZ = new THREE.Matrix4().makeRotationY(Math.PI / 2); // faces +x
+  const glassBay = (x0, x1, z, h, F = M0) => {
     const w = x1 - x0;
-    I.glass.add(piece(M0, (x0 + x1) / 2, 0.3 + h / 2, z + 0.02, w, h, 1), '#cfe2ee');
-    for (let x = x0; x <= x1 + 0.01; x += w / Math.round(w / 1.6)) I.frame.add(piece(M0, x, 0.3 + h / 2, z + 0.05, 0.1, h, 0.1), '#d9dcdf');
-    for (const y of [0.3, 0.3 + h * 0.55, 0.3 + h]) I.frame.add(piece(M0, (x0 + x1) / 2, y, z + 0.05, w, 0.1, 0.1), '#d9dcdf');
+    I.glass.add(piece(F, (x0 + x1) / 2, 0.3 + h / 2, z + 0.02, w, h, 1), '#cfe2ee');
+    for (let x = x0; x <= x1 + 0.01; x += w / Math.max(1, Math.round(w / 1.6))) I.frame.add(piece(F, x, 0.3 + h / 2, z + 0.05, 0.1, h, 0.1), '#d9dcdf');
+    for (const y of [0.3, 0.3 + h * 0.55, 0.3 + h]) I.frame.add(piece(F, (x0 + x1) / 2, y, z + 0.05, w, 0.1, 0.1), '#d9dcdf');
   };
+  const pilaster = (x, z) => {
+    const c = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, H + 1.2, 20), white);
+    c.position.set(x, (H + 1.2) / 2, z + 0.4);
+    c.castShadow = true;
+    add(c);
+  };
+  const plant = (x, z) => box(new THREE.MeshStandardMaterial({ color: '#c3c6c8', roughness: 0.5, metalness: 0.4 }), 2.6, 1.2, 2.0, x, H + 1.0, z);
 
-  // ---- main cream building (west two-thirds) ----
-  const mainW = W * 0.68;
-  const mx = -W / 2 + mainW / 2;
-  box(panel, mainW, H, D, mx, H / 2, 0);
-  box(panel, mainW + 0.3, 1.4, D + 0.3, mx, H + 0.4, 0); // parapet band
-  for (let x = -W / 2; x < -W / 2 + mainW; x += 3) I.trim.add(piece(M0, x, H + 0.4, front + 0.17, 0.05, 1.3, 0.02), '#d8cfbf');
-  // Glass bays between round pilasters, disc ornaments on the solid panels.
-  const bays = [[-W / 2 + 6, -W / 2 + 22], [-W / 2 + 27, -W / 2 + 46], [-W / 2 + 58, -W / 2 + 76]];
-  for (const [x0, x1] of bays) {
-    glassBay(x0, x1, front, 4.6);
-    for (const x of [x0 - 0.9, x1 + 0.9]) {
-      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, H + 1.2, 20), white);
-      c.position.set(x, (H + 1.2) / 2, front + 0.4);
-      c.castShadow = true;
-      add(c);
-    }
-  }
-  const gold = new THREE.MeshStandardMaterial({ color: '#a89548', roughness: 0.4, metalness: 0.6 });
-  for (const xs of [-W / 2 + 49.5, -W / 2 + 53.5]) {
-    for (const y of [2.2, 3.5, 4.8]) {
-      const d = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.08, 20), new THREE.MeshStandardMaterial({ color: '#8f8a83', roughness: 0.6 }));
-      d.rotation.x = Math.PI / 2;
-      d.position.set(xs + (y === 3.5 ? 1 : 0), y, front + 0.06);
-      add(d);
-    }
-  }
-  // CARA sign with gold discs over the entrance bay.
+  // ---- footprint (traced) ----
+  const N = { x0: -W / 2, x1: -11.4, z0: -27, z1: front }; // north block
+  const Mb = { x0: -11.4, x1: 60.6, z0: -front, z1: 23 }; // middle block
+  const S = { x0: 60.6, x1: W / 2, z0: -35, z1: 0 }; // south block
+  const HN = 7.6;
+
+  // ---- north block: industrial, white split-face block ----
+  box(blockMat, N.x1 - N.x0, HN, N.z1 - N.z0, (N.x0 + N.x1) / 2, HN / 2, (N.z0 + N.z1) / 2);
+  box(white, N.x1 - N.x0 + 0.3, 0.5, N.z1 - N.z0 + 0.3, (N.x0 + N.x1) / 2, HN + 0.1, (N.z0 + N.z1) / 2);
+  // Small strip windows along the west face, truck doors on the north end.
+  for (let x = N.x0 + 8; x < N.x1 - 10; x += 7) glassBay(x, x + 3.2, N.z1, 1.1, new THREE.Matrix4().makeTranslation(0, 3.6, 0));
   {
-    const tex = textTexture({
-      width: 1024, height: 192, bg: 'rgba(0,0,0,0)',
-      draw(ctx, w, h) { ctx.fillStyle = '#a89548'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '500 130px "Helvetica Neue", Arial'; ctx.fillText(sign.split('').join(' '), w / 2, h / 2 + 6); },
-    });
-    const s = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.5), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 0.4, metalness: 0.5, depthWrite: false }));
-    s.position.set(-W / 2 + 67, H + 0.45, front + 0.18);
-    add(s);
-    for (const x of [-W / 2 + 72.5, -W / 2 + 74]) {
-      const d = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 20), gold);
-      d.rotation.x = Math.PI / 2;
-      d.position.set(x, H + 0.45, front + 0.2);
-      add(d);
-    }
-  }
-  // Glazed entrance pavilion with a lit lobby.
-  {
-    const lobby = new THREE.Mesh(new THREE.BoxGeometry(14, 4.2, 4), new THREE.MeshBasicMaterial({ color: '#f3ecd2', side: THREE.BackSide }));
-    lobby.position.set(-W / 2 + 67, 2.4, front - 1.8);
-    add(lobby);
+    const Fn = new THREE.Matrix4().makeRotationY(-Math.PI / 2).setPosition(N.x0, 0, 0);
+    for (const z of [-12, 8]) I.trim.add(piece(Fn, z, 2.2, 0.05, 3.4, 4.0, 0.1), '#c9ccce');
   }
 
-  // ---- east wing: split-face block with a grey ribbed fascia ----
+  // ---- middle block ----
+  // (the south-west corner is left open for the rounded corner below)
+  box(panel, Mb.x1 - Mb.x0, H, Mb.z1 - 3 - Mb.z0, (Mb.x0 + Mb.x1) / 2, H / 2, (Mb.z0 + Mb.z1 - 3) / 2);
+  box(panel, Mb.x1 - 3 - Mb.x0, H, 3, (Mb.x0 + Mb.x1 - 3) / 2, H / 2, Mb.z1 - 1.5);
+  box(panel, Mb.x1 - Mb.x0 + 0.3, 1.4, Mb.z1 - 3 - Mb.z0 + 0.3, (Mb.x0 + Mb.x1) / 2, H + 0.4, (Mb.z0 + Mb.z1 - 3) / 2);
+  box(panel, Mb.x1 - 3 - Mb.x0 + 0.3, 1.4, 3.3, (Mb.x0 + Mb.x1 - 3) / 2, H + 0.4, Mb.z1 - 1.35);
+  for (let x = Mb.x0 + 17; x < Mb.x1; x += 3) I.trim.add(piece(M0, x, H + 0.4, Mb.z1 + 0.17, 0.05, 1.3, 0.02), '#d8cfbf');
+  // Industrial wing entrance: block return wall, ribbed fascia over a window ribbon.
   {
-    const ew = W - mainW;
-    const ex = W / 2 - ew / 2;
-    const fz = front - 8; // set back from the main front
-    box(blockMat, ew, H + 1.2, D - 8, ex, (H + 1.2) / 2, -4);
-    // Recessed bay: grey ribbed fascia over a ribbon of tall windows.
-    const bx0 = ex - ew / 2 + 10;
-    const bx1 = W / 2 - 3;
+    const bx0 = Mb.x0 + 1.5;
+    const bx1 = Mb.x0 + 16;
+    const fz = Mb.z1;
+    box(blockMat, 1.5, H + 1.2, 6, Mb.x0 + 0.75, (H + 1.2) / 2, fz - 2.5);
     box(rib, bx1 - bx0, 2.4, 0.4, (bx0 + bx1) / 2, H - 0.3, fz + 0.2);
     glassBay(bx0, bx1, fz, 4.0);
-    // Entrance doors and three steps.
-    I.frame.add(piece(M0, bx0 + 7, 1.6, fz + 0.08, 2.2, 2.6, 0.12), '#c7ccd0');
-    for (let k = 0; k < 3; k++) box(new THREE.MeshStandardMaterial({ color: '#cfcbc3', roughness: 0.9 }), 3.4, 0.18, 0.6, bx0 + 7, 0.09 + k * 0.18, fz + 1.6 - k * 0.5);
-    // Wall-pack light on the block.
-    I.trim.add(piece(M0, ex - ew / 2 + 5, H - 1.2, fz + 0.1, 0.8, 0.5, 0.3), '#2c2e30');
-    // Mulch bed and clipped shrubs along the wing.
-    const mulch = new THREE.Mesh(new THREE.PlaneGeometry(ew, 3), new THREE.MeshStandardMaterial({ color: '#4a3226', roughness: 1 }));
+    I.frame.add(piece(M0, bx0 + 4, 1.6, fz + 0.08, 2.2, 2.6, 0.12), '#c7ccd0');
+    for (let k = 0; k < 3; k++) box(new THREE.MeshStandardMaterial({ color: '#cfcbc3', roughness: 0.9 }), 3.4, 0.18, 0.6, bx0 + 4, 0.09 + k * 0.18, fz + 1.6 - k * 0.5);
+    I.trim.add(piece(M0, Mb.x0 + 0.7, H - 1.2, fz + 0.6, 0.5, 0.5, 0.8), '#2c2e30');
+    const mulch = new THREE.Mesh(new THREE.PlaneGeometry(bx1 - bx0, 3), new THREE.MeshStandardMaterial({ color: '#4a3226', roughness: 1 }));
     mulch.rotation.x = -Math.PI / 2;
-    mulch.position.set(ex, 0.06, fz + 1.6);
+    mulch.position.set((bx0 + bx1) / 2, 0.06, fz + 1.6);
     add(mulch);
     const shrub = new THREE.MeshStandardMaterial({ color: '#5d7a35', roughness: 1 });
-    for (let x = ex - ew / 2 + 1.5; x < W / 2 - 1; x += 2.2) {
+    for (let x = bx0 + 6.5; x < bx1; x += 2.2) {
       const s = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9 + r() * 0.3, 1), shrub);
       s.position.set(x, 0.7, fz + 1.4 + (r() - 0.5) * 0.6);
       s.scale.y = 0.8;
       s.castShadow = true;
       add(s);
     }
-  }
-
-  // ---- stone planters, entry drive and landscaping ----
-  {
-    const ex = -W / 2 + 67;
-    for (const [x, w] of [[ex - 7, 9], [ex + 7.5, 8]]) {
-      box(stone, w, 1.2, 1.2, x, 0.6, front + 4.2);
-      for (let k = 0; k <= w; k += 0.6) I.steel.add(piece(M0, x - w / 2 + k, 1.75, front + 4.0, 0.03, 0.9, 0.03));
-    }
-    const island = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.25, 40), new THREE.MeshStandardMaterial({ color: '#5f9a3f', roughness: 1 }));
-    island.position.set(ex - 6, 0.14, front + 14);
-    add(island);
-    const kerb = new THREE.Mesh(new THREE.TorusGeometry(5, 0.2, 6, 40), new THREE.MeshStandardMaterial({ color: '#d6d2c9', roughness: 0.9 }));
-    kerb.rotation.x = -Math.PI / 2;
-    kerb.position.set(ex - 6, 0.16, front + 14);
-    add(kerb);
-    // Lamp post.
-    I.steel.add(piece(M0, -W / 2 + 51, 3.5, front + 5, 0.12, 7, 0.12));
-    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.3, 0.5), new THREE.MeshStandardMaterial({ color: '#f4f1e8', emissive: '#fff4d6', emissiveIntensity: 0.6 }));
-    lamp.position.set(-W / 2 + 51, 7.1, front + 5);
-    add(lamp);
-    // Evergreen and deciduous trees.
-    const ever = new THREE.MeshStandardMaterial({ color: '#2f4b2a', roughness: 1 });
-    for (const [x, z, h] of [[-W / 2 + 50, front + 8, 11], [-W / 2 - 6, front + 9, 10], [W / 2 + 4, front + 6, 9]]) {
-      const c = new THREE.Mesh(new THREE.ConeGeometry(h * 0.32, h, 10), ever);
-      c.position.set(x, h / 2 + 0.8, z);
-      c.castShadow = true;
-      add(c);
-    }
-    const bare = new THREE.MeshStandardMaterial({ color: '#8c8279', roughness: 1 });
-    for (const [x, z] of [[W / 2 - 22, front - 5], [W / 2 - 15, front - 5.5], [W / 2 - 9, front - 5]]) {
-      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 9, 8), bare);
-      t.position.set(x, 4.5, z);
+    for (const x of [bx0 + 7.5, bx0 + 10.5, bx0 + 13]) {
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 9, 8), new THREE.MeshStandardMaterial({ color: '#8c8279', roughness: 1 }));
+      t.position.set(x, 4.5, fz + 3);
       t.rotation.z = (r() - 0.5) * 0.15;
       t.castShadow = true;
       add(t);
     }
   }
+  // Office facade: glass curtain-wall bays between round pilasters.
+  const bays = [[Mb.x0 + 19, Mb.x0 + 33], [Mb.x0 + 36, Mb.x0 + 50], [Mb.x0 + 53, Mb.x0 + 66]];
+  for (const [x0, x1] of bays) {
+    glassBay(x0, x1, Mb.z1, 4.6);
+    for (const x of [x0 - 0.9, x1 + 0.9]) pilaster(x, Mb.z1);
+  }
+  // Rounded south-west corner with grey disc ornaments.
+  {
+    const cyl = new THREE.Mesh(new THREE.CylinderGeometry(3.1, 3.1, H + 1.1, 24, 1, false, 0, Math.PI / 2), panel);
+    cyl.position.set(Mb.x1 - 3, (H + 1.1) / 2, Mb.z1 - 3);
+    cyl.castShadow = true;
+    add(cyl);
+    for (const y of [2.2, 3.5, 4.8]) {
+      const d = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.08, 20), new THREE.MeshStandardMaterial({ color: '#8f8a83', roughness: 0.6 }));
+      d.rotation.x = Math.PI / 2;
+      d.position.set(Mb.x1 - 4.6 + (y === 3.5 ? 0.9 : 0), y, Mb.z1 + 0.06);
+      add(d);
+    }
+  }
+  // South face of the middle block (in the recess): glazing.
+  glassBay(-20, -6, Mb.x1, 4.4, RZ);
+  // Truck doors on the east side.
+  {
+    const Fe = new THREE.Matrix4().makeRotationY(Math.PI).setPosition(0, 0, Mb.z0);
+    for (const x of [-20, -14, 30]) I.trim.add(piece(Fe, x, 2.2, 0.05, 3.4, 4.0, 0.1), '#c9ccce');
+  }
 
-  // Roof plant.
-  for (let k = 0; k < 7; k++) box(new THREE.MeshStandardMaterial({ color: '#c3c6c8', roughness: 0.5, metalness: 0.4 }), 3, 1.3, 2.4, -W / 2 + 10 + k * 15, H + 0.65, -10 + (k % 3) * 8);
+  // ---- south block: CARA lobby ----
+  box(panel, S.x1 - S.x0, H, S.z1 - S.z0, (S.x0 + S.x1) / 2, H / 2, (S.z0 + S.z1) / 2);
+  box(panel, S.x1 - S.x0 + 0.3, 1.4, S.z1 - S.z0 + 0.3, (S.x0 + S.x1) / 2, H + 0.4, (S.z0 + S.z1) / 2);
+  for (let x = S.x0; x < S.x1; x += 3) I.trim.add(piece(M0, x, H + 0.4, S.z1 + 0.17, 0.05, 1.3, 0.02), '#d8cfbf');
+  const ex = S.x0 + 13; // entrance centre
+  glassBay(S.x0 + 1.5, S.x0 + 6, S.z1, 4.6);
+  glassBay(ex - 5.5, ex + 5.5, S.z1, 4.6);
+  for (const x of [S.x0 + 7, ex + 6.4]) pilaster(x, S.z1);
+  {
+    const lobby = new THREE.Mesh(new THREE.BoxGeometry(11, 4.2, 4), new THREE.MeshBasicMaterial({ color: '#f3ecd2', side: THREE.BackSide }));
+    lobby.position.set(ex, 2.4, S.z1 - 2.1);
+    add(lobby);
+    const tex = textTexture({
+      width: 1024, height: 192, bg: 'rgba(0,0,0,0)',
+      draw(ctx, w, h) { ctx.fillStyle = '#a89548'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '500 130px "Helvetica Neue", Arial'; ctx.fillText(sign.split('').join(' '), w / 2, h / 2 + 6); },
+    });
+    const s = new THREE.Mesh(new THREE.PlaneGeometry(8, 1.5), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 0.4, metalness: 0.5, depthWrite: false }));
+    s.position.set(ex + 1.5, H + 0.45, S.z1 + 0.18);
+    add(s);
+    const gold = new THREE.MeshStandardMaterial({ color: '#a89548', roughness: 0.4, metalness: 0.6 });
+    for (const x of [ex + 7, ex + 8.5]) {
+      const d = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 20), gold);
+      d.rotation.x = Math.PI / 2;
+      d.position.set(x, H + 0.45, S.z1 + 0.2);
+      add(d);
+    }
+  }
+  // Stone planters with railings, the steps, lamp post.
+  {
+    for (const [x, w] of [[ex - 8, 9], [ex + 6.5, 6]]) {
+      box(stone, w, 1.2, 1.2, x, 0.6, S.z1 + 4.2);
+      for (let k = 0; k <= w; k += 0.6) I.steel.add(piece(M0, x - w / 2 + k, 1.75, S.z1 + 4.0, 0.03, 0.9, 0.03));
+    }
+    for (let k = 0; k < 3; k++) box(new THREE.MeshStandardMaterial({ color: '#d4d0c8', roughness: 0.9 }), 4, 0.18, 0.6, ex + 1.5, 0.09 + k * 0.18, S.z1 + 4.6 - k * 0.5);
+    I.steel.add(piece(M0, S.x0 - 4, 3.5, 6, 0.12, 7, 0.12));
+    const lamp = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.3, 0.5), new THREE.MeshStandardMaterial({ color: '#f4f1e8', emissive: '#fff4d6', emissiveIntensity: 0.6 }));
+    lamp.position.set(S.x0 - 4, 7.1, 6);
+    add(lamp);
+  }
+
+  // ---- other tenants: door plaques / wall signs ----
+  // tenants: [{ name, sub, at: [x, y, z], ry, w, bg, ink }]
+  for (const t of tenants) {
+    const tex = textTexture({ text: t.name, sub: t.sub, width: 1024, height: 220, bg: t.bg ?? '#ffffff', ink: t.ink ?? '#1f2a3a', font: '800 96px Arial', subFont: '600 44px Arial' });
+    const w = t.w ?? 5;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.215), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 }));
+    m.position.set(...t.at);
+    m.rotation.y = t.ry ?? 0;
+    add(m);
+  }
+
+  // Roof plant (many small rooftop units, as seen from above).
+  for (let x = N.x0 + 6; x < N.x1 - 3; x += 9) for (let z = N.z0 + 6; z < N.z1 - 3; z += 11) if (r() < 0.6) box(new THREE.MeshStandardMaterial({ color: '#c3c6c8', roughness: 0.5, metalness: 0.4 }), 2.6, 1.2, 2.0, x + r() * 3, HN + 0.9, z + r() * 3);
+  for (let x = Mb.x0 + 6; x < Mb.x1 - 3; x += 12) for (let z = Mb.z0 + 6; z < Mb.z1 - 4; z += 13) if (r() < 0.55) plant(x + r() * 3, z + r() * 3);
+  plant(S.x0 + 10, -18);
+  plant(S.x0 + 16, -8);
 
   finish();
+  // Front face z at a given x (stepped facade).
+  const faceZ = (x) => (x < N.x1 ? N.z1 : x < Mb.x1 ? Mb.z1 : S.z1);
   const floorRange = () => [0, H];
   const hotspotPosition = ([u, v, faceName]) => {
     const y = v * H;
+    const x = (u - 0.5) * W;
     switch (faceName) {
-      case 'front': return V((u - 0.5) * W, y, front + 2);
-      case 'roof': return V((u - 0.5) * W, y, 0);
+      case 'front': return V(x, y, faceZ(x) + 2);
+      case 'roof': return V(x, y, 0);
       default: return V(0, y, 0);
     }
   };

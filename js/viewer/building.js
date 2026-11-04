@@ -19,8 +19,9 @@ export function buildPrewarBrick(params) {
     width: W = 18.3,
     depth: D = 30.5,
     groundH = 4.2,
-    secondH = 3.8,
-    floorH: FH = 3.35,
+    secondH = 3.5,
+    floorH: FH = 2.95, // 15 storeys in OSM's 47 m roof height
+    parapet = 1.0,
     pavilionWidth: pw = 4.4,
     pavilionProjection: proj = 1.6,
     leaseBanner = null,
@@ -30,7 +31,9 @@ export function buildPrewarBrick(params) {
   const baseH = groundH + secondH;
   const towerFloors = floors - 2;
   const towerTop = baseH + towerFloors * FH;
-  const parapet = 1.4;
+  // Base details were laid out on a 18.3 m frontage; scale them to the
+  // real ~19.8 m (65 ft) lot.
+  const s = W / 18.3;
   const cw = W - 2 * pw;
   const zc = D / 2 - proj;
 
@@ -46,8 +49,8 @@ export function buildPrewarBrick(params) {
   const matCommonPlain = brickMaterial('common');
   const { matStone, matSteel, I, opening, add, stoneBox, brickBox, finish } = createKit(g, r);
 
-  const winY = (f) => f * FH + 0.85 + 0.925; // window centre above a tower floor's base
-  const WH = 1.85;
+  const winY = (f) => f * FH + 0.72 + 0.85; // window centre above a tower floor's base
+  const WH = 1.7;
   const crown = (f) => f >= towerFloors - 2;
 
   // =====================================================================
@@ -58,26 +61,26 @@ export function buildPrewarBrick(params) {
   const baseHoles = [];
   const secondY = groundH + 1.75;
   for (const x of [-7.3, -3.7, 0, 3.7, 7.3]) {
-    baseHoles.push({ x: X(x), y: secondY, w: 2.6, h: 2.1, kind: 'band', room: 'warm', reveal: C.revealBase, rd: 0.3 });
+    baseHoles.push({ x: X(x * s), y: secondY, w: 2.6 * s, h: 2.1, kind: 'band', room: 'warm', reveal: C.revealBase, rd: 0.3 });
   }
   baseHoles.push(
-    { x: X(-8.2), y: 0.12 + 1.3, w: 1.0, h: 2.6, kind: 'panel', panel: '#121212', reveal: C.revealBase, rd: 0.15, sill: false },
-    { x: X(-6.85), y: 0.12 + 1.45, w: 1.3, h: 2.9, kind: 'shop', room: 'shop', reveal: C.revealBase, rd: 0.15, sill: false },
-    { x: X(-4.0), y: 0.12 + 1.45, w: 3.0, h: 2.9, kind: 'shop', room: 'shop', reveal: C.revealBase, rd: 0.2, sill: false },
+    { x: X(-8.2 * s), y: 0.12 + 1.3, w: 1.0, h: 2.6, kind: 'panel', panel: '#121212', reveal: C.revealBase, rd: 0.15, sill: false },
+    { x: X(-6.85 * s), y: 0.12 + 1.45, w: 1.3, h: 2.9, kind: 'shop', room: 'shop', reveal: C.revealBase, rd: 0.15, sill: false },
+    { x: X(-4.0 * s), y: 0.12 + 1.45, w: 3.0 * s, h: 2.9, kind: 'shop', room: 'shop', reveal: C.revealBase, rd: 0.2, sill: false },
     { x: X(0), y: 0.12 + 1.625, w: 2.3, h: 3.25, kind: 'lobby', room: 'lobby', reveal: '#151515', rd: 0.35, sill: false, roomDepth: 4 },
-    { x: X(3.4), y: 0.12 + 1.35, w: 2.0, h: 2.7, kind: 'french', room: 'warm', frame: C.wood, reveal: C.revealBase, rd: 0.2, sill: false, blinds: false },
-    { x: X(5.45), y: 0.12 + 1.3, w: 0.75, h: 2.6, kind: 'shop', room: 'warm', frame: C.wood, reveal: C.revealBase, rd: 0.2, sill: false, blinds: false },
+    { x: X(3.4 * s), y: 0.12 + 1.35, w: 2.0 * s, h: 2.7, kind: 'french', room: 'warm', frame: C.wood, reveal: C.revealBase, rd: 0.2, sill: false, blinds: false },
+    { x: X(5.45 * s), y: 0.12 + 1.3, w: 0.75, h: 2.6, kind: 'shop', room: 'warm', frame: C.wood, reveal: C.revealBase, rd: 0.2, sill: false, blinds: false },
   );
   add(wall(Fb, W, baseH, baseHoles, matBase));
   baseHoles.forEach((o) => opening(Fb, o));
 
   // Piers + ball finials, stone coping band across the full front.
   for (const sx of [-1, 1]) {
-    brickBox(matBasePlain, 0.6, baseH + 0.55, 0.3, sx * 1.83, (baseH + 0.55) / 2, D / 2 + 0.15);
-    stoneBox(0.78, 0.26, 0.48, sx * 1.83, baseH + 0.68, D / 2 + 0.15);
-    stoneBox(0.5, 0.2, 0.4, sx * 1.83, baseH + 0.9, D / 2 + 0.15);
+    brickBox(matBasePlain, 0.6, baseH + 0.55, 0.3, sx * 1.83 * s, (baseH + 0.55) / 2, D / 2 + 0.15);
+    stoneBox(0.78, 0.26, 0.48, sx * 1.83 * s, baseH + 0.68, D / 2 + 0.15);
+    stoneBox(0.5, 0.2, 0.4, sx * 1.83 * s, baseH + 0.9, D / 2 + 0.15);
     const ball = new THREE.Mesh(new THREE.SphereGeometry(0.27, 24, 16), matStone);
-    ball.position.set(sx * 1.83, baseH + 1.27, D / 2 + 0.15);
+    ball.position.set(sx * 1.83 * s, baseH + 1.27, D / 2 + 0.15);
     ball.castShadow = true;
     add(ball);
     brickBox(matBasePlain, 0.4, baseH, 0.14, sx * (W / 2 - 0.2), baseH / 2, D / 2 + 0.07);
@@ -114,10 +117,10 @@ export function buildPrewarBrick(params) {
       },
     });
     const black = new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.5 });
-    const sign = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.85, 0.2), [
+    const sign = new THREE.Mesh(new THREE.BoxGeometry(7.4 * s, 0.85, 0.2), [
       black, black, black, black, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.45 }), black,
     ]);
-    sign.position.set(-5.65, 3.65, D / 2 + 0.1);
+    sign.position.set(-5.65 * s, 3.65, D / 2 + 0.1);
     sign.castShadow = true;
     add(sign);
   }
@@ -139,11 +142,11 @@ export function buildPrewarBrick(params) {
     const slopeTex = stripedAwning('');
     const slope = new THREE.Mesh(new THREE.PlaneGeometry(7.3, Math.hypot(1.3, 0.55)), new THREE.MeshStandardMaterial({ map: slopeTex, side: THREE.DoubleSide, roughness: 0.8 }));
     slope.rotation.x = -Math.atan2(1.3, 0.55);
-    slope.position.set(5.65, 3.675, D / 2 + 0.65);
+    slope.position.set(5.65 * s, 3.675, D / 2 + 0.65);
     slope.castShadow = true;
     add(slope);
     const val = new THREE.Mesh(new THREE.PlaneGeometry(7.3, 0.34), new THREE.MeshStandardMaterial({ map: stripedAwning('120 E. 56TH     MiRano     RISTORANTE'), roughness: 0.8 }));
-    val.position.set(5.65, 3.23, D / 2 + 1.3);
+    val.position.set(5.65 * s, 3.23, D / 2 + 1.3);
     add(val);
   }
   // Blue vestibule enclosure.
@@ -161,7 +164,7 @@ export function buildPrewarBrick(params) {
       },
     });
     const box = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.7, 1.3), [blue, blue, blue, blue, new THREE.MeshStandardMaterial({ map: front, roughness: 0.4 }), blue]);
-    box.position.set(7.7, 1.35, D / 2 + 0.65);
+    box.position.set(7.7 * s, 1.35, D / 2 + 0.65);
     box.castShadow = box.receiveShadow = true;
     add(box);
   }
@@ -191,7 +194,7 @@ export function buildPrewarBrick(params) {
     }
   }
   // Gooseneck lamps over the right-hand 2nd-floor windows.
-  for (const x of [2.9, 6.5]) {
+  for (const x of [2.9 * s, 6.5 * s]) {
     const arm = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.5), matSteel);
     arm.position.set(x, groundH + 3.05, D / 2 + 0.25);
     const shade = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.16, 16, 1, true), new THREE.MeshStandardMaterial({ color: '#1d1d1d', side: THREE.DoubleSide, metalness: 0.5, roughness: 0.4 }));
@@ -327,18 +330,18 @@ export function buildPrewarBrick(params) {
     // Rear.
     const Fr = face(Math.PI, W / 2, 0, -D / 2);
     const holesR = [];
-    const rearXs = [1.9, 5.5, 9.15, 12.8, 16.4];
+    const rearXs = [1.9, 5.5, 9.15, 12.8, 16.4].map((x) => x * s);
     for (const x of rearXs) holesR.push({ ...sideWin(x, 0), y: groundH + 1.75, w: 1.4 });
     for (const f of floorsList) for (const x of rearXs) holesR.push({ ...sideWin(x, f), w: 1.4 });
-    holesR.push({ x: 9.15, y: 0.12 + 1.15, w: 1.1, h: 2.3, kind: 'panel', panel: '#3a3f44', sill: false, reveal: C.revealCommon });
+    holesR.push({ x: W / 2, y: 0.12 + 1.15, w: 1.1, h: 2.3, kind: 'panel', panel: '#3a3f44', sill: false, reveal: C.revealCommon });
     add(wall(Fr, W, sideH, holesR, matCommon(43)));
     holesR.forEach((o) => opening(Fr, o));
 
     // Leasing banner near the front of the west wall, hung from a steel rail.
     if (leaseBanner) {
-      const bw = 4.4;
-      const bh = 19;
-      const bz = D / 2 - 3.3;
+      const bw = 3.6; // fits the ~4.4 m strip in front of 425 Park's core
+      const bh = 17;
+      const bz = D / 2 - 2.3;
       const by = baseH + 0.9 + bh / 2;
       const banner = new THREE.Mesh(
         new THREE.PlaneGeometry(bw, bh),

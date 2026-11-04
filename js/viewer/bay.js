@@ -46,12 +46,14 @@ export function buildStoneBay(params) {
   const { width: W = 10.5, depth: D = 30.5, garageH = 11 } = params;
 
   const r = rand(1910);
-  const g1 = 4.6;
-  const g2 = 4.2;
+  // Storey heights fitted to the surveyed roof height (NYC/OSM: 34.5 m) and
+  // the photo, where the garage decks next door line up with the floors.
+  const g1 = 4.1;
+  const g2 = 3.1;
   const baseH = g1 + g2;
-  const FH = 3.45;
+  const FH = 2.66;
   const floors = 10;
-  const top = baseH + floors * FH + 1.0;
+  const top = baseH + floors * FH + 0.7;
 
   const g = new THREE.Group();
   g.name = 'building';
@@ -63,7 +65,8 @@ export function buildStoneBay(params) {
   // Weathered grey stucco for the exposed side wall.
   const stucco = brickMaterial('common', grime('baystucco', { seed: 361, streaks: 35, strength: 0.3 }));
   stucco.map = matStone.map; stucco.normalMap = null; stucco.color = new THREE.Color('#f0ede6');
-  const bannerTop = garageH + 3 + 15;
+  const bannerH = 10.5;
+  const bannerTop = garageH + 3 + bannerH;
   const granite = new THREE.MeshStandardMaterial({ color: '#2b2a2a', roughness: 0.35, metalness: 0.2 });
   const matCommon = (seed) => brickMaterial('common', grime(`baycommon${seed}`, { seed, streaks: 50, strength: 0.7 }));
   const black = '#1d1f21';
@@ -79,8 +82,8 @@ export function buildStoneBay(params) {
   const Fb = face(0, -W / 2, 0, D / 2);
   const baseHoles = [
     { x: 2.9, y: 0.12 + 1.75, w: 4.6, h: 3.5, kind: 'grid', cols: 3, transom: 0.8, room: 'warm', blinds: false, frame: '#141414', reveal: '#2b2a2a', rd: 0.25, sill: false },
-    { x: 7.9, y: 0.12 + 1.5, w: 1.9, h: 3.0, kind: 'lobby', room: 'lobby', frame: '#141414', reveal: '#2b2a2a', rd: 0.5, sill: false, roomDepth: 4 },
-    { x: W / 2, y: g1 + g2 / 2 + 0.1, w: cw, h: 3.2, kind: 'grid', cols: 4, transom: 0.9, frame: black, reveal: '#3a3a3a', rd: 0.3, sill: false, tint: '#9fb0be' },
+    { x: 7.9, y: 0.12 + 1.45, w: 1.9, h: 2.9, kind: 'lobby', room: 'lobby', frame: '#141414', reveal: '#2b2a2a', rd: 0.5, sill: false, roomDepth: 4 },
+    { x: W / 2, y: g1 + g2 / 2 + 0.1, w: cw, h: 2.5, kind: 'grid', cols: 4, transom: 0.7, frame: black, reveal: '#3a3a3a', rd: 0.3, sill: false, tint: '#9fb0be' },
   ];
   add(wall(Fb, W, baseH, baseHoles, matGrey));
   baseHoles.forEach((o) => opening(Fb, o));
@@ -120,21 +123,21 @@ export function buildStoneBay(params) {
   const Ft = face(0, -W / 2, baseH, D / 2);
   const upperH = top - baseH;
   const holes = [];
-  const wy = (f) => f * FH + 0.6 + 1.2;
+  const wy = (f) => f * FH + 0.55 + 1.0;
   for (let f = 0; f < floors; f++) {
-    for (const x of cx) holes.push({ x, y: wy(f), w: cww, h: 2.4, kind: 'dh', frame: black, reveal: '#2a2c2e', rd: 0.22, sill: false, tint: skyTint() });
+    for (const x of cx) holes.push({ x, y: wy(f), w: cww, h: 1.95, kind: 'dh', frame: black, reveal: '#2a2c2e', rd: 0.22, sill: false, tint: skyTint() });
   }
   add(wall(Ft, W, upperH, holes, matGrey));
   holes.forEach((o) => opening(Ft, o));
   // Black metal frame of the bay: mullions, spandrels and projecting ledges.
   for (let f = 0; f < floors; f++) {
     const y0 = f * FH;
-    I.trim.add(piece(Ft, W / 2, y0 + 0.3, 0.06, cw + 0.1, 0.62, 0.12), '#26282a');
-    I.trim.add(piece(Ft, W / 2, y0 + 0.62, 0.22, cw + 0.4, 0.12, 0.42), '#1b1c1e');
-    for (let k = 0; k < 4; k++) I.trim.add(piece(Ft, cx[k], y0 + 0.3, 0.13, cww - 0.1, 0.32, 0.03), '#34373a');
+    I.trim.add(piece(Ft, W / 2, y0 + 0.28, 0.06, cw + 0.1, 0.56, 0.12), '#26282a');
+    I.trim.add(piece(Ft, W / 2, y0 + 0.57, 0.22, cw + 0.4, 0.1, 0.42), '#1b1c1e');
+    for (let k = 0; k < 4; k++) I.trim.add(piece(Ft, cx[k], y0 + 0.28, 0.13, cww - 0.1, 0.3, 0.03), '#34373a');
     for (let k = 0; k <= 4; k++) {
       const x = W / 2 + (k - 2) * (cw / 4);
-      I.trim.add(piece(Ft, x, y0 + FH / 2 + 0.3, 0.07, k === 0 || k === 4 ? 0.22 : 0.16, FH - 0.6, 0.12), '#1d1f21');
+      I.trim.add(piece(Ft, x, y0 + FH / 2 + 0.28, 0.07, k === 0 || k === 4 ? 0.22 : 0.16, FH - 0.56, 0.12), '#1d1f21');
     }
   }
   stoneBox(W + 0.15, 0.3, 0.35, 0, top - 0.15, D / 2 + 0.1);
@@ -146,19 +149,20 @@ export function buildStoneBay(params) {
   const sideHoles = [];
   for (let f = 1; f < floors; f++) {
     const y = baseH + wy(f);
-    if (y < garageH + 1.5) continue;
-    // As on site: the banner hangs near the street corner, a single column
-    // of windows runs just behind it, and a second window sits above it.
-    sideHoles.push({ x: 5.7, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
-    if (y > bannerTop + 1) sideHoles.push({ x: 2.6, y, w: 1.1, h: 1.7, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
+    // As on site: the wall is blank down to the garage below ~20 m; above,
+    // a single column of windows runs just behind the banner on the upper
+    // floors, and one more window sits beside it over the banner.
+    if (y < 20 || f > 8) continue;
+    sideHoles.push({ x: 5.7, y, w: 1.1, h: 1.6, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
+    if (y > bannerTop + 1 && y < top - 5) sideHoles.push({ x: 2.6, y, w: 1.1, h: 1.6, kind: 'dh', frame: black, reveal: '#c9c5bc', sillColor: '#e2ded5', header: '#e2ded5', tint: skyTint() });
   }
   add(wall(Fw, D, top, sideHoles, stucco));
   sideHoles.forEach((o) => opening(Fw, o));
   {
-    const bh = 15;
-    const banner = new THREE.Mesh(new THREE.PlaneGeometry(4.4, bh), (() => { const t = bannerTexture(); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, emissive: '#ffffff', emissiveMap: t, emissiveIntensity: 0.35 }); })());
+    const bh = bannerH;
+    const banner = new THREE.Mesh(new THREE.PlaneGeometry(3.15, bh), (() => { const t = bannerTexture(); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, emissive: '#ffffff', emissiveMap: t, emissiveIntensity: 0.35 }); })());
     banner.rotation.y = Math.PI / 2;
-    banner.position.set(W / 2 + 0.06, garageH + 3 + bh / 2, D / 2 - 2.45);
+    banner.position.set(W / 2 + 0.06, garageH + 3 + bh / 2, D / 2 - 2.1);
     banner.castShadow = true;
     add(banner);
   }
@@ -175,25 +179,47 @@ export function buildStoneBay(params) {
     roof.position.y = top - 0.6;
     roof.receiveShadow = true;
     add(roof);
-    const bulk = new THREE.Mesh(new THREE.BoxGeometry(4, 3.4, 5.5), renderGrey);
-    bulk.position.set(-W / 2 + 2.6, top + 1.1, -D / 2 + 6);
+    // Roof as seen from above (local -x = east): stair/elevator bulkhead on
+    // the east side, the timber water tank toward the rear, a small white
+    // tank mid-roof, and a white mechanical enclosure with fans at the
+    // front-east corner (it shows over the parapet from the street).
+    const roofY = top - 0.6;
+    const bulk = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.0, 5.0), renderGrey);
+    bulk.position.set(-W / 2 + 2.2, roofY + 1.5, -D / 2 + 10.5);
     bulk.castShadow = true;
     add(bulk);
     const tank = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.85, 3.4, 24), new THREE.MeshStandardMaterial({ color: '#7a5a3e', roughness: 0.95 }));
-    body.position.y = 5.0;
-    const lid = new THREE.Mesh(new THREE.ConeGeometry(2.0, 1.1, 24), new THREE.MeshStandardMaterial({ color: '#33302d', roughness: 0.9 }));
-    lid.position.y = 7.25;
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.85, 3.4, 24), new THREE.MeshStandardMaterial({ color: '#8a6446', roughness: 0.95 }));
+    body.position.y = 4.4;
+    const lid = new THREE.Mesh(new THREE.ConeGeometry(2.0, 1.0, 24), new THREE.MeshStandardMaterial({ color: '#a27a55', roughness: 0.9 }));
+    lid.position.y = 6.6;
     tank.add(body, lid);
     for (let k = 0; k < 6; k++) {
       const a = (k / 6) * Math.PI * 2;
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 3.3), matSteel);
-      leg.position.set(Math.cos(a) * 1.4, 1.65, Math.sin(a) * 1.4);
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.7), matSteel);
+      leg.position.set(Math.cos(a) * 1.4, 1.35, Math.sin(a) * 1.4);
       tank.add(leg);
     }
     tank.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    tank.position.set(W / 2 - 2.6, top - 0.6, -D / 2 + 10);
+    tank.position.set(0.3, roofY, -D / 2 + 5.8);
     add(tank);
+    const white = new THREE.MeshStandardMaterial({ color: '#e6e6e2', roughness: 0.55, metalness: 0.15 });
+    const small = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 1.6, 20), white);
+    small.position.set(-1.5, roofY + 0.8, -D / 2 + 12);
+    small.castShadow = true;
+    add(small);
+    const ahu = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.1, 4.2), white);
+    ahu.position.set(-W / 2 + 2.1, roofY + 1.05, D / 2 - 3.6);
+    ahu.castShadow = true;
+    add(ahu);
+    for (const dz of [-1, 1]) {
+      const fan = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.12, 18), new THREE.MeshStandardMaterial({ color: '#3b3d40', roughness: 0.5, metalness: 0.5 }));
+      fan.position.set(-W / 2 + 2.1, roofY + 2.16, D / 2 - 3.6 + dz);
+      add(fan);
+    }
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.0, 6), matSteel);
+    rail.position.set(-W / 2 + 4.2, roofY + 0.5, D / 2 - 3.6);
+    add(rail);
   }
 
   finish();

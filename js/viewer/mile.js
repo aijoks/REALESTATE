@@ -14,13 +14,15 @@ export function buildLadiesMile(params) {
   const { width: W = 30, depth: D = 29, banner = ['SVA', 'NYC'] } = params;
 
   const r = rand(1900);
-  const g1 = 5.0;
-  const g2 = 4.0;
-  const g3 = 4.0;
+  // Storey heights sized so the cornice top meets the surveyed roof height
+  // (NYC/OSM: 46.6 m).
+  const g1 = 4.6;
+  const g2 = 3.8;
+  const g3 = 3.8;
   const baseH = g1 + g2 + g3;
-  const FH = 3.7;
+  const FH = 3.5;
   const shaftFloors = 7;
-  const TFH = 3.9;
+  const TFH = 3.85;
   const topFloors = 2;
   const shaftTop = baseH + shaftFloors * FH;
   const wallTop = shaftTop + topFloors * TFH;
@@ -186,25 +188,65 @@ export function buildLadiesMile(params) {
     roof.position.y = top - 0.5;
     roof.receiveShadow = true;
     add(roof);
-    const bulk = new THREE.Mesh(new THREE.BoxGeometry(6, 3.6, 7), matCommon(4));
-    bulk.position.set(-W / 2 + 5, top + 1.3, -D / 2 + 6);
+    // Roof as seen from above: two wooden water tanks side by side on a
+    // steel platform over the west-centre stair/elevator bulkhead, a mechanical
+    // penthouse east of centre, rows of white condensing units toward the
+    // rear-east corner, and a low parapet all round.
+    const roofY = top - 0.5;
+    const parapetMat = matCommon(5);
+    for (const [w, d, x, z] of [[W, 0.35, 0, -D / 2 + 0.18], [0.35, D, -W / 2 + 0.18, 0], [0.35, D, W / 2 - 0.18, 0]]) {
+      const p = new THREE.Mesh(new THREE.BoxGeometry(w, 1.1, d), parapetMat);
+      p.position.set(x, roofY + 0.55, z);
+      add(p);
+    }
+    const bulk = new THREE.Mesh(new THREE.BoxGeometry(9.5, 3.4, 6.5), matCommon(4));
+    bulk.position.set(-W / 2 + 10.5, roofY + 1.7, -1.5);
     bulk.castShadow = true;
     add(bulk);
-    const tank = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.05, 3.8, 28), new THREE.MeshStandardMaterial({ color: '#6e5038', roughness: 0.95 }));
-    body.position.y = 5.0;
-    const lid = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.2, 28), new THREE.MeshStandardMaterial({ color: '#33302d', roughness: 0.9 }));
-    lid.position.y = 7.5;
-    tank.add(body, lid);
-    for (let k = 0; k < 6; k++) {
-      const a = (k / 6) * Math.PI * 2;
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 3.1), matSteel);
-      leg.position.set(Math.cos(a) * 1.5, 1.55, Math.sin(a) * 1.5);
-      tank.add(leg);
+    const pent = new THREE.Mesh(new THREE.BoxGeometry(5, 3.0, 9), matCommon(6));
+    pent.position.set(W / 2 - 9, roofY + 1.5, 3.5);
+    pent.castShadow = true;
+    add(pent);
+    const tankWood = new THREE.MeshStandardMaterial({ color: '#8a6a4c', roughness: 0.95 });
+    const tankLid = new THREE.MeshStandardMaterial({ color: '#b08a66', roughness: 0.9 });
+    for (const tx of [-W / 2 + 8.4, -W / 2 + 12.8]) {
+      const tank = new THREE.Group();
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(1.95, 2.0, 3.8, 28), tankWood);
+      body.position.y = 3.4 + 1.9;
+      const lid = new THREE.Mesh(new THREE.ConeGeometry(2.1, 1.0, 28), tankLid);
+      lid.position.y = 3.4 + 3.8 + 0.5;
+      tank.add(body, lid);
+      for (let k = 0; k < 6; k++) {
+        const a = (k / 6) * Math.PI * 2;
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.4), matSteel);
+        leg.position.set(Math.cos(a) * 1.5, 3.4 + 0.7 - 1.4, Math.sin(a) * 1.5);
+        tank.add(leg);
+      }
+      tank.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+      tank.position.set(tx, roofY + 1.4, -2.2);
+      add(tank);
     }
-    tank.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    tank.position.set(W / 2 - 6, top - 0.5, -D / 2 + 8);
-    add(tank);
+    // Condensing units: instanced white boxes in rows at the rear-east.
+    {
+      const units = [];
+      for (let row = 0; row < 3; row++) for (let k = 0; k < 6; k++) units.push([W / 2 - 13 + k * 1.9, -D / 2 + 2.6 + row * 2.2]);
+      for (let k = 0; k < 4; k++) units.push([W / 2 - 4.2, 0.5 + k * 2.0]);
+      const unitMesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1.5, 1.1, 1.4), new THREE.MeshStandardMaterial({ color: '#e4e4df', roughness: 0.6, metalness: 0.2 }), units.length);
+      const m4 = new THREE.Matrix4();
+      units.forEach(([x, z], i) => { m4.makeTranslation(x, roofY + 0.75, z); unitMesh.setMatrixAt(i, m4); });
+      unitMesh.castShadow = true;
+      add(unitMesh);
+      // Silver duct run from the units to the penthouse.
+      const duct = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.6, D * 0.45), new THREE.MeshStandardMaterial({ color: '#b9bcbf', roughness: 0.4, metalness: 0.6 }));
+      duct.position.set(W / 2 - 6, roofY + 0.5, -D / 2 + 9);
+      add(duct);
+    }
+    // Low skylight frames on the front half of the roof.
+    for (const [x, z] of [[-3, 7], [1, 7], [-3, 11], [1, 11]]) {
+      const sk = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, 2.6), new THREE.MeshStandardMaterial({ color: '#3a3f44', roughness: 0.3, metalness: 0.4 }));
+      sk.position.set(x, roofY + 0.25, z);
+      add(sk);
+    }
   }
 
   finish();

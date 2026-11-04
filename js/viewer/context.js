@@ -383,50 +383,74 @@ export function buildContext(scene, { W, D, site = {} }) {
 
   const eastX = -W / 2 - 0.05;
   if (siteId === 'e56-park') {
-  // Tower 56 — granite/glass podium, stepped louvred setbacks, tower behind.
+  // Footprints and heights from OpenStreetMap (NYC survey data), measured in
+  // the Manhattan grid from the 56th St building line: Z(o) maps an OSM
+  // offset (m north of the building's centre, building line at +15.8) to
+  // scene z. Block depth 56th→55th building lines is ~61 m.
+  const Z = (o) => front + o - 15.8;
+  const zS56 = streetZ(-1) + road / 2 + walk; // 55th St building line
+  const zN56 = streetZ(1) - road / 2 - walk; // 57th St building line
+  // Tower 56 (east, x -27.9…-9.8): 30 m podium with four slanted louvred
+  // setbacks across its front 5.2 m, 33-storey (118 m) tower behind.
   {
     const parts = [];
-    parts.push(block('glass', -36, eastX, -D / 2, front, 10));
-    const steps = [[10, 15, 2.5], [15, 20, 5], [20, 25, 7.5], [25, 30, 10]];
+    const x0 = -27.9;
+    const run = 1.3;
+    parts.push(block('glass', x0, eastX, Z(-14.4), front, 10));
+    const steps = [[10, 15, run], [15, 20, 2 * run], [20, 25, 3 * run], [25, 30, 4 * run]];
     const slopeMat = new THREE.MeshStandardMaterial({ color: '#9fb7c8', metalness: 0.6, roughness: 0.1, transparent: true, opacity: 1, envMapIntensity: 1.6 });
     for (const [y0, y1, set] of steps) {
-      parts.push(block('louver', -36, eastX, -D / 2, front - set, y1 - y0, y0));
-      const slope = new THREE.Mesh(new THREE.PlaneGeometry(36 + eastX, Math.hypot(2.5, 1.6)), slopeMat);
-      slope.rotation.x = -Math.atan2(2.5, 1.6);
-      slope.position.set((-36 + eastX) / 2, y0 + 0.8, front - set + 1.25);
+      parts.push(block('louver', x0, eastX, Z(-14.4), front - set, y1 - y0, y0));
+      const slope = new THREE.Mesh(new THREE.PlaneGeometry(eastX - x0, Math.hypot(run, 1.6)), slopeMat);
+      slope.rotation.x = -Math.atan2(run, 1.6);
+      slope.position.set((x0 + eastX) / 2, y0 + 0.8, front - set + run / 2);
       scene.add(slope);
       parts.push(slope);
     }
-    parts.push(block('banded', -36, eastX - 2, -D / 2, front - 14, 110, 30));
+    parts.push(block('banded', x0, eastX, Z(-14.4), Z(10.6), 88, 30));
     group(parts);
+    // Zimbabwe House (5 storeys) and the 44.7 m building at the Lexington corner.
+    block('prewar', -40.5, x0 - 0.05, Z(-13.6), front, 17.2);
+    block('prewar', -73.9, -40.55, Z(-26.8), front, 44.7, 0, { fade: false });
   }
 
-  // West: the fluted tower abuts the building's west wall. Its street face is
-  // set back ~6 m, leaving the front strip of the wall (with the lease banner)
-  // exposed.
+  // West: 425 Park Avenue's fluted service core is built tight against the
+  // west wall. Its 45 m front block is set back 4.4 m from the building line,
+  // leaving the front strip of the wall (with the lease banner) exposed; the
+  // core then steps to 110 m and to the 219–262 m fins of the tower crown.
   {
-    const setback = 6.2;
-    // The setback in front of it is open paving.
-    slab(W / 2, W / 2 + 13.5, front - setback, front);
-    block('fluted', W / 2 + 0.02, W / 2 + 13.5, -D / 2 - 6, front - setback, 165);
-  }
-
-  // 425 Park Avenue — SE corner of Park & 56th: glass lobby under an
-  // L-shaped canopy, tower rising in three setback tiers.
-  {
-    const x0 = W / 2 + 13.6;
-    const x1 = PK.eastLine;
-    const zS = streetZ(-1) + road / 2 + walk;
+    const x0 = W / 2 + 0.02;
+    const x1 = 20.5;
+    slab(W / 2, x1, Z(11.4), front); // open paving in front of it
     const parts = [
-      block('glass', x0, x1 - 3, zS, front - 3, 14),
-      block('glass', x0 + 1, x1 - 1, zS + 2, front - 2, 106, 14),
-      block('glass', x0 + 3, x1 - 3, zS + 4, front - 4, 80, 120),
-      block('glass', x0 + 5, x1 - 5, zS + 6, front - 6, 70, 200),
+      block('fluted', x0, x1, Z(5.1), Z(11.4), 45),
+      block('fluted', x0, x1, Z(2.1), Z(5.1), 110),
+      block('fluted', x0, x1, Z(-31.4), Z(2.1), 219),
+      block('fluted', x0, x1, Z(-35.6), Z(-31.4), 110),
+      block('fluted', x0, x1, Z(-40.5), Z(-35.6), 45),
+    ];
+    for (const [a, b, h] of [[-9.0, -6.8, 242], [-4.4, -1.7, 242], [-13.3, -11.1, 242], [-17.9, -15.7, 242], [-22.1, -20.0, 242], [-26.8, -24.5, 242],
+      [-6.9, -4.2, 262], [-15.8, -13.2, 262], [-24.7, -22.0, 262]]) parts.push(block('fluted', x0 + 0.3, x1 - 0.3, Z(a), Z(b), h - 219, 219));
+    group(parts);
+    // A 4-storey annex of 425 Park behind our rear yard.
+    block('brickwall', 5.1, x0 - 0.05, zS56, Z(-23.7), 16);
+  }
+
+  // 425 Park Avenue — SE corner of Park & 56th (Foster + Partners): glass
+  // lobby under a canopy, then three setback tiers (45 / 110 / 219 m).
+  {
+    const x0 = 20.55;
+    const x1 = PK.eastLine;
+    const parts = [
+      block('glass', 22.2, x1 - 2.4, zS56 + 4, Z(8.0), 10),
+      block('glass', x0, x1, zS56 + 2.6, Z(13.6), 35, 10),
+      block('glass', x0, 43.1, Z(-38.2), Z(9.2), 65, 45),
+      block('glass', x0, 38.8, Z(-33.8), Z(4.8), 109, 110),
     ];
     const canopyMat = new THREE.MeshStandardMaterial({ color: '#e7e6e2', roughness: 0.6, transparent: true, opacity: 1 });
-    for (const [cx0, cx1, cz0, cz1] of [[x0, x1 + 0.5, front - 3.5, front + 1.2], [x1 - 4, x1 + 0.5, zS, front + 1.2]]) {
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(cx1 - cx0, 1.0, cz1 - cz0), canopyMat);
-      canopy.position.set((cx0 + cx1) / 2, 14.3, (cz0 + cz1) / 2);
+    for (const [cx0, cx1, cz0, cz1] of [[x0, x1 + 0.5, Z(8.0) - 0.5, front + 1.2], [x1 - 2.6, x1 + 0.5, zS56, front + 1.2]]) {
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(cx1 - cx0, 0.8, cz1 - cz0), canopyMat);
+      canopy.position.set((cx0 + cx1) / 2, 9.6, (cz0 + cz1) / 2);
       canopy.castShadow = true;
       scene.add(canopy);
       parts.push(canopy);
@@ -434,23 +458,45 @@ export function buildContext(scene, { W, D, site = {} }) {
     group(parts);
   }
 
-  // Behind (south).
-  block('banded', -30, 18, streetZ(-1) + road / 2 + walk, -D / 2 - 3, 175);
+  // Behind (south, the north side of 55th St), east to west.
+  block('prewar', -12.4, 5.05, zS56, Z(-23.7), 56.4); // 115 E 55th
+  block('tenement', -18.4, -12.45, zS56, Z(-23.7), 18.1); // 119 E 55th
+  block('prewar', -35.0, -18.45, zS56, Z(-15.1), 41.6); // 123 E 55th
+  block('banded', -46.6, -35.05, zS56, Z(-24.1), 106); // Concorde Hotel
+  block('tenement', -73.9, -46.65, zS56, Z(-26.9), 20, 0, { fade: false });
 
-  // Across the street (north).
-  block('whitegrid', -52, -14, acrossZ, acrossZ + 30, 96);
-  block('prewar', -13, 12, acrossZ, acrossZ + 25, 52);
+  // Across E 56th (north side), east to west.
+  block('prewar', -73.6, -38.65, acrossZ, Z(64.6), 45, 0, { fade: false });
+  block('redtenement', -38.6, -32.75, acrossZ, Z(64.6), 19.2); // 127 E 56th
+  block('tenement', -32.7, -26.65, acrossZ, Z(64.6), 18.6); // 125 E 56th
+  block('prewar', -26.6, 22.05, acrossZ, Z(64.7), 68.9); // Lombardy Hotel
   {
-    // 445 Park Avenue — NE corner: banded 1940s/50s office slab over shops.
-    const zN = streetZ(1) - road / 2 - walk;
+    // 445 Park Avenue — NE corner: banded office block over shops, stepping
+    // back in wedding-cake setbacks from 46 m to 80 m.
+    const x0 = 22.1;
     const shopMat = new THREE.MeshStandardMaterial({ color: '#23272b', roughness: 0.4, metalness: 0.3, transparent: true, opacity: 1 });
-    const shops = new THREE.Mesh(new THREE.BoxGeometry(PK.eastLine - 13 + 0.2, 5, zN - acrossZ + 0.2), shopMat);
-    shops.position.set((13 + PK.eastLine) / 2, 2.5, (acrossZ + zN) / 2);
+    const shops = new THREE.Mesh(new THREE.BoxGeometry(PK.eastLine - x0 + 0.2, 5, zN56 - acrossZ + 0.2), shopMat);
+    shops.position.set((x0 + PK.eastLine) / 2, 2.5, (acrossZ + zN56) / 2);
     scene.add(shops);
-    group([block('banded', 13, PK.eastLine, acrossZ, zN, 72, 5), shops]);
-    // Corners west of the avenue.
-    block('glass', PK.westLine, PK.westLine + 52, acrossZ, zN, 150);
-    block('banded', PK.westLine, PK.westLine + 52, streetZ(-1) + road / 2 + walk, front, 118);
+    const parts = [shops, block('banded', x0, PK.eastLine, acrossZ, zN56, 41, 5)];
+    for (const [y0, y1, x1, z0, z1] of [[46, 52, PK.eastLine, 40.9, 95.3], [52, 58, 46.1, 40.9, 92], [58, 64, 43.1, 40.9, 88.8], [64, 70, 39.5, 44.6, 86.3], [70, 80, 35.9, 47.2, 83]]) {
+      parts.push(block('banded', x0, x1, Z(z0), Math.min(Z(z1), zN56), y1 - y0, y0));
+    }
+    group(parts);
+  }
+  // Corners west of Park Avenue: 6-storey corner building under the 124 m
+  // Franklin National Bank tower (NW); 70 m corner block and the stepped
+  // Park Avenue Tower (SW).
+  {
+    const wl = PK.westLine;
+    block('prewar', wl, wl + 21, acrossZ, Z(56), 39);
+    block('glass', wl, wl + 21, Z(56), zN56, 124.3);
+    block('banded', wl, wl + 21, zS56, front, 70);
+    group([
+      block('glass', wl + 21.1, wl + 55, zS56, front, 40),
+      block('glass', wl + 24.8, wl + 55, Z(-21.8), Z(13.8), 110, 40),
+      block('glass', wl + 30.6, wl + 52.7, Z(-15.2), Z(7.4), 21, 150),
+    ]);
   }
 
   } else if (siteId === 'canal-lafayette') {
@@ -552,11 +598,14 @@ export function buildContext(scene, { W, D, site = {} }) {
     scene.add(v);
   };
   const lane = front + walk + 1.2;
-  vehicle(-14, lane);
-  vehicle(-4, lane, { len: 5.4, ht: 2.3 });
-  vehicle(7, lane);
-  if (16 < PK.eastLine - 3) vehicle(16, lane, { len: 4.6, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#d7d9db', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
-  vehicle(2, front + walk + 5.2, { len: 4.8, ht: 1.6, body: yellow, cabin: 0.5 });
+  // site.frontVans === false keeps the kerb in front clear so the shopfronts show.
+  if (site.frontVans !== false) {
+    vehicle(-14, lane);
+    vehicle(-4, lane, { len: 5.4, ht: 2.3 });
+    vehicle(7, lane);
+    if (16 < PK.eastLine - 3) vehicle(16, lane, { len: 4.6, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#d7d9db', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
+    vehicle(2, front + walk + 5.2, { len: 4.8, ht: 1.6, body: yellow, cabin: 0.5 });
+  }
   vehicle(-30, farWalk - 1.2, { len: 4.7, ht: 1.5, body: new THREE.MeshStandardMaterial({ color: '#2b3a4f', roughness: 0.3, metalness: 0.5 }), cabin: 0.5 });
 
   const cab = { len: 4.8, ht: 1.7, body: yellow, cabin: 0.5 };
@@ -651,13 +700,19 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
   const eastX = -W / 2 - 0.02;
   const westX = W / 2 + 0.02;
 
-  // East: building wrapped in black netting over pipe scaffolding.
+  // Footprints / heights from OpenStreetMap (NYC survey data), in the
+  // Manhattan grid: Z(o) maps an OSM offset (m north of the building's
+  // centre; 38th St building line at +14.4) to scene z.
+  const Z = (o) => front + o - 14.4;
+  const netX = -23.2; // 14 E 38th: x -23.2…-7.8, 52.4 m
+
+  // East: 14 E 38th, wrapped in black netting over pipe scaffolding.
   {
-    const net = block('netting', -W / 2 - 24, eastX, -D / 2, front + 0.3, 56);
+    const net = block('netting', netX, eastX, Z(-10.5), front + 0.3, 52.4);
     const pipeMat = new THREE.MeshStandardMaterial({ color: '#8d9296', roughness: 0.5, metalness: 0.6, transparent: true, opacity: 1 });
     const pipes = [];
-    for (let x = -W / 2 - 23.5; x < eastX; x += 2.4) pipes.push([x, 28, front + 0.45, 0.06, 56, 0.06]);
-    for (let y = 2; y < 56; y += 2) pipes.push([-W / 2 - 12, y, front + 0.45, 24, 0.05, 0.05]);
+    for (let x = netX + 0.5; x < eastX; x += 2.4) pipes.push([x, 26.2, front + 0.45, 0.06, 52.4, 0.06]);
+    for (let y = 2; y < 52; y += 2) pipes.push([(netX + eastX) / 2, y, front + 0.45, eastX - netX, 0.05, 0.05]);
     const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), pipeMat, pipes.length);
     const m = new THREE.Matrix4();
     pipes.forEach(([x, y, z, sx, sy, sz], i) => im.setMatrixAt(i, m.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion(), new THREE.Vector3(sx, sy, sz))));
@@ -665,52 +720,85 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
     group([net, im]);
   }
 
-  // West: ornate limestone corner building to Fifth Avenue, deep dark cornice.
+  // West: the ornate limestone building (46.6 m, deep dark cornice) runs
+  // 61 m along 38th St to the Fifth Avenue corner, 37 m deep, with a leg
+  // back to 37th St.
   {
     const x1 = PK.eastLine;
-    const z0 = front - 30;
+    const z0 = Z(-22.6);
+    const h = 46.6;
     const base = block('glass', westX, x1, z0, front, 9);
-    const body = block('beaux', westX, x1, z0, front, 52, 9);
+    const body = block('beaux', westX, x1, z0, front, h - 9, 9);
+    const leg = block('beaux', 10.3, 30.1, zS, z0 - 0.05, h);
     const corniceMat = new THREE.MeshStandardMaterial({ color: '#26282a', roughness: 0.7, transparent: true, opacity: 1 });
-    const cornice = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX + 0.8, 2.4, 31.8), corniceMat);
-    cornice.position.set((westX + x1) / 2 + 0.4, 61.2, (z0 + front) / 2 + 0.9);
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX + 0.8, 2.4, front - z0 + 1.8), corniceMat);
+    cornice.position.set((westX + x1) / 2 + 0.4, h - 1.2, (z0 + front) / 2 + 0.9);
     cornice.castShadow = true;
     scene.add(cornice);
     const bracketMat = new THREE.MeshStandardMaterial({ color: '#1d1f21', roughness: 0.7, transparent: true, opacity: 1 });
     const brackets = new THREE.InstancedMesh(new THREE.BoxGeometry(0.35, 1.4, 1.6), bracketMat, Math.ceil((x1 - westX) / 1.6));
     const mm = new THREE.Matrix4();
-    for (let i = 0; i < brackets.count; i++) brackets.setMatrixAt(i, mm.makeTranslation(westX + 0.8 + i * 1.6, 59.3, front + 0.8));
+    for (let i = 0; i < brackets.count; i++) brackets.setMatrixAt(i, mm.makeTranslation(westX + 0.8 + i * 1.6, h - 3.1, front + 0.8));
     scene.add(brackets);
     const band = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX, 1.2, 0.5), new THREE.MeshStandardMaterial({ color: '#cfc4ae', roughness: 0.8, transparent: true, opacity: 1 }));
     band.position.set((westX + x1) / 2, 9.6, front + 0.25);
     scene.add(band);
     group([base, body, cornice, brackets, band]);
-    block('prewar', westX, x1, zS, z0 - 0.1, 70, 0, { fade: false });
+    group([leg]);
+    // The 37th St / Fifth corner (44.5 m).
+    block('prewar', 30.15, x1, zS, z0 - 0.05, 44.5, 0, { fade: false });
   }
 
-  // Behind (south): brick party walls a few storeys above the roof terrace,
-  // with a small yard behind the building.
-  block('brickwall', -W / 2 - 24, PK.eastLine, zS, -D / 2 - 6, 52);
-  block('brickwall', -W / 2 - 24, eastX, -D / 2 - 6, -D / 2, 52, 0, { fade: false });
+  // Behind (north side of 37th St), with a ~6.6 m yard behind our building.
+  block('prewar', -6.2, 10.25, zS, Z(-21.1), 47.1); // 9 E 37th
+  block('tenement', -13.7, -6.25, zS, Z(-19.3), 28.5); // 13 E 37th
+  block('banded', -59.4, -13.75, zS, Z(-15.3), 56.5); // 232 Madison
 
-  // Further east on our side of the street.
-  block('prewar', -W / 2 - 58, -W / 2 - 24.1, zS, front, 46, 0, { fade: false });
-  block('banded', -104, -W / 2 - 58.1, zS, front, 72, 0, { fade: false });
+  // Further east on our side: a 56 m sliver, then the 65 m Madison corner.
+  block('prewar', -30.8, netX - 0.05, Z(-7.1), Z(12.7), 56.3);
+  block('banded', -59.5, -30.85, Z(-15.5), Z(14.1), 65, 0, { fade: false });
+  slab(-70, -59.5, zS, front, 0.165); // corner paving toward Madison Av
 
-  // Across E 38th (north side), and the corners west of Fifth.
-  block('prewar', -46, -10, acrossZ, zN, 64);
-  block('banded', -9.9, 20, acrossZ, zN, 82);
-  block('beaux', 20.1, PK.eastLine, acrossZ, zN, 58);
-  block('glass', -104, -46.1, acrossZ, zN, 112, 0, { fade: false });
-  block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 140);
-  block('banded', PK.westLine, PK.westLine + 50, zS, front, 96);
+  // Across E 38th (north side), east to west.
+  {
+    // 260 Madison: 40 m street wall stepping back to 91 m.
+    const parts = [block('prewar', -59.1, -14.2, acrossZ, zN, 40)];
+    for (const [y0, y1, x0, z0, z1] of [[40, 52, -53.7, 37.8, 89.2], [52, 64, -47.4, 42.7, 83.2], [64, 76, -41.8, 48.2, 77.6], [76, 91, -36.4, 56.7, 69.3]]) {
+      parts.push(block('prewar', x0, -14.25, Z(z0), Math.min(Z(z1), zN), y1 - y0, y0));
+    }
+    group(parts);
+  }
+  block('banded', -14.15, 0.1, acrossZ, zN, 43.5);
+  block('glass', 0.15, 11.4, acrossZ, zN, 90); // Hyatt Centric (height not in OSM; estimated)
+  block('prewar', 11.45, 22.7, acrossZ, zN, 46.5);
+  block('beaux', 22.75, 35.05, acrossZ, Z(55), 30); // not in OSM; estimated
+  {
+    // 425 Fifth Avenue: 41 m podium, 188 m tower set close to the street.
+    const parts = [block('beaux', 35.1, PK.eastLine, acrossZ, Z(56.7), 41)];
+    for (const [y0, y1, x0, x1, z0, z1] of [[41, 85, 39.8, 66.3, 34.6, 56.7], [85, 133, 40.8, 65.3, 35.2, 56.6], [133, 188, 42.8, 63.2, 36.8, 54.8]]) {
+      parts.push(block('glass', x0, x1, Z(z0), Z(z1), y1 - y0, y0));
+    }
+    group(parts);
+    block('prewar', 34.6, PK.eastLine, Z(56.75), zN, 31, 0, { fade: false });
+  }
+  // West of Fifth: 420 Fifth (40 m podium, 119 m tower) on our side, the
+  // 61 m former Lord & Taylor block across 38th, 8 W 38th beyond.
+  {
+    const wl = PK.westLine;
+    group([
+      block('banded', wl, wl + 44, zS, front, 40),
+      block('glass', wl + 4, wl + 40, Z(-34.8), Z(5.8), 79.2, 40),
+    ]);
+    block('beaux', wl, wl + 55.9, acrossZ, zN, 61.4);
+    block('prewar', wl + 44.05, wl + 55.9, Z(-19.3), front, 47, 0, { fade: false });
+  }
 
   // Empire State Building: west side of Fifth between 33rd and 34th St.
   empireState(scene, PK.westLine + 64, streetZ(-5) + road / 2 + walk, streetZ(-4) - road / 2 - walk);
 
   // Green sidewalk shed along the frontage (and the netted building next door).
   {
-    const x0 = -W / 2 - 24;
+    const x0 = netX;
     const x1 = W / 2 + 0.4;
     const depth = 3.4;
     const hgt = 3.7;
@@ -775,21 +863,27 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
   const westX = W / 2 + 0.02;
   const eastX = -W / 2 - 0.02;
 
-  // West: six-storey cream lofts with New York Sports Clubs at grade, then
-  // the corner building at Park Avenue South.
-  const loftA = block('prewar', westX, westX + 20, front - 26, front, 24);
-  const loftB = block('prewar', westX + 20.1, PK.eastLine - 8, front - 26, front, 26);
-  block('glass', PK.eastLine - 7.9, PK.eastLine, front - 26, front, 30);
+  // Footprints / heights from OpenStreetMap (NYC survey data). Z(o) maps an
+  // OSM offset (m north of the building's centre; 23rd St building line at
+  // -5.0) to local z (front = +z = south). Local x = west, as in OSM.
+  const Z = (o) => front - (o + 5.0);
+
+  // West: the 21.4 m (six-storey) cream lofts with New York Sports Clubs at
+  // grade run all the way to the Park Avenue South corner, 33 m deep.
+  const loftA = block('prewar', westX, westX + 20, Z(28.2), front, 21.4);
+  const loftB = block('prewar', westX + 20.1, PK.eastLine - 9, Z(28.2), front, 21.4);
+  const loftC = block('beaux', PK.eastLine - 8.9, PK.eastLine, Z(28.2), front, 21.4);
   const orange = new THREE.MeshStandardMaterial({ color: '#ef6a1f', roughness: 0.6 });
   for (const x of [westX + 4, westX + 13, westX + 24, westX + 33]) {
     const sgn = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.7, 0.25), orange);
     sgn.position.set(x, 3.6, front + 0.15);
     scene.add(sgn);
   }
-  group([loftA, loftB]);
+  group([loftA, loftB, loftC]);
 
-  // Behind the lofts: the tall brick building with the shark mural.
-  const muralBldg = block('brickwall', westX + 1, westX + 24, front - 50, front - 26.2, 46);
+  // Behind the lofts: the 81.9 m brick building with the shark mural on its
+  // south wall, facing 23rd St above the lofts.
+  const muralBldg = block('brickwall', 11, PK.eastLine, Math.max(zS, Z(56.8)), Z(24.9), 81.9);
   {
     const c = document.createElement('canvas');
     c.width = 512; c.height = 512;
@@ -806,21 +900,25 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
     ctx.font = '900 96px Impact, Arial Black, Arial'; ctx.textAlign = 'center'; ctx.fillText('SHARK', 256, 480);
     const tex = unmirror(new THREE.CanvasTexture(c));
     tex.colorSpace = THREE.SRGBColorSpace;
-    const mural = new THREE.Mesh(new THREE.PlaneGeometry(22, 22), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, transparent: true, opacity: 1 }));
-    mural.position.set(westX + 12.5, 35, front - 26.1);
+    const mural = new THREE.Mesh(new THREE.PlaneGeometry(26, 30), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, transparent: true, opacity: 1 }));
+    mural.position.set(26, 41, Z(24.9) + 0.1);
     scene.add(mural);
     group([muralBldg, mural]);
   }
-  block('brickwall', westX + 24.1, westX + 40, front - 56, front - 30, 52);
 
-  // East: tall red-brick residential tower built against our east wall, on a
-  // stone retail podium, with street trees in front.
-  const podium = block('beaux', eastX - 34, eastX, front - 28, front, 9);
-  const tower = block('redtower', eastX - 34, eastX, front - 28, front - 0.8, 78, 9);
+  // East: 119 E 23rd, the 70.5 m red-brick residential tower built against
+  // our east wall on a stone retail podium, with street trees in front; then
+  // two 25 m walk-ups, the low Gramercy Theatre and the Lexington corner.
+  const podium = block('beaux', -25.4, eastX, Z(28.1), front, 9);
+  const tower = block('redtower', -25.4, eastX, Z(28.1), front - 0.8, 61.5, 9);
   group([podium, tower]);
+  block('tenement', -34.0, -25.45, Z(24.7), front, 25.4); // 123 E 23rd
+  block('redtenement', -42.6, -34.05, Z(24.1), front, 25.0); // 125 E 23rd
+  block('stucco', -58.3, -42.65, Z(29.4), front, 10.7); // Gramercy Theatre
+  block('prewar', -73.3, -58.35, Z(24.2), front, 46.6, 0, { fade: false });
   const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
   const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
-  for (const x of [eastX - 7, eastX - 20, eastX - 31]) {
+  for (const x of [eastX - 4, eastX - 13, eastX - 29]) {
     const t = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.2, 3.4, 8), trunk);
     t.position.set(x, 1.7, front + walk - 1.1);
     const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(2.6, 1), leaf);
@@ -829,21 +927,37 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
     for (const o of [t, crown]) { o.castShadow = true; scene.add(o); }
   }
 
-  // Behind our lot (north) and further east.
-  block('banded', eastX - 34, westX + 1, zS, -D / 2 - 0.2, 62);
-  block('prewar', -104, eastX - 34.1, zS, front, 48, 0, { fade: false });
-  // Across 23rd Street.
-  block('glass', -70, -12, acrossZ, zN, 72);
-  block('prewar', -11.9, 24, acrossZ, zN, 40);
-  block('banded', 24.1, PK.eastLine, acrossZ, zN, 58);
-  // West of Park Avenue South.
-  block('banded', PK.westLine, PK.westLine + 50, zS, front, 92);
-  block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 110);
+  // Behind our lot (south side of 24th St), across a ~10 m yard.
+  block('tenement', -19.8, 10.95, zS, Z(32.4), 19.9); // 124 E 24th
+  block('redtenement', -44.1, -19.85, zS, Z(26.6), 18.8);
+  block('tenement', -57.9, -44.15, zS, Z(39.7), 16.2);
+  block('prewar', -73.2, -57.95, zS, Z(30.4), 19.9, 0, { fade: false });
+  // Across 23rd Street (south side), east to west.
+  block('prewar', -73.6, -27.55, acrossZ, zN, 44.2);
+  block('banded', -27.5, 3.0, acrossZ, zN, 46.1);
+  block('tenement', 3.05, 10.4, acrossZ, Z(-65.8), 16.9); // 112 E 23rd
+  block('prewar', 10.45, 18.1, acrossZ, Z(-62.7), 37.0); // 110 E 23rd
+  block('banded', 18.15, PK.eastLine, acrossZ, Z(-78.1), 48.4);
+  block('prewar', 3.05, PK.eastLine, Z(-78.15), zN, 40.8, 0, { fade: false });
+  // West of Park Avenue South: the MetLife office complex fills the block
+  // (40 m base, 119–142 m slabs); 304 Park Av S and the 237 m tower at
+  // 45 E 22nd across 23rd.
+  {
+    const wl = PK.westLine;
+    group([
+      block('banded', wl, wl + 55.9, zS, front, 40),
+      block('banded', wl + 5.7, wl + 55.9, Z(26.4), Z(6.2), 89, 40),
+      block('banded', wl + 9.9, wl + 32.4, Z(40), Z(26.45), 79, 40),
+      block('banded', wl + 32.4, wl + 55.9, Z(40.4), Z(24.5), 101.8, 40),
+    ]);
+    block('prewar', wl, wl + 53, acrossZ, Z(-68.4), 58.8); // 304 Park Av S
+    block('glass', 124, 145, Z(-65.7) + 3, Z(-93.8) - 3, 237, 0, { fade: false }); // 45 E 22nd
+  }
 
   // MetLife clock tower (Madison Ave & 23rd–24th St), west beyond Park Ave S.
   {
     const cx = PK.westLine + 118;
-    const cz = front - 40;
+    const cz = Z(44.1);
     const stone = new THREE.MeshStandardMaterial({ color: '#d8d2c4', roughness: 0.75 });
     const add = (geo, mat, y, ry = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(cx, y, cz); m.rotation.y = ry; m.castShadow = true; scene.add(m); return m; };
     const tex = new THREE.CanvasTexture((() => {
@@ -872,36 +986,42 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
 // 133 W 21st St neighbours (north side of 21st, Sixth Avenue to the east;
 // here local +x is east, toward the avenue).
 function neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  // Footprints, widths and heights from NYC building survey data (OSM),
+  // measured along 21st St from the building's centre (x = 0, +x = east).
   const zS = streetZ(-1) + road / 2 + walk;
   const zN = streetZ(1) - road / 2 - walk;
   const westX = -W / 2 - 0.02;
   const eastX = W / 2 + 0.02;
+  const rear22 = front - 33.4; // back of the lots facing 22nd St
 
-  // West: five-storey tan-brick loft, with a taller dark-brick building behind.
-  block('prewar', westX - 24, westX, front - 28, front, 21);
-  block('brickwall', westX - 28, westX - 1, front - 52, front - 28.2, 46);
-  block('banded', -120, westX - 24.1, zS, front, 40, 0, { fade: false });
+  // West: Nos. 143 and 145 — a five-storey tan-brick loft read as one front
+  // (16.2 m / 15.8 m, No. 145 only 16 m deep), the blue-panelled No. 151
+  // (15.8 m), then the 50 m "Casa" block.
+  block('prewar', westX - 6, westX, front - 30, front, 16.2);
+  block('prewar', westX - 12, westX - 6.05, front - 16, front, 15.8);
+  block('glass', westX - 36, westX - 12.05, front - 30, front, 15.8);
+  block('redtower', westX - 57, westX - 36.05, front - 30, front, 50.6);
 
-  // East, toward Sixth Avenue: narrow ornate building, a modern grey
-  // residential block with roof planting, an older building with a dark
-  // cornice, then the corner.
-  block('beaux', eastX, eastX + 7.5, front - 26, front, 24);
-  const modern = block('whitegrid', eastX + 7.6, eastX + 30, front - 26, front, 40);
+  // East, toward Sixth Avenue: narrow ornate No. 131 (13.2 m), the modern
+  // grey No. 125 with roof planting (49.4 m), brick No. 117 (19 m), then the
+  // big corner building with a dark cornice (30.3 m) wrapping to 22nd St.
+  block('beaux', eastX, eastX + 7, front - 26, front, 13.2);
+  const modern = block('whitegrid', eastX + 7.05, eastX + 36, front - 30, front, 49.4);
   const green = new THREE.MeshStandardMaterial({ color: '#4c7f36', roughness: 1, transparent: true, opacity: 1 });
-  const planting = new THREE.Mesh(new THREE.BoxGeometry(20, 1.4, 3), green);
-  planting.position.set(eastX + 18.8, 40.7, front - 2);
+  const planting = new THREE.Mesh(new THREE.BoxGeometry(26, 1.4, 3), green);
+  planting.position.set(eastX + 21.5, 50.1, front - 2);
   scene.add(planting);
   group([modern, planting]);
-  const older = block('beaux', eastX + 30.1, eastX + 52, front - 26, front, 30);
-  const cor = new THREE.Mesh(new THREE.BoxGeometry(22.4, 1.6, 1.4), new THREE.MeshStandardMaterial({ color: '#2b3a36', roughness: 0.7, transparent: true, opacity: 1 }));
-  cor.position.set(eastX + 41, 30.4, front + 0.4);
+  block('brickwall', eastX + 36.05, eastX + 50, front - 30, front, 19.0);
+  const older = block('beaux', eastX + 50.05, PK.eastLine, zS, front, 30.3);
+  const cor = new THREE.Mesh(new THREE.BoxGeometry(PK.eastLine - eastX - 50 + 0.4, 1.6, 1.4), new THREE.MeshStandardMaterial({ color: '#2b3a36', roughness: 0.7, transparent: true, opacity: 1 }));
+  cor.position.set((eastX + 50 + PK.eastLine) / 2, 30.4, front + 0.4);
   scene.add(cor);
   group([older, cor]);
-  if (PK.eastLine > eastX + 52.2) block('prewar', eastX + 52.1, PK.eastLine, front - 26, front, 28);
   // Street trees along the east sidewalk.
   const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
   const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
-  for (const x of [eastX + 14, eastX + 22, eastX + 30]) {
+  for (const x of [eastX + 14, eastX + 22, eastX + 30, eastX + 44, eastX + 58]) {
     const t = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 3, 8), trunk);
     t.position.set(x, 1.5, front + walk - 1);
     const c = new THREE.Mesh(new THREE.IcosahedronGeometry(1.7, 1), leaf);
@@ -910,11 +1030,22 @@ function neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ,
     for (const o of [t, c]) { o.castShadow = true; scene.add(o); }
   }
 
-  // Behind (north) and across 21st Street.
-  block('banded', westX - 24, PK.eastLine, zS, -D / 2 - 0.2, 58);
-  block('prewar', -70, -20, acrossZ, zN, 32);
-  block('whitegrid', -19.9, 18, acrossZ, zN, 48);
-  block('beaux', 18.1, PK.eastLine, acrossZ, zN, 30);
+  // Behind: the south side of 22nd St (Nos. 156 to 116), lot by lot.
+  for (const [kind, x0, x1, h] of [
+    ['tenement', -66, -57.05, 13.2], ['banded', -57, -39.05, 45.5], ['prewar', -39, -28.05, 41.5],
+    ['brickwall', -28, -8.05, 46.0], ['prewar', -8, 5.35, 35.3], ['beaux', 5.4, 17.5, 50.5],
+    ['whitegrid', 17.55, 34.95, 50.5], ['prewar', 35, 55.95, 45.8], ['brickwall', 56, eastX + 49.95, 39.1],
+  ]) block(kind, x0, x1, zS, rear22, h);
+
+  // Across 21st St (south side): No. 150 (19.4 m), low No. 142 (8.3 m),
+  // Nos. 136 and 132 (45.5 / 46.1 m), the long No. 120 (44.5 m), then the
+  // corner toward Sixth Avenue.
+  block('redtenement', -72, -55.05, acrossZ, zN, 19.4);
+  block('tenement', -55, -30.55, acrossZ, zN, 8.3);
+  block('brickwall', -30.5, -6.35, acrossZ, zN, 45.5);
+  block('prewar', -6.3, 7.65, acrossZ, zN, 46.1);
+  block('beaux', 7.7, 64.8, acrossZ, zN, 44.5);
+  block('prewar', 64.85, PK.eastLine, acrossZ, zN, 30);
   block('glass', PK.westLine, PK.westLine + 50, acrossZ, zN, 80);
   block('prewar', PK.westLine, PK.westLine + 50, zS, front, 36);
 }
@@ -923,37 +1054,66 @@ function neighbours21st({ scene, block, group, W, D, front, walk, road, acrossZ,
 // 102 W 38th St neighbours. The building faces north and the site is
 // mirrored, so local +x points east toward Sixth Avenue.
 function neighbours102w38({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  // Widths and heights from NYC building survey data (OSM); x is measured
+  // along 38th St from the building's centre (+x = east, toward Sixth Ave).
   const zS = streetZ(-1) + road / 2 + walk;
   const zN = streetZ(1) - road / 2 - walk;
   const eastX = W / 2 + 0.02;
   const westX = -W / 2 - 0.02;
 
-  // East: pink four-storey walk-up with a black-awninged shop (Polish Me),
-  // a tall dark-brick tower rising behind it, then the corner at Sixth.
-  const pink = block('stucco', eastX, eastX + 8, front - 20, front, 15);
+  // East: the low corner group at Sixth Avenue — the pink four-storey front
+  // on 38th St with the black-awninged Polish Me (14.5 m), then Nos. 1015,
+  // 1013 and 1011 Sixth Avenue (14.8 / 15.4 / 15.7 m), 18 m deep.
+  const pink = block('stucco', eastX, PK.eastLine, front - 7, front, 14.5);
   const awnMat = new THREE.MeshStandardMaterial({ color: '#141414', roughness: 0.6, transparent: true, opacity: 1 });
   const awn = new THREE.Mesh(new THREE.BoxGeometry(7.6, 1.0, 1.4), awnMat);
   awn.position.set(eastX + 4, 3.6, front + 0.6);
   scene.add(awn);
   group([pink, awn]);
-  block('darkgrid', eastX + 0.5, eastX + 24, front - 46, front - 20.2, 92);
-  if (PK.eastLine > eastX + 8.2) block('prewar', eastX + 8.1, PK.eastLine, front - 22, front, 26);
+  block('tenement', eastX, PK.eastLine, front - 15, front - 7.05, 14.8);
+  block('redtenement', eastX, PK.eastLine, front - 23, front - 15.05, 15.4);
+  block('tenement', eastX, PK.eastLine, front - 31, front - 23.05, 15.7);
 
-  // West: tall buff ornate loft with dark louvred windows, and its stepped
-  // tower rising behind with a crowning lantern.
-  const loft = block('beaux', westX - 26, westX, front - 24, front, 56);
-  const t1 = block('prewar', westX - 24, westX - 2, front - 40, front - 24.2, 72);
-  const t2 = block('prewar', westX - 21, westX - 5, front - 37, front - 27, 84);
-  const lantern = block('beaux', westX - 16, westX - 10, front - 35, front - 29, 92);
+  // Behind: 1001 Sixth Avenue, the dark-brick stepped tower on the 37th St
+  // half of the block (63 / 71 m wings, 87 m shaft, 95 m crown).
+  {
+    const shaft = block('darkgrid', westX - 4, eastX + 10, zS, front - 31.05, 87);
+    const crown = block('darkgrid', westX + 3, eastX + 5, front - 48, front - 41, 8, 87);
+    block('darkgrid', eastX + 10.05, PK.eastLine, zS, front - 31.1, 71);
+    group([shaft, crown]);
+  }
+
+  // West: the 30 m-wide buff ornate loft (front ~50 m) and its stepped tower
+  // behind, crowned by a lantern at the surveyed 80.8 m.
+  const loft = block('beaux', westX - 30, westX, front - 24, front, 50);
+  const t1 = block('prewar', westX - 28, westX - 2, front - 36, front - 24.2, 62);
+  const t2 = block('prewar', westX - 25, westX - 5, front - 33, front - 27, 72);
+  const lantern = block('beaux', westX - 18, westX - 12, front - 32, front - 28, 8.8, 72);
   group([loft, t1, t2, lantern]);
-  block('banded', -110, westX - 26.1, zS, front, 60, 0, { fade: false });
+  // Further west, the 89.6 m tower, and the 12-storey (45.5 m) building
+  // behind on the 37th St side.
+  block('banded', -74, westX - 30.05, front - 30, front, 89.6);
+  block('prewar', -74, westX - 4.05, zS, front - 36.6, 45.5);
 
-  // Behind and across West 38th Street (garment district lofts).
-  block('prewar', westX - 26, PK.eastLine, zS, -D / 2 - 0.2, 64);
-  block('beaux', -60, -14, acrossZ, zN, 58);
-  block('prewar', -13.9, 14, acrossZ, zN, 44);
-  block('banded', 14.1, PK.eastLine, acrossZ, zN, 70);
-  block('glass', PK.westLine, PK.westLine + 50, zS, front, 120);
+  // Across West 38th Street (north side), west to east: a 67 m slab, a
+  // wedding-cake setback building climbing from 33 to 81 m, No. 109
+  // (43.7 m), then a low 14.5 m strip to the corner with the 133 m tower
+  // rising behind it from the 39th St half of the block.
+  block('banded', -74, -37.55, acrossZ, zN, 67);
+  {
+    const tiers = [[0, 2.5, 33], [2.5, 5, 50], [5, 8, 67], [8, 30, 81]];
+    const parts = tiers.map(([d0, d1, h]) => block('prewar', -37.5, -22.55, acrossZ + d0, acrossZ + d1 - 0.05, h));
+    group(parts);
+  }
+  block('beaux', -22.5, -13.05, acrossZ, zN, 43.7);
+  block('tenement', -13, PK.eastLine, acrossZ, acrossZ + 28, 14.5);
+  block('glass', -8, 18, acrossZ + 28.05, zN, 133);
+
+  // East of Sixth Avenue: a 65 m podium on the 38th St corner with a 132 m
+  // tower, low walk-ups (9-16 m) further south; banded offices to the north.
+  block('banded', PK.westLine, PK.westLine + 36, front - 24, front, 65);
+  block('glass', PK.westLine + 5, PK.westLine + 34, front - 22, front - 3, 67, 65);
+  block('tenement', PK.westLine, PK.westLine + 18, zS, front - 24.05, 12.5);
   block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
 }
 
@@ -992,20 +1152,23 @@ function empireState(scene, cx, z0, z1) {
 // 8 W 36th St neighbours. Faces north; mirrored so local +x points east,
 // toward Fifth Avenue.
 function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
+  // Widths and heights from NYC building survey data (OSM); x is measured
+  // along 36th St from the building's centre (+x = east, toward Fifth Ave).
   const zS = streetZ(-1) + road / 2 + walk;
   const zN = streetZ(1) - road / 2 - walk;
   const eastX = W / 2 + 0.02;
   const westX = -W / 2 - 0.02;
 
-  // East: tall cream loft, then the Gorham Building on the Fifth Ave corner
-  // (white stone, arcaded base, green copper cornice).
-  block('beaux', eastX, eastX + 8, front - 24, front, 41);
-  const gx0 = eastX + 8.1;
+  // East: the narrow cream loft and the Gorham Building (390 Fifth Ave:
+  // white stone, arcaded base, green copper cornice), both 43.4 m, running
+  // ~48 m to the Fifth Avenue corner; No. 384 Fifth (32.3 m) south of it.
+  block('beaux', eastX, eastX + 8, front - 24, front, 43.4);
+  const gx0 = eastX + 8.05;
   const gx1 = PK.eastLine;
-  const gor = block('beaux', gx0, gx1, front - 40, front, 37);
+  const gor = block('beaux', gx0, gx1, front - 30, front, 43.4);
   const copper = new THREE.MeshStandardMaterial({ color: '#4f8a72', roughness: 0.6, metalness: 0.3, transparent: true, opacity: 1 });
   const cor = new THREE.Mesh(new THREE.BoxGeometry(gx1 - gx0 + 1.2, 2.0, 2.4), copper);
-  cor.position.set((gx0 + gx1) / 2, 38, front + 0.6);
+  cor.position.set((gx0 + gx1) / 2, 42.4, front + 0.6);
   scene.add(cor);
   const arcMat = new THREE.MeshStandardMaterial({ color: '#e8e2d4', roughness: 0.7, transparent: true, opacity: 1 });
   const arcs = [];
@@ -1017,30 +1180,33 @@ function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ,
     arcs.push(a);
   }
   group([gor, cor, ...arcs]);
+  block('prewar', PK.eastLine - 31, PK.eastLine, front - 39, front - 30.05, 32.3);
 
-  // West: three-level open parking garage, then a tall grey stone loft.
+  // West: the four-level open parking garage (11.5 m, ~15 m frontage), then
+  // No. 16 (49.6 m), No. 20 (46.2 m) and No. 28 (44.5 m).
   const deck = new THREE.MeshStandardMaterial({ color: '#8d8b86', roughness: 0.9, transparent: true, opacity: 1 });
   const steel = new THREE.MeshStandardMaterial({ color: '#2d3540', roughness: 0.5, metalness: 0.5, transparent: true, opacity: 1 });
   const parts = [];
-  const gx = westX - 12;
+  const gw = 15;
+  const gx = westX - gw / 2;
   for (const y of [0.1, 3.6, 7.1, 10.6]) {
-    const s = new THREE.Mesh(new THREE.BoxGeometry(24, 0.3, 26), deck);
-    s.position.set(gx, y, front - 13);
-    s.receiveShadow = true;
-    scene.add(s); parts.push(s);
+    const sl = new THREE.Mesh(new THREE.BoxGeometry(gw, 0.3, 30), deck);
+    sl.position.set(gx, y, front - 15);
+    sl.receiveShadow = true;
+    scene.add(sl); parts.push(sl);
   }
-  for (let x = westX - 23; x < westX; x += 5.5) {
+  for (let x = westX - gw + 0.3; x < westX; x += 4.9) {
     const c = new THREE.Mesh(new THREE.BoxGeometry(0.35, 11, 0.35), steel);
     c.position.set(x, 5.5, front - 0.4);
     scene.add(c); parts.push(c);
   }
-  const rail = new THREE.Mesh(new THREE.BoxGeometry(24, 0.9, 0.08), steel);
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(gw, 0.9, 0.08), steel);
   rail.position.set(gx, 11.5, front - 0.3);
   scene.add(rail); parts.push(rail);
   const carCols = ['#c9ccd0', '#2b2f36', '#8c1d1d', '#e5e5e2', '#4a5563'];
   let ci = 0;
   for (const y of [3.75, 7.25, 10.75]) {
-    for (let x = westX - 21; x < westX - 2; x += 3.2) {
+    for (let x = westX - gw + 2; x < westX - 1.5; x += 3.2) {
       const car = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.3, 4.4), new THREE.MeshStandardMaterial({ color: carCols[ci++ % carCols.length], roughness: 0.35, metalness: 0.5, transparent: true, opacity: 1 }));
       car.position.set(x, y + 0.65, front - 3);
       scene.add(car); parts.push(car);
@@ -1050,14 +1216,33 @@ function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ,
   const sign = new THREE.Mesh(new THREE.BoxGeometry(0.15, 4.2, 0.8), new THREE.MeshStandardMaterial({ color: '#111', roughness: 0.5 }));
   sign.position.set(westX - 1.6, 8.0, front + 0.5);
   scene.add(sign);
-  block('prewar', westX - 48, westX - 24.1, front - 26, front, 48);
-  block('banded', -120, westX - 48.1, zS, front, 44, 0, { fade: false });
+  block('prewar', westX - 31, westX - gw - 0.05, front - 30, front, 49.6);
+  block('banded', westX - 51, westX - 31.05, front - 30, front, 46.2);
+  block('prewar', westX - 66, westX - 51.05, front - 30, front, 44.5);
 
-  // Behind and across West 36th Street.
-  block('prewar', westX - 48, PK.eastLine, zS, -D / 2 - 0.2, 52);
-  block('beaux', -60, -12, acrossZ, zN, 46);
-  block('prewar', -11.9, 18, acrossZ, zN, 58);
-  block('banded', 18.1, PK.eastLine, acrossZ, zN, 64);
+  // Behind (35th St half of the block): a 55.3 m building right behind
+  // No. 8, a 49.5 m one toward Fifth, a five-storey building behind No. 16,
+  // and the rest of the garage deck.
+  block('banded', westX - 0.6, eastX + 20, zS, front - 30.2, 55.3);
+  block('prewar', eastX + 20.05, PK.eastLine, zS, front - 39.05, 49.5);
+  block('tenement', westX - 35, westX - gw - 0.05, zS, front - 30.05, 17);
+  {
+    const sl = new THREE.Mesh(new THREE.BoxGeometry(gw - 0.7, 11.5, zS - front + 30), deck);
+    sl.position.set(gx - 0.35, 5.75, (zS + front - 30) / 2);
+    sl.castShadow = sl.receiveShadow = true;
+    scene.add(sl);
+  }
+
+  // Across West 36th Street, west to east: No. 19 (45.5 m), No. 15
+  // (61.4 m), Nos. 13 and 11 (27 / 23.4 m), No. 7 (58 m), No. 3 (23
+  // storeys), then 400 Fifth Avenue — a 40 m podium with its 193 m tower.
+  for (const [kind, x0, x1, h] of [
+    ['prewar', -71, -55.65, 45], ['banded', -55.6, -40.65, 45.5], ['prewar', -40.6, -27.05, 61.4],
+    ['redtenement', -27, -20.75, 27], ['tenement', -20.7, -12.7, 23.4], ['beaux', -12.65, 3.2, 58],
+    ['banded', 3.25, 15.8, 84],
+  ]) block(kind, x0, x1, acrossZ, zN, h);
+  block('prewar', 15.85, PK.eastLine, acrossZ, zN, 40);
+  block('glass', 20.8, 46.8, acrossZ + 11, acrossZ + 45, 153, 40);
   block('glass', PK.westLine, PK.westLine + 50, zS, front, 110);
   block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 80);
 
@@ -1068,52 +1253,141 @@ function neighbours8w36({ scene, block, group, W, D, front, walk, road, acrossZ,
 // ---------------------------------------------------------------------------
 // 12 E 44th St neighbours. Faces north; local +x is west, toward Fifth Ave.
 function neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
-  const zS = streetZ(-1) + road / 2 + walk;
+  // Positions and heights from the OSM / NYC building footprints (x west+,
+  // z north+, the subject centred). 44th St is 19.6 m between building lines,
+  // Fifth's east building line is at x = 72, Madison's west line at x = -55.6.
+  const zS = streetZ(-1) + road / 2 + walk; // 43rd St north building line (~ -47)
   const zN = streetZ(1) - road / 2 - walk;
   const eastX = -W / 2 - 0.02;
   const westX = W / 2 + 0.02;
+  const MAD = -55.6;
 
-  // East: five-storey building — red-brick base with arched windows and a
-  // black shop sign, grey-green painted upper floors with dark cornices —
-  // and a taller cream tower set back behind it.
-  const low = block('brickwall', eastX - 9, eastX, front - 24, front, 8);
-  const up = block('prewar', eastX - 9, eastX, front - 24, front, 10, 8);
+  // East: 14 E 44th (7.6 m wide, 19.9 m) — red-brick base with arched
+  // windows and a black Bread & Butter sign, grey-green painted upper floors
+  // under a deep dark cornice; its 20 m rear wing wraps behind.
+  const low = block('brickwall', eastX - 7.63, eastX, -13.8, front, 8);
+  const up = block('prewar', eastX - 7.63, eastX, -13.8, front, 11.9, 8);
   up.material.color.set('#aab5a9');
   const black = new THREE.MeshStandardMaterial({ color: '#141516', roughness: 0.5, transparent: true, opacity: 1 });
-  const sign = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.8, 0.2), black);
-  sign.position.set(eastX - 4.5, 3.9, front + 0.12);
+  const bb = textTexture({ text: 'BREAD & BUTTER', width: 1024, height: 96, bg: '#141516', ink: '#f2ede2', font: '600 58px Georgia, serif' });
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(7.3, 0.8, 0.2), [black, black, black, black, new THREE.MeshStandardMaterial({ map: bb, roughness: 0.5, transparent: true, opacity: 1 }), black]);
+  sign.position.set(eastX - 3.82, 3.9, front + 0.12);
   scene.add(sign);
-  const cor = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.5, 0.7), black);
-  cor.position.set(eastX - 4.5, 18.2, front + 0.3);
+  const cor = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.6, 0.8), black);
+  cor.position.set(eastX - 3.82, 19.5, front + 0.35);
   scene.add(cor);
   group([low, up, sign, cor]);
-  block('whitegrid', eastX - 30, eastX - 1, front - 50, front - 24.2, 70);
-  block('prewar', eastX - 30, eastX - 9.1, front - 24, front, 30);
-  block('banded', -120, eastX - 30.1, zS, front, 52, 0, { fade: false });
+  const wingA = block('brickwall', -16.4, eastX, -23.1, -13.82, 20);
+  const wingB = block('brickwall', -16.4, eastX - 7.65, -13.82, -3.6, 20);
+  group([wingA, wingB]);
 
-  // West: white limestone nine-storey with an arched window bay and a white
-  // sidewalk shed, then a taller brown-brick building toward Fifth.
-  const white = block('beaux', westX, westX + 8.5, front - 26, front, 34);
+  // 340 Madison Avenue: through-block office building from 14 E 44th to
+  // Madison, 62 m with setbacks to 72 and 81.8 m, and an 81.8 m rear wing
+  // reaching behind this building.
+  {
+    const tint = (m) => { m.material.color.set('#d9cdb6'); return m; };
+    const parts = [
+      tint(block('prewar', MAD, eastX - 7.67, -3.6, front - 0.1, 62)),
+      tint(block('prewar', MAD, -16.45, zS, -3.62, 62)),
+      tint(block('prewar', MAD + 2.8, eastX - 7.67, zS + 1.1, front - 3.0, 10, 62)),
+      tint(block('prewar', MAD + 6, -16.45, zS + 3.2, front - 6.6, 9.8, 72)),
+      tint(block('prewar', -16.4, -1.45, zS, -23.15, 81.8)),
+    ];
+    group(parts);
+  }
+
+  // Madison Avenue (one-way north), 24 m between building lines.
+  {
+    const asphalt = new THREE.MeshStandardMaterial({ color: '#36373a', roughness: 0.95 });
+    const walkMat = new THREE.MeshStandardMaterial({ color: '#b3afa7', roughness: 0.95 });
+    const xs = [MAD - 24, MAD - 19.5, MAD - 4.5, MAD];
+    const mad = new THREE.Mesh(new THREE.BoxGeometry(xs[2] - xs[1], 0.172, 900), asphalt);
+    mad.position.set((xs[1] + xs[2]) / 2, 0.086, 0);
+    mad.receiveShadow = true;
+    scene.add(mad);
+    const lines = new THREE.MeshBasicMaterial({ color: '#d9d6cc' });
+    for (let z = -400; z < 400; z += 9) {
+      const kk = Math.round((z - streetZ(0)) / (streetZ(1) - streetZ(0)));
+      if (Math.abs(z - streetZ(kk)) < road / 2 + 2) continue;
+      for (const dx of [3.75, 7.5, 11.25]) {
+        const l = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 3), lines);
+        l.rotation.x = -Math.PI / 2;
+        l.position.set(xs[1] + dx, 0.175, z);
+        scene.add(l);
+      }
+    }
+    // Avenue sidewalks between the cross streets; the cross streets' own
+    // asphalt is covered by a patch where they meet the avenue.
+    for (let k = -5; k < 5; k++) {
+      const z0 = streetZ(k) + road / 2;
+      const z1 = streetZ(k + 1) - road / 2;
+      for (const [a, b] of [[xs[0], xs[1]], [xs[2], xs[3]]]) {
+        const s = new THREE.Mesh(new THREE.BoxGeometry(b - a, 0.17, z1 - z0), walkMat);
+        s.position.set((a + b) / 2, 0.085, (z0 + z1) / 2);
+        s.receiveShadow = true;
+        scene.add(s);
+      }
+    }
+  }
+  // East of Madison.
+  block('banded', -120, MAD - 24, zS, front, 58, 0, { fade: false });
+  block('glass', -120, MAD - 24, acrossZ, zN, 96, 0, { fade: false });
+
+  // West: 10 E 44th (7 m, 29.4 m) — white with an arched window bay and a
+  // white sidewalk shed; the Cornell Club (15.4 m wide, 55.5 m); then 529
+  // Fifth Avenue on the corner, 38 m at the street stepping up to 80 m.
+  const white = block('beaux', westX, 11.0, -13.7, front, 29.4);
   white.material.color.set('#f2efe8');
   const shedMat = new THREE.MeshStandardMaterial({ color: '#f1f1ee', roughness: 0.6, transparent: true, opacity: 1 });
-  const shed = new THREE.Mesh(new THREE.BoxGeometry(9, 0.9, 3.2), shedMat);
-  shed.position.set(westX + 4.3, 3.6, front + 1.6);
+  const shed = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.9, 3.2), shedMat);
+  shed.position.set(westX + 4.0, 3.6, front + 1.6);
   scene.add(shed);
   const posts = [];
-  for (const x of [westX + 0.3, westX + 4.3, westX + 8.3]) {
+  for (const x of [westX + 0.3, westX + 4.0, westX + 7.7]) {
     const p = new THREE.Mesh(new THREE.BoxGeometry(0.15, 3.2, 0.15), shedMat);
     p.position.set(x, 1.6, front + 3.1);
     scene.add(p); posts.push(p);
   }
   group([white, shed, ...posts]);
-  block('darkgrid', westX + 8.6, westX + 19, front - 28, front, 44);
-  block('prewar', westX + 19.1, PK.eastLine, front - 30, front, 40);
+  const cornell = block('prewar', 11.02, 26.4, -13.7, front, 55.5);
+  cornell.material.color.set('#b9a998');
+  {
+    const parts = [block('beaux', 26.42, PK.eastLine, -13.6, front, 38)];
+    for (const [x1, z1, y0, h] of [[66.8, 9.3, 38, 22], [63.9, 5.8, 60, 6], [61, 1.7, 66, 6], [41, -1.1, 72, 7.6]]) {
+      parts.push(block('banded', 26.42, x1, -13.6, z1, h, y0));
+    }
+    group(parts);
+  }
 
-  // Behind and across East 44th Street.
-  block('glass', eastX - 30, PK.eastLine, zS, -D / 2 - 0.2, 95);
-  block('prewar', -60, -14, acrossZ, zN, 72);
-  block('glass', -13.9, 16, acrossZ, zN, 110);
-  block('beaux', 16.1, PK.eastLine, acrossZ, zN, 64);
+  // Behind, on 43rd St: an 11-storey building right behind this one, and the
+  // Lefcourt National Building tower (to 141 m) toward Fifth.
+  block('prewar', -1.43, 15.68, zS, -20.0, 32.6);
+  {
+    const parts = [
+      block('prewar', 15.7, PK.eastLine, zS, -13.65, 67.2),
+      block('prewar', 18.4, 47.4, -40, -22.5, 57.2, 67.2),
+      block('prewar', 23.9, 42, -37, -25.4, 16.8, 124.4),
+    ];
+    group(parts);
+  }
+
+  // Across East 44th Street (north side), west to east.
+  {
+    const parts = [block('prewar', 29.2, PK.eastLine, acrossZ, zN, 43), block('glass', 29.2, 62.2, acrossZ + 9, acrossZ + 24.4, 77, 43)];
+    group(parts);
+  }
+  block('tenement', 22.15, 29.18, acrossZ, zN, 23.6);
+  {
+    const parts = [block('brickwall', 13.1, 22.13, acrossZ, acrossZ + 2.3, 16.7), block('whitegrid', 13.1, 22.13, acrossZ + 2.3, zN, 58)];
+    group(parts);
+  }
+  block('whitegrid', -12.1, 13.08, acrossZ, zN, 64.8);
+  {
+    const parts = [block('prewar', MAD, -12.12, acrossZ, zN, 49.2), block('prewar', MAD + 7, -12.12, acrossZ + 4, zN, 4.9, 49.2)];
+    group(parts);
+  }
+
+  // Across Fifth Avenue.
   block('glass', PK.westLine, PK.westLine + 50, zS, front, 130);
   block('banded', PK.westLine, PK.westLine + 50, acrossZ, zN, 90);
 }
@@ -1122,53 +1396,83 @@ function neighbours12e44({ scene, block, group, W, D, front, walk, road, acrossZ
 // 370 W 51st St neighbours: corner of Ninth Avenue (local +x = west, the
 // avenue starts at the building's west wall). Hell's Kitchen walk-ups.
 function neighbours370w51({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK }) {
-  const zS = streetZ(-1) + road / 2 + walk;
-  const zN = streetZ(1) - road / 2 - walk;
+  // Lots and heights from the OSM / NYC building footprints (x west+, z
+  // north+). 51st St is 18.1 m between building lines; Ninth Ave's east
+  // building line is the west wall (x = W/2), its west line 30.5 m beyond.
+  const zS = streetZ(-1) + road / 2 + walk; // 50th St north building line
+  const zN = streetZ(1) - road / 2 - walk; // 52nd St south building line
   const eastX = -W / 2 - 0.02;
+  const AV = W / 2 + 0.02;
+  const tint = (m, c) => { m.material.color.set(c); return m; };
 
-  // East along 51st: the six-storey walk-up with fire escapes and the green
-  // Cleaners/Tailors awning, then more walk-ups.
-  block('tenement', eastX - 15, eastX, front - 17, front, 19);
-  const green = new THREE.MeshStandardMaterial({ color: '#1f5a3a', roughness: 0.6, transparent: true, opacity: 1 });
-  const awn = new THREE.Mesh(new THREE.BoxGeometry(13, 0.9, 1.3), green);
-  awn.position.set(eastX - 7.5, 3.4, front + 0.65);
-  awn.rotation.x = 0.25;
-  scene.add(awn);
-  block('redtenement', eastX - 30, eastX - 15.1, front - 17, front, 17);
-  block('tenement', eastX - 46, eastX - 30.1, front - 17, front, 21);
-  block('prewar', -120, eastX - 46.1, zS, front, 24, 0, { fade: false });
-  // South along Ninth Avenue: red-brick walk-ups with fire escapes and
-  // colourful shop awnings.
-  const awnCols = ['#2b6fd0', '#d23a2a', '#f0b429', '#2b6fd0'];
-  let k = 0;
-  for (let z = -D / 2 - 0.02; z > zS + 4; z -= 9) {
-    const z0 = Math.max(zS, z - 8.9);
-    block(k % 2 ? 'tenement' : 'redtenement', W / 2 - 16, W / 2, z0, z, 16 + (k % 3) * 2.5);
-    const a = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.7, z - z0 - 1), new THREE.MeshStandardMaterial({ color: awnCols[k % 4], roughness: 0.6 }));
-    a.position.set(W / 2 + 0.6, 3.3, (z + z0) / 2);
-    scene.add(a);
-    k++;
+  // East along 51st (south side): older brick walk-ups with fire escapes,
+  // 17.8-19.4 m, then a 52 m modern building.
+  tint(block('tenement', eastX - 8.0, eastX, -23.7, front, 17.8), '#c9a58a');
+  block('redtenement', eastX - 19.6, eastX - 8.02, -22.2, front, 19.2);
+  block('tenement', eastX - 31.4, eastX - 19.62, -23.4, front, 19.4);
+  block('redtenement', eastX - 35, eastX - 31.42, -24, front, 18);
+  block('prewar', -87, eastX - 35.02, -25.6, front - 0.3, 52.5);
+  block('tenement', -120, -87.02, zS, front, 20, 0, { fade: false });
+
+  // South along Ninth Avenue: 754 (lighter stone with an ornate cornice,
+  // 14.2 m) behind this building, then 752-744 Ninth Ave walk-ups and a
+  // one-storey corner at 50th. Awnings over their shops.
+  {
+    const st = tint(block('beaux', -15.5, AV - 0.02, -11.4, -D / 2 - 0.02, 14.2), '#e3dccb');
+    const lot = new THREE.Mesh(new THREE.BoxGeometry(W - 7.8 + 0.1, 14.2, front - 5.8 + D / 2 - 0.04), st.material);
+    lot.position.set(-15.5 + (W - 7.8 + 15.5 - W / 2) / 2, 7.1, (-D / 2 + front - 5.8) / 2);
+    scene.add(lot);
+    const cor = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.7, 7.5), new THREE.MeshStandardMaterial({ color: '#cfc6b2', roughness: 0.8, transparent: true, opacity: 1 }));
+    cor.position.set(AV + 0.3, 13.9, -7.6);
+    scene.add(cor);
+    group([st, lot, cor]);
   }
-  block('tenement', eastX - 46, W / 2 - 16.1, zS, -D / 2 - 0.2, 20);
+  const awnCols = ['#2b6fd0', '#d23a2a', '#f0b429', '#2b6fd0', '#1f5a3a', '#7a2a6a'];
+  [[-19.2, -11.42, 16.3], [-26.9, -19.22, 16.7], [-34.8, -26.92, 16.7], [-42.2, -34.82, 16.7], [-50.2, -42.22, 17.1], [zS, -50.22, 6.1]].forEach(([z0, z1, h], k) => {
+    block(k % 2 ? 'tenement' : 'redtenement', -12, AV - 0.02, z0, z1, h);
+    const a = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.7, z1 - z0 - 1), new THREE.MeshStandardMaterial({ color: awnCols[k], roughness: 0.6 }));
+    a.position.set(AV + 0.6, 3.3, (z0 + z1) / 2);
+    scene.add(a);
+  });
+  // Behind, toward 50th St.
+  block('tenement', -15.3, -12.02, zS, -11.42, 16);
+  block('redtenement', -23.2, -15.32, zS, -30.3, 16.9);
+  block('tenement', -41.2, -23.22, zS, -25, 18);
+  block('prewar', -64.5, -41.22, zS, -31.2, 49.4);
 
-  // Across 51st Street and across Ninth Avenue.
-  block('tenement', -60, -14, acrossZ, zN, 19);
-  block('redtenement', -13.9, PK.eastLine, acrossZ, zN, 22);
-  block('tenement', PK.westLine, PK.westLine + 40, zS, front, 18);
-  block('redtenement', PK.westLine, PK.westLine + 40, acrossZ, zN, 20);
+  // Across 51st (north side), east to west: walk-ups 14.6-19.8 m, then the
+  // corner row on Ninth (15.1 m on the corner, 17.4 m beyond).
+  for (const [x0, x1, h, k] of [[-60, -53.4, 14.6, 0], [-53.4, -45.9, 17.2, 1], [-45.9, -28.7, 19.8, 0], [-28.8, -23.1, 18.0, 1], [-23.1, -15.7, 18.3, 0]]) {
+    block(k ? 'redtenement' : 'tenement', x0, x1 - 0.02, acrossZ, acrossZ + 26.2, h);
+  }
+  block('tenement', -120, -60.02, acrossZ, zN, 19, 0, { fade: false });
+  block('redtenement', -15.7, AV - 0.02, acrossZ, acrossZ + 7.7, 15.1);
+  [[29.8, 37.6, 17.4], [37.6, 44.9, 17.4], [44.9, 52.9, 17.4], [52.9, 60.2, 17.4], [60.2, 67.9, 17.4], [67.9, zN, 14.4]].forEach(([z0, z1, h], k) => {
+    block(k % 2 ? 'redtenement' : 'tenement', -11.1, AV - 0.02, z0 - 3.85 + 3.85, z1 - 0.02, h);
+  });
+  block('tenement', -15.68, -11.12, acrossZ + 7.72, zN, 18.4);
 
-  // Street trees on 51st.
+  // Across Ninth Avenue: 18-19 m walk-ups south of 51st, ~14.5 m north.
+  for (let z = front - 0.3, k = 0; z > zS + 1; z -= 7.9, k++) block(k % 2 ? 'tenement' : 'redtenement', PK.westLine, PK.westLine + 26.5, Math.max(zS, z - 7.9), z - 0.02, 18.1 + (k % 3) * 0.3);
+  for (let z = acrossZ, k = 0; z < zN - 1; z += 7.7, k++) block(k % 2 ? 'redtenement' : 'tenement', PK.westLine, PK.westLine + 24.3, z, Math.min(zN, z + 7.68), 14.5 + (k % 2) * 0.4);
+
+  // Glass towers in the distance to the east (seen over the corner).
+  block('glass', -175, -150, 60, 95, 150, 0, { fade: false });
+  block('glass', -215, -185, 10, 40, 190, 0, { fade: false });
+
+  // Street trees on 51st (one in front of the building, one by the east end).
   const leaf = new THREE.MeshStandardMaterial({ color: '#4f8a35', roughness: 1 });
   const trunk = new THREE.MeshStandardMaterial({ color: '#4a3a2c', roughness: 1 });
-  for (const x of [eastX - 4, eastX - 18, eastX - 32]) {
+  for (const x of [2.5, -14.5, eastX - 12]) {
     const t = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, 4, 8), trunk);
-    t.position.set(x, 2, front + walk - 1);
-    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(3.2, 1), leaf);
-    c.position.set(x, 7, front + walk - 1);
+    t.position.set(x, 2, front + walk - 0.8);
+    const c = new THREE.Mesh(new THREE.IcosahedronGeometry(2.8, 1), leaf);
+    c.position.set(x, 6.8, front + walk - 0.8);
     c.scale.set(1.1, 1, 1.1);
     for (const o of [t, c]) { o.castShadow = true; scene.add(o); }
   }
 }
+
 
 // ---------------------------------------------------------------------------
 // 34-09 Queens Blvd: the building fills the block between 34th St (-x) and
@@ -1210,11 +1514,42 @@ function neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, ac
     group(parts, { keep: true });
   }
 
-  // Across 35th St (east), across 34th St (west), behind, and across Queens Blvd.
-  block('prewar', PK.westLine, PK.westLine + 40, zS, front, 14);
-  block('tenement', west - 59, west - 19, front - 30, front, 10);
-  block('brickwall', west - 59, west - 19, zS, front - 30.1, 16);
-  block('brickwall', west, PK.eastLine, zS, -D / 2 - 6, 18);
+  // Neighbours traced from satellite + OSM building heights (NYC survey data).
+  // d = depth back from the Queens Blvd building line.
+  const Zd = (d) => front - d;
+  const nb = (kind, x0, x1, d0, d1, h) => block(kind, x0, x1, Zd(d1), Zd(d0), h);
+  // The generic street-canyon filler (added after this function) would put a
+  // 15-29 m block over the low buildings across 34th St; keep it out there.
+  {
+    const add0 = scene.add.bind(scene);
+    scene.add = (...objs) => {
+      const keep = objs.filter((o) => !(o.isMesh && Math.abs(o.position.x + 88) < 0.01 && o.position.z > zS - 10 && o.position.z < front));
+      return keep.length ? add0(...keep) : scene;
+    };
+  }
+  // Our side of the north street, and its far sidewalk (the generic street
+  // is drawn 34 m wide; the real one is ~10 m, so the rest is built over).
+  slab(west - 4.5, PK.eastLine, zS - 5, zS, 0.165);
+  slab(west - 19, PK.westLine + 60, zS - 19.5, zS - 15, 0.165);
+  // Across 34th St (west): low storefront buildings on Queens Blvd, taller
+  // lofts behind (OSM heights 6-17 m).
+  nb('redtenement', west - 42, west - 19, 0, 38, 7.8);
+  nb('tenement', west - 55, west - 42, 0, 38, 6.2);
+  nb('redtenement', west - 79, west - 55, 0, 38, 6.7);
+  nb('brickwall', west - 54, west - 19, 38, 70, 10.3);
+  nb('prewar', west - 79, west - 54, 38, 70, 16.8);
+  nb('brickwall', west - 74, west - 33, 70, 133, 12);
+  nb('tenement', west - 33, west - 19, 70, 125, 9);
+  nb('brickwall', west - 79, west - 19, 133, D - 0.5, 8);
+  // Across 35th St (east): corner building (9.2 m), a one-storey shop behind
+  // it (4.9 m), then a long white-roofed two-storey warehouse.
+  nb('prewar', PK.westLine, PK.westLine + 30, 0, 30, 9.2);
+  nb('tenement', PK.westLine, PK.westLine + 30, 30, 42, 4.9);
+  nb('stucco', PK.westLine, PK.westLine + 42, 42, D - 0.5, 10);
+  // North of the north street.
+  block('brickwall', west - 19, 16, zS - 75, zS - 19.5, 9);
+  block('stucco', PK.westLine, PK.westLine + 50, zS - 75, zS - 19.5, 8);
+  // Across Queens Blvd.
   block('prewar', -70, -15, acrossZ, zN, 12);
   block('tenement', -14.9, 22, acrossZ, zN, 16);
   block('prewar', 22.1, PK.eastLine, acrossZ, zN, 10);
@@ -1222,19 +1557,23 @@ function neighboursQueensBlvd({ scene, block, group, W, D, front, walk, road, ac
 }
 
 // ---------------------------------------------------------------------------
-// 250 Canal St (SW corner of Canal & Lafayette). Faces north; mirrored, so
-// local +x is east toward Lafayette St. The bank is one storey, so the
-// neighbours' graffitied walls show above its roof.
+// 250 Canal St (TD Bank) on the SE corner of Canal & Lafayette. Faces north;
+// unmirrored, so local +x is west toward Lafayette St. The bank is one
+// storey, so the neighbours' graffitied walls show above its roof.
 function neighbours250canal({ scene, block, group, W, D, front, walk, road, acrossZ, streetZ, PK, unmirror, r }) {
+  // Lots and heights from the OSM / NYC building footprints, in the frame
+  // x = west along Canal (+x toward Lafayette), z = north (Canal). Canal is
+  // 30 m between building lines; Lafayette's west line is at x = 29.9.
   const zS = streetZ(-1) + road / 2 + walk;
   const zN = streetZ(1) - road / 2 - walk;
-  const westX = -W / 2 - 0.02;
+  const eastX = -W / 2 - 0.02;
+  const LAF = W / 2 + 0.02;
 
-  const graffiti = (w, h) => {
+  const graffiti = (w, h, dark = false) => {
     const c = document.createElement('canvas');
     c.width = 1024; c.height = 256;
     const ctx = c.getContext('2d');
-    const cols = ['#c8312b', '#e7e7e7', '#7fa6d8', '#202020', '#e3c54a'];
+    const cols = dark ? ['#1c1c1c', '#3a3a3a', '#e7e7e7', '#1c1c1c'] : ['#c8312b', '#e7e7e7', '#7fa6d8', '#202020', '#e3c54a'];
     for (let k = 0; k < 9; k++) {
       ctx.strokeStyle = cols[k % cols.length]; ctx.lineWidth = 14 + r() * 18; ctx.lineJoin = 'round'; ctx.beginPath();
       let x = 40 + k * 105; let y = 60 + r() * 140; ctx.moveTo(x, y);
@@ -1246,45 +1585,86 @@ function neighbours250canal({ scene, block, group, W, D, front, walk, road, acro
     return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.9 }));
   };
 
-  // Behind the bank along Lafayette: grey-painted brick five-storey with
-  // graffiti on the wall that faces Canal above the bank's roof.
-  const back = block('prewar', -W / 2 + 4, W / 2, zS + 20, -D / 2 - 0.02, 18);
-  back.material.color.set('#b8b4ad');
-  const gB = graffiti(14, 3.2);
-  gB.position.set(3, 10.6, -D / 2 + 0.03);
-  scene.add(gB);
-  group([back, gB]);
-  // West along Canal: tall white-painted loft with AC units and graffiti,
-  // Popeyes at its corner further west.
-  const west = block('prewar', westX - 16, westX, front - 26, front, 30);
-  west.material.color.set('#e6e4df');
-  const gW = graffiti(12, 3.5);
-  gW.position.set(westX - 6, 10.5, front + 0.03);
-  scene.add(gW);
-  group([west, gW]);
-  const pop = new THREE.Mesh(new THREE.BoxGeometry(5, 1.0, 0.25), new THREE.MeshStandardMaterial({ color: '#e35a1f', roughness: 0.5 }));
-  pop.position.set(westX - 13.5, 4.4, front + 0.15);
-  scene.add(pop);
-  block('tenement', westX - 40, westX - 16.1, front - 24, front, 20);
-  block('prewar', -110, westX - 40.1, zS, front, 24, 0, { fade: false });
-  block('tenement', westX - 40, -W / 2 + 3.9, zS, front - 24.1, 22);
+  // East along Canal: 244 Canal, a grey four-storey (13.5 m) with graffiti on
+  // the side wall above the bank's roof; then New Cameron Bakery (one storey)
+  // and a 12 m building.
+  {
+    const grey = block('prewar', eastX - 6.9, eastX, -4.9, front, 13.5);
+    grey.material.color.set('#b9b6b0');
+    const rearLow = block('brickwall', eastX - 6.9, eastX, -8.5, -4.92, 6);
+    const gE = graffiti(11, 3.4);
+    gE.rotation.y = Math.PI / 2;
+    gE.position.set(eastX + 0.03, 9.2, 2.5);
+    scene.add(gE);
+    group([grey, rearLow, gE]);
+  }
+  block('tenement', -25.2, eastX - 6.92, -6.6, front - 0.1, 4.7);
+  block('redtenement', -39.2, -25.22, -23.5, front - 0.2, 12.1);
+  // Baxter St gap, then 112 Walker and taller lofts further east.
+  {
+    const asphalt = new THREE.MeshStandardMaterial({ color: '#36373a', roughness: 0.95 });
+    const bax = new THREE.Mesh(new THREE.BoxGeometry(12, 0.172, front - zS + 0.2), asphalt);
+    bax.position.set(-47, 0.086, (front + zS) / 2);
+    scene.add(bax);
+  }
+  block('tenement', -76.7, -55, -13.8, front - 0.1, 8);
+  block('prewar', -104, -76.72, -12, front - 0.1, 27.8, 0, { fade: false });
 
-  // Across Canal Street and across Lafayette (Chinatown / SoHo edge).
-  block('tenement', -70, -20, acrossZ, zN, 22);
-  block('redtenement', -19.9, PK.eastLine, acrossZ, zN, 26);
-  block('prewar', PK.westLine, PK.westLine + 34, zS, front, 30);
-  block('beaux', PK.westLine, PK.westLine + 34, acrossZ, zN, 34);
+  // Behind the bank: a white-painted 31 m loft (bulkhead to 35 m) wrapping
+  // the bank's rear, graffiti across its north wall above the bank's roof,
+  // Popeyes in its ground floor on Lafayette.
+  {
+    const white = block('prewar', -16.5, LAF, -30.3, -D / 2 - 0.02, 31);
+    white.material.color.set('#e6e4df');
+    const bulk = block('brickwall', -18, -5.7, -27.8, -19, 4, 31);
+    const gB = graffiti(16, 3.6, true);
+    gB.position.set(0, 10.6, -D / 2 + 0.03);
+    scene.add(gB);
+    const pop = new THREE.Mesh(new THREE.BoxGeometry(0.25, 1.0, 5), new THREE.MeshStandardMaterial({ color: '#e35a1f', roughness: 0.5, transparent: true, opacity: 1 }));
+    pop.position.set(LAF + 0.15, 4.0, -16);
+    scene.add(pop);
+    const shed = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, 9), new THREE.MeshStandardMaterial({ color: '#4a4f55', roughness: 0.6, transparent: true, opacity: 1 }));
+    shed.position.set(LAF + 1.3, 3.4, -24);
+    scene.add(shed);
+    group([white, bulk, gB, pop, shed]);
+  }
+  block('brickwall', -25.8, -16.52, -25, -8.52, 7);
+  block('prewar', -39.2, LAF, zS, -30.32, 35);
+  block('tenement', -104, -39.22, zS, -23.52, 22, 0, { fade: false });
 
-  // Canal St subway entrance and a newsstand on the bank's sidewalk.
+  // Across Lafayette (west): the Hardware Building (21.8 m) on the corner,
+  // 262-264 Canal, and taller hotels behind.
+  block('prewar', PK.westLine, 66.4, -15.7, front - 0.1, 21.8);
+  block('redtenement', 66.42, 74.2, -13.9, front - 0.1, 22.5);
+  block('tenement', 74.22, 85.8, -13.9, front - 0.1, 22.1);
+  block('beaux', PK.westLine, 48.7, -38.5, -15.72, 38.8);
+  block('glass', 48.72, 63.7, -41.9, -15.72, 32);
+  block('tenement', 63.72, 85.8, -43, -15.72, 24.6);
+
+  // Across Canal Street (north side), east to west.
+  block('tenement', -72.6, -44.4, acrossZ, zN, 26.2);
+  block('redtenement', -44.38, -27.12, acrossZ, zN, 20);
+  block('prewar', -27.1, -15.32, acrossZ, zN, 26.6);
+  block('redtenement', -15.3, -0.82, acrossZ, zN, 24.8);
+  block('tenement', -0.8, 8.5, acrossZ, zN, 19.4);
+  block('brickwall', 8.52, PK.eastLine, acrossZ, acrossZ + 20, 3.3);
+  block('tenement', PK.westLine, 50.5, acrossZ, zN, 17.9);
+  block('redtenement', 50.52, 57.3, acrossZ, zN, 20.6);
+  block('brickwall', 57.32, 73.4, acrossZ, zN, 10.5);
+  block('prewar', 73.42, 85.8, acrossZ, zN, 27.3);
+
+  // Canal St subway entrance (far end of the Canal frontage) and the
+  // JCDecaux newsstand nearer the corner, on the bank's sidewalk.
   const steel = new THREE.MeshStandardMaterial({ color: '#2f4a3b', roughness: 0.5, metalness: 0.5 });
   const rail = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.1, 2.2), steel);
   rail.position.set(-W / 2 + 5, 0.55, front + walk - 1.6);
   scene.add(rail);
   const stand = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.8, 1.8), new THREE.MeshStandardMaterial({ color: '#9a9c9e', roughness: 0.4, metalness: 0.6 }));
-  stand.position.set(-1, 1.4, front + walk - 1.4);
+  stand.position.set(2.5, 1.4, front + walk - 1.4);
   stand.castShadow = true;
   scene.add(stand);
 }
+
 
 // ---------------------------------------------------------------------------
 // Suburban business park (e.g. Orlando Central Park): lawn, parking lots,
@@ -1308,6 +1688,12 @@ function buildSuburban(scene, { W, D, site }) {
   const yellow = new THREE.MeshBasicMaterial({ color: '#e6be2e' });
   const kerbMat = new THREE.MeshStandardMaterial({ color: '#d4d0c7', roughness: 0.9 });
   flat(grass, -800, 800, -800, 800, 0);
+  if (site.bare) {
+    // The site file draws every real surrounding itself (no generic lots/trees/sheds).
+    const box = (w, h, d, x, y, z, mat) => { const m = add(new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat)); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; return m; };
+    SITE_EXTRAS[site.id]?.({ THREE, scene, add, flat, box, W, D, front, site, r, mats: { grass, asphalt, white, yellow, kerbMat } });
+    return { fadeables: [] };
+  }
 
   // Lots: front (+z) and along the long side (-x), plus the access road.
   const lotX0 = -W / 2 - 46;

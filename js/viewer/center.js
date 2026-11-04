@@ -5,15 +5,14 @@
 //     seam red-brown metal roofs on the wings, lit red FRY'S FOOD & DRUG
 //     sign, Pharmacy / Western Union / Bakery-Deli lettering, storefront
 //     glass and a covered walk
-//   - Potosino Mexican Food pad (No. 7865): stepped stucco box with small
-//     square windows, stone wainscot, metal shade awnings on brackets, sun
-//     logo, and a red monument sign
+//   - the Potosino pad (No. 7865) is across Speedway Blvd and is built with
+//     the surroundings in sites/tucson-saguaro-vista.js
 import * as THREE from 'three';
 import { textTexture, rand } from './textures.js';
 import { V, piece, createKit } from './kit.js';
 
 export function buildCenter(params) {
-  const { width: W = 110, depth: D = 55 } = params;
+  const { width: W = 136, depth: D = 58 } = params;
   const front = D / 2;
   const r = rand(7865);
   const g = new THREE.Group();
@@ -98,59 +97,17 @@ export function buildCenter(params) {
     sign("FRY'S", (h) => `900 ${Math.round(h * 0.85)}px Arial Black, Arial`, '#d0242e', 8, 2.2, 0, 8.6, front + 1.82, 0.5);
     sign('FOOD & DRUG', (h) => `800 ${Math.round(h * 0.8)}px Arial`, '#d0242e', 8.5, 1.0, 0, 6.9, front + 1.82, 0.5);
   }
-  sign('Pharmacy', (h) => `italic 600 ${Math.round(h * 0.8)}px Georgia, serif`, '#2b2f33', 5, 1.0, -26, 6.4, front + 0.05, 0);
+  // In-line tenants along the Fry's frontage (east = -x): Fry's Pharmacy and
+  // the Chase branch (7812 E Speedway) at the east end; Starbucks inside Fry's;
+  // Dollar Tree in the west in-line space (OSM).
+  sign('Pharmacy', (h) => `italic 600 ${Math.round(h * 0.8)}px Georgia, serif`, '#2b2f33', 5, 1.0, -44, 6.4, front + 0.05, 0);
+  sign('CHASE', (h) => `700 ${Math.round(h * 0.8)}px Arial`, '#1a5fb4', 4.2, 1.0, -57, 6.4, front + 0.05, 0.4);
+  sign('STARBUCKS', (h) => `800 ${Math.round(h * 0.7)}px Arial`, '#00704a', 3.4, 0.6, 12.5, 6.4, front + 0.05, 0.2);
+  sign('DOLLAR TREE', (h) => `900 ${Math.round(h * 0.78)}px Arial Black, Arial`, '#1e8a3c', 9, 1.4, 56, 6.3, front + 0.05, 0.3);
   sign('WESTERN UNION', (h) => `700 ${Math.round(h * 0.75)}px Arial`, '#2b2f33', 6, 0.7, -14, 6.4, front + 0.05, 0);
   sign('Bakery-Deli', (h) => `italic 700 ${Math.round(h * 0.8)}px Georgia, serif`, '#2b2f33', 6.5, 1.2, 24, 6.4, front + 0.05, 0);
   // Roof units.
   for (let k = 0; k < 8; k++) box(new THREE.MeshStandardMaterial({ color: '#c9c5bd', roughness: 0.5, metalness: 0.4 }), 3, 1.4, 2.4, -40 + k * 11, H + 0.7, -8 + (k % 3) * 6);
-
-  // =====================================================================
-  // PAD: Potosino Mexican Food (No. 7865)
-  // =====================================================================
-  {
-    const px = -W / 2 - 22;
-    const pz = front + 20;
-    const pw = 12;
-    const pd = 9;
-    box(stucco, pw, 7.0, pd, px, 3.5, pz);
-    box(stucco, 3, 6.0, pd - 2, px + pw / 2 + 1.4, 3.0, pz - 0.5); // stepped side mass
-    box(stucco, pw + 0.8, 0.5, pd + 0.8, px, 7.2, pz);
-    box(stucco, 3.6, 0.45, pd - 1.2, px + pw / 2 + 1.4, 6.2, pz - 0.5);
-    const stone = new THREE.MeshStandardMaterial({ color: '#7a6a5a', roughness: 1 });
-    for (const x of [px - pw / 2 + 0.8, px - 0.6, px + pw / 2 - 0.8]) box(stone, 1.4, 1.1, 0.3, x, 0.55, pz + pd / 2 + 0.1);
-    for (const x of [px - 3.5, px + 3.5]) {
-      I.clear.add(piece(new THREE.Matrix4(), x, 1.9, pz + pd / 2 + 0.02, 4.4, 3.0, 1), '#e8eef4');
-      for (let k = -2; k <= 2; k++) I.frame.add(piece(new THREE.Matrix4(), x + k * 1.1, 1.9, pz + pd / 2 + 0.04, 0.08, 3.0, 0.05), '#202326');
-    }
-    for (let k = 0; k < 4; k++) I.trim.add(piece(new THREE.Matrix4(), px - 4.2 + k * 2.8, 6.0, pz + pd / 2 + 0.02, 0.7, 0.7, 0.04), '#3b4650');
-    const awn = new THREE.MeshStandardMaterial({ color: '#4e4a45', roughness: 0.5, metalness: 0.5 });
-    const shade = box(awn, pw + 2.5, 0.12, 2.2, px, 3.9, pz + pd / 2 + 1.1);
-    shade.rotation.x = 0.12;
-    for (const x of [px - 5, px, px + 5]) I.steel.add(piece(new THREE.Matrix4(), x, 3.5, pz + pd / 2 + 0.5, 0.06, 0.8, 0.8));
-    const logo = textTexture({
-      width: 1024, height: 256, bg: 'rgba(0,0,0,0)',
-      draw(ctx, w, h) {
-        ctx.fillStyle = '#f2b81c'; ctx.beginPath(); ctx.arc(w * 0.86, h * 0.45, 70, 0, Math.PI * 2); ctx.fill();
-        ctx.font = 'italic 900 128px Georgia, serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#f4c23a'; ctx.fillText('Potosino', w / 2 + 4, h * 0.4 + 4); ctx.fillStyle = '#d6331f'; ctx.fillText('Potosino', w / 2, h * 0.4);
-        ctx.font = '700 46px Arial'; ctx.fillStyle = '#1f9fb1'; ctx.fillText('MexicanFood', w / 2, h * 0.82);
-      },
-    });
-    const lg = new THREE.Mesh(new THREE.PlaneGeometry(6, 1.5), new THREE.MeshStandardMaterial({ map: logo, transparent: true, roughness: 0.4, emissive: '#ffffff', emissiveMap: logo, emissiveIntensity: 0.2, depthWrite: false }));
-    lg.position.set(px, 4.9, pz + pd / 2 + 0.03);
-    add(lg);
-    sign('7865', (h) => `600 ${Math.round(h * 0.85)}px Arial`, '#6f6a62', 1.6, 0.5, px + pw / 2 - 1.2, 6.6, pz + pd / 2 + 0.03, 0);
-    // Red monument sign and a planter wall with agave.
-    const mono = textTexture({
-      width: 256, height: 384, bg: '#d6331f',
-      draw(ctx, w, h) { ctx.fillStyle = '#f2e6c8'; ctx.fillRect(24, 60, w - 48, 180); ctx.fillStyle = '#d6331f'; ctx.font = 'italic 900 52px Georgia'; ctx.textAlign = 'center'; ctx.fillText('Potosino', w / 2, 150); ctx.font = '600 24px Arial'; ctx.fillText('Mexican Food', w / 2, 190); },
-    });
-    const m = box(new THREE.MeshStandardMaterial({ color: '#d6331f', roughness: 0.6 }), 1.6, 2.4, 0.5, px - 9, 1.2, pz + pd / 2 + 6);
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 2.3), new THREE.MeshStandardMaterial({ map: mono, roughness: 0.6 }));
-    face.position.set(m.position.x, 1.2, m.position.z + 0.26);
-    add(face);
-    box(stucco, 9, 1.0, 0.5, px + 3, 0.5, pz + pd / 2 + 4);
-  }
 
   finish();
   const floorRange = () => [0, H];
@@ -158,7 +115,7 @@ export function buildCenter(params) {
     const y = v * 13;
     switch (faceName) {
       case 'front': return V((u - 0.5) * W, y, front + 4);
-      case 'pad': return V(-W / 2 - 22, 9, front + 25);
+      case 'pad': return V(-68, 9, 222); // Potosino, across Speedway (site file)
       case 'roof': return V((u - 0.5) * W, y, 0);
       default: return V(0, y, 0);
     }

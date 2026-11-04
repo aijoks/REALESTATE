@@ -19,6 +19,9 @@ export function buildClassicOffice(params) {
   } = params;
 
   const r = rand(1913);
+  // Details were laid out on a 21 m frontage; the real lot is 16.8 m (OSM),
+  // so opening and sign widths scale with the width.
+  const s = W / 21;
   const g1 = 5.0; // ground
   const g2 = 4.2; // 2nd
   const g3 = 3.7; // 3rd
@@ -50,17 +53,17 @@ export function buildClassicOffice(params) {
   const Fb = face(0, -W / 2, 0, D / 2);
   const baseHoles = [
     // Ground floor.
-    { x: X(0.13), y: 0.12 + 1.6, w: 1.9, h: 3.2, kind: 'lobby', room: 'lobby', frame, reveal: '#8f8b84', rd: 0.35, sill: false, roomDepth: 4 },
+    { x: X(0.13), y: 0.12 + 1.6, w: 1.9 * s, h: 3.2, kind: 'lobby', room: 'lobby', frame, reveal: '#8f8b84', rd: 0.35, sill: false, roomDepth: 4 },
     { x: X(0.51), y: 0.12 + 1.65, w: X(0.46), h: 3.3, kind: 'grid', cols: 4, transom: 0.7, room: 'shop', frame: '#26292c', reveal: '#8f8b84', rd: 0.25, sill: false },
-    { x: X(0.87), y: 0.12 + 1.5, w: 1.6, h: 3.0, kind: 'french', room: 'warm', frame: '#6a4a2c', reveal: '#8f8b84', rd: 0.3, sill: false, blinds: false },
+    { x: X(0.87), y: 0.12 + 1.5, w: 1.6 * s, h: 3.0, kind: 'french', room: 'warm', frame: '#6a4a2c', reveal: '#8f8b84', rd: 0.3, sill: false, blinds: false },
     // 2nd floor: single windows either side of the big glass.
-    { x: X(0.13), y: g1 + g2 / 2, w: 1.9, h: 2.5, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' },
+    { x: X(0.13), y: g1 + g2 / 2, w: 1.9 * s, h: 2.5, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' },
     { x: X(0.51), y: g1 + g2 / 2 + 0.1, w: X(0.48), h: 3.1, kind: 'grid', cols: 6, transom: 0, room: 'warm', blinds: false, reveal: '#9c978e', frame: '#3b3f44', rd: 0.3, sillColor: '#cfcbc2' },
-    { x: X(0.87), y: g1 + g2 / 2, w: 1.9, h: 2.5, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' },
+    { x: X(0.87), y: g1 + g2 / 2, w: 1.9 * s, h: 2.5, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' },
   ];
   // 3rd floor: five windows.
   for (const f of [0.13, 0.31, 0.5, 0.69, 0.87]) {
-    baseHoles.push({ x: X(f), y: g1 + g2 + g3 / 2, w: 2.3, h: 2.2, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' });
+    baseHoles.push({ x: X(f), y: g1 + g2 + g3 / 2, w: 2.3 * s, h: 2.2, kind: 'dh2', reveal: '#9c978e', frame, sillColor: '#cfcbc2' });
   }
   add(wall(Fb, W, baseH, baseHoles, matBase));
   baseHoles.forEach((o) => opening(Fb, o));
@@ -86,7 +89,7 @@ export function buildClassicOffice(params) {
         ctx.font = 'bold 60px Arial'; ctx.fillText('2,287 SF + BASEMENT', w / 2, h * 0.8);
       },
     });
-    const sign1 = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.05), new THREE.MeshStandardMaterial({ map: lease, roughness: 0.5 }));
+    const sign1 = new THREE.Mesh(new THREE.PlaneGeometry(4.2 * s, 1.05 * s), new THREE.MeshStandardMaterial({ map: lease, roughness: 0.5 }));
     sign1.position.set(-W / 2 + X(0.38), 3.55, D / 2 + 0.06);
     add(sign1);
     const tea = textTexture({
@@ -99,7 +102,7 @@ export function buildClassicOffice(params) {
         ctx.fillStyle = '#e8352b'; ctx.fillText('TEA', w * 0.8, h / 2 + 6);
       },
     });
-    const sign2 = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.95, 0.15), [
+    const sign2 = new THREE.Mesh(new THREE.BoxGeometry(4.0 * s, 0.95 * s, 0.15), [
       matSteel, matSteel, matSteel, matSteel, new THREE.MeshStandardMaterial({ map: tea, roughness: 0.45 }), matSteel,
     ]);
     sign2.position.set(-W / 2 + X(0.64), 3.55, D / 2 + 0.1);
@@ -128,11 +131,11 @@ export function buildClassicOffice(params) {
   const holes = [];
   const wy = (f) => f * FH + 0.6 + 1.25;
   for (let f = 0; f < shaftFloors; f++) {
-    for (const x of [0.133, 0.867]) holes.push({ x: X(x), y: wy(f), w: 1.55, h: 2.5, kind: 'dh', reveal, frame, rd: 0.42, sillColor: '#d6cfbf', tint: skyTint() });
-    for (const x of centre) holes.push({ x: X(x), y: wy(f), w: 1.7, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d6cfbf', tint: skyTint() });
+    for (const x of [0.133, 0.867]) holes.push({ x: X(x), y: wy(f), w: 1.55 * s, h: 2.5, kind: 'dh', reveal, frame, rd: 0.42, sillColor: '#d6cfbf', tint: skyTint() });
+    for (const x of centre) holes.push({ x: X(x), y: wy(f), w: 1.7 * s, h: 2.5, kind: 'dh', reveal, frame, sillColor: '#d6cfbf', tint: skyTint() });
   }
   for (const x of [0.13, 0.31, 0.5, 0.69, 0.87]) {
-    holes.push({ x: X(x), y: shaftFloors * FH + atticH / 2, w: 2.1, h: 2.3, kind: 'dh2', reveal, frame, sillColor: '#d6cfbf' });
+    holes.push({ x: X(x), y: shaftFloors * FH + atticH / 2, w: 2.1 * s, h: 2.3, kind: 'dh2', reveal, frame, sillColor: '#d6cfbf' });
   }
   add(wall(Ft, W, upperH, holes, matBuff));
   holes.forEach((o) => opening(Ft, o));
@@ -149,7 +152,7 @@ export function buildClassicOffice(params) {
     for (let x = fx0 + 0.15; x < fx1; x += 0.24) I.trim.add(piece(Ft, x, f * FH + 0.32, 0.065, 0.012, 0.56, 0.004), '#bfae8f');
     for (let k = 0; k < centre.length - 1; k++) {
       const x = X((centre[k] + centre[k + 1]) / 2);
-      I.trim.add(piece(Ft, x, f * FH + FH / 2 + 0.3, 0.07, 0.34, FH - 0.6, 0.14), '#bfae8f');
+      I.trim.add(piece(Ft, x, f * FH + FH / 2 + 0.3, 0.07, 0.34 * s, FH - 0.6, 0.14), '#bfae8f');
     }
   }
   I.trim.add(piece(Ft, (fx0 + fx1) / 2, shaftH - 0.15, 0.05, fx1 - fx0 + 0.42, 0.3, 0.1), '#d3c7ad');
@@ -177,15 +180,15 @@ export function buildClassicOffice(params) {
   const Fr = face(Math.PI, W / 2, 0, -D / 2);
   const rear = [];
   for (let f = 0; f < shaftFloors + 2; f++) {
-    for (const x of [2.2, 5.6, 9.0, 12.0, 15.4, 18.8]) {
-      rear.push({ x, y: g1 + 1.9 + f * FH, w: 1.3, h: 2.3, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });
+    for (const x of [2.2, 5.6, 9.0, 12.0, 15.4, 18.8].map((v) => v * s)) {
+      rear.push({ x, y: g1 + 1.9 + f * FH, w: 1.3 * s, h: 2.3, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });
     }
   }
   add(wall(Fr, W, top, rear, matCommon(3)));
   rear.forEach((o) => opening(Fr, o));
   addFireEscape(I, { x0: W / 2 - 7.4, x1: W / 2 - 1.2, z: -D / 2, levels: [...Array(shaftFloors + 2).keys()].map((f) => g1 + 0.75 + f * FH) });
   {
-    const roof = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: '#4f4b48', roughness: 1 }));
+    const roof = new THREE.Mesh(new THREE.PlaneGeometry(W, D), new THREE.MeshStandardMaterial({ color: '#9d9384', roughness: 1 }));
     roof.rotation.x = -Math.PI / 2;
     roof.position.y = top - 0.4;
     roof.receiveShadow = true;
@@ -195,11 +198,33 @@ export function buildClassicOffice(params) {
     bulk.castShadow = true;
     add(bulk);
     const hvac = new THREE.MeshStandardMaterial({ color: '#b8bcbf', roughness: 0.45, metalness: 0.55 });
-    for (const [x, z] of [[2, 2], [5, -3], [-1, -6]]) {
+    for (const [x, z] of [[2.5, 3], [5, -3], [3, -8.5]]) {
       const u = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.2, 1.8), hvac);
       u.position.set(x, top + 0.2, z);
       u.castShadow = true;
       add(u);
+    }
+    // From the aerial: a row of three dark glazed skylights on the west half
+    // of the roof and a timber water tank on a steel stand beside them.
+    const skyMat = new THREE.MeshStandardMaterial({ color: '#2c3238', roughness: 0.25, metalness: 0.4 });
+    for (const z of [3.2, -0.6, -4.4]) {
+      const sk = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.7, 3.2), skyMat);
+      sk.position.set(-3.2, top - 0.05, z);
+      sk.rotation.x = 0.08;
+      sk.castShadow = true;
+      add(sk);
+    }
+    const tankMat = new THREE.MeshStandardMaterial({ color: '#7a5636', roughness: 0.95 });
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.65, 3.0, 24), tankMat);
+    tank.position.set(0.8, top + 3.6, -1.5);
+    const lid = new THREE.Mesh(new THREE.ConeGeometry(1.75, 0.9, 24), new THREE.MeshStandardMaterial({ color: '#33302d', roughness: 0.9 }));
+    lid.position.set(0.8, top + 5.55, -1.5);
+    for (const m of [tank, lid]) { m.castShadow = true; add(m); }
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.5), matSteel);
+      leg.position.set(0.8 + Math.cos(a) * 1.2, top + 0.85, -1.5 + Math.sin(a) * 1.2);
+      add(leg);
     }
   }
 

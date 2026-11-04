@@ -13,14 +13,14 @@ import { grime, textTexture, rand } from './textures.js';
 import { V, C, face, piece, brickMaterial, wall, createKit, addFireEscape } from './kit.js';
 
 export function buildArchLoft(params) {
-  const { width: W = 7.6, depth: D = 31 } = params;
+  const { width: W = 8.0, depth: D = 27.5 } = params;
 
   const r = rand(1905);
   const g1 = 5.9;
   const g2 = 4.0;
   const frieze = 0.7;
   const baseH = g1 + frieze + g2;
-  const FH = 3.4;
+  const FH = 3.6; // roof at ~30.8 m (NYC survey height)
   const floors = 5;
   const wallTop = baseH + floors * FH;
   const top = wallTop + 1.5;
@@ -201,10 +201,27 @@ export function buildArchLoft(params) {
     roof.position.y = top - 0.6;
     roof.receiveShadow = true;
     add(roof);
-    const bulk = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.0, 5), matCommon(4));
-    bulk.position.set(0, top + 0.9, -D / 2 + 6);
+    // As seen from above: stair/elevator bulkhead a little behind mid-depth
+    // against the east party wall, a row of condensers beside it and a
+    // skylight hatch near the front parapet.
+    const bulk = new THREE.Mesh(new THREE.BoxGeometry(3.4, 3.0, 5.5), matCommon(4));
+    bulk.position.set(-W / 2 + 1.75, top + 0.9, -1.5);
     bulk.castShadow = true;
     add(bulk);
+    stoneBox(3.6, 0.2, 5.7, -W / 2 + 1.75, top + 2.45, -1.5);
+    const metal = new THREE.MeshStandardMaterial({ color: '#c9cbcc', roughness: 0.45, metalness: 0.5 });
+    for (const z of [3.2, 4.6, 6.0]) {
+      const ac = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 1.0), metal);
+      ac.position.set(W / 2 - 1.2, top - 0.15, z);
+      ac.castShadow = true;
+      add(ac);
+    }
+    const hatch = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.6, 1.4), new THREE.MeshStandardMaterial({ color: '#7d8287', roughness: 0.4, metalness: 0.4 }));
+    hatch.position.set(0.6, top - 0.3, D / 2 - 4.5);
+    add(hatch);
+    const vent = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 1.6, 10), metal);
+    vent.position.set(-W / 2 + 0.6, top + 0.2, -D / 2 + 3);
+    add(vent);
   }
 
   finish();

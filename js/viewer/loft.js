@@ -42,10 +42,15 @@ export function buildBuffLoft(params) {
   const revealBuff = '#8f8d88';
 
   // Window centres across the front: 3 | 5 | 3 with wider piers between groups.
-  const steps = [1.41, 1.41, 1.88, 1.41, 1.41, 1.41, 1.41, 1.88, 1.41, 1.41];
-  const xs = [1.19];
+  // Laid out for a 17.4 m frontage; the real one is 15.7 m (OSM), so the
+  // window pitch and the base openings scale with the width.
+  const s = W / 17.4;
+  const margin = 1.11;
+  const k = (W - 2 * margin) / 15.04;
+  const steps = [1.41, 1.41, 1.88, 1.41, 1.41, 1.41, 1.41, 1.88, 1.41, 1.41].map((d) => d * k);
+  const xs = [margin];
   steps.forEach((d) => xs.push(xs[xs.length - 1] + d));
-  const WW = 1.04;
+  const WW = Math.min(1.04, 0.74 * 1.41 * k);
   const WH = 2.5;
   const winY = (f) => f * FH + 0.75 + WH / 2;
 
@@ -58,14 +63,14 @@ export function buildBuffLoft(params) {
   const baseHoles = [];
   groups.forEach((grp, i) => {
     baseHoles.push({
-      x: mean(grp), y: groundH + 2.1, w: i === 1 ? 6.75 : 3.9, h: 3.2, kind: 'grid', cols: grp.length,
+      x: mean(grp), y: groundH + 2.1, w: (i === 1 ? 6.75 : 3.9) * k, h: 3.2, kind: 'grid', cols: grp.length,
       room: 'warm', blinds: false, reveal: '#9f9d96', frame: frameGrey, rd: 0.3, sillColor: '#cfcdc6',
     });
   });
   baseHoles.push(
-    { x: 2.55, y: 0.12 + 1.65, w: 2.2, h: 3.3, kind: 'lobby', room: 'lobby', reveal: '#8f8d87', frame: frameGrey, rd: 0.35, sill: false, roomDepth: 4 },
-    { x: 7.4, y: 0.12 + 1.6, w: 2.8, h: 3.2, kind: 'french', room: 'warm', frame: '#4a1f17', reveal: '#8f8d87', rd: 0.25, sill: false, blinds: false },
-    { x: 13.1, y: 0.12 + 1.65, w: 4.6, h: 3.3, kind: 'shop', room: 'shop', frame: '#3b3326', reveal: '#8f8d87', rd: 0.25, sill: false },
+    { x: 2.55 * s, y: 0.12 + 1.65, w: 2.2, h: 3.3, kind: 'lobby', room: 'lobby', reveal: '#8f8d87', frame: frameGrey, rd: 0.35, sill: false, roomDepth: 4 },
+    { x: 7.4 * s, y: 0.12 + 1.6, w: 2.8 * s, h: 3.2, kind: 'french', room: 'warm', frame: '#4a1f17', reveal: '#8f8d87', rd: 0.25, sill: false, blinds: false },
+    { x: 13.1 * s, y: 0.12 + 1.65, w: 4.6 * s, h: 3.3, kind: 'shop', room: 'shop', frame: '#3b3326', reveal: '#8f8d87', rd: 0.25, sill: false },
   );
   add(wall(Fb, W, baseH, baseHoles, matBaseStone));
   baseHoles.forEach((o) => opening(Fb, o));
@@ -76,7 +81,7 @@ export function buildBuffLoft(params) {
   {
     const num = textTexture({ text: address, width: 256, height: 128, bg: 'rgba(0,0,0,0)', ink: '#3b3b3b', font: '600 92px "Helvetica Neue", Arial' });
     const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.45), new THREE.MeshBasicMaterial({ map: num, transparent: true }));
-    plate.position.set(-W / 2 + 2.55, 3.95, D / 2 + 0.01);
+    plate.position.set(-W / 2 + 2.55 * s, 3.95, D / 2 + 0.01);
     add(plate);
     const blade = textTexture({
       width: 128, height: 512, bg: '#9f1f1a',
@@ -89,7 +94,7 @@ export function buildBuffLoft(params) {
       new THREE.MeshStandardMaterial({ map: blade }), new THREE.MeshStandardMaterial({ map: blade }),
       matSteel, matSteel, matSteel, matSteel,
     ]);
-    sign.position.set(-W / 2 + 9.2, 2.6, D / 2 + 0.32);
+    sign.position.set(-W / 2 + 9.2 * s, 2.6, D / 2 + 0.32);
     add(sign);
     const decal = textTexture({
       width: 1024, height: 256, bg: 'rgba(0,0,0,0)', ink: '#ffffff',
@@ -99,7 +104,7 @@ export function buildBuffLoft(params) {
         ctx.fillText("who's back", w * 0.52, h * 0.72);
       },
     });
-    const d = new THREE.Mesh(new THREE.PlaneGeometry(6.4, 1.6), new THREE.MeshBasicMaterial({ map: decal, transparent: true, depthWrite: false }));
+    const d = new THREE.Mesh(new THREE.PlaneGeometry(6.4 * k, 1.6 * k), new THREE.MeshBasicMaterial({ map: decal, transparent: true, depthWrite: false }));
     d.position.set(-W / 2 + mean(groups[1]), groundH + 1.7, D / 2 - 0.24);
     add(d);
   }
@@ -164,7 +169,7 @@ export function buildBuffLoft(params) {
   add(wall(face(-Math.PI / 2, -W / 2, 0, -D / 2), D, sideH, [], matCommon(2)));
   const Fr = face(Math.PI, W / 2, 0, -D / 2);
   const rear = [];
-  const rearXs = [1.8, 4.5, 7.2, 10.2, 12.9, 15.6];
+  const rearXs = [1.8, 4.5, 7.2, 10.2, 12.9, 15.6].map((x) => x * s);
   for (let f = -1; f < towerFloors; f++) {
     for (const x of rearXs) {
       rear.push({ x, y: f < 0 ? groundH + 2.0 : baseH + winY(f), w: 1.2, h: 2.3, kind: 'dh', reveal: C.revealCommon, sillColor: '#b3a999' });

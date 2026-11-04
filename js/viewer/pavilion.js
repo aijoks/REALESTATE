@@ -3,20 +3,22 @@
 //   - black steel frame and full-height glass on both street faces, with a
 //     black organic laser-cut screen behind part of the glazing
 //   - wraparound green fascia with TD logo panels and 道明银行 lettering,
-//     black parapet above; "OPEN 7 DAYS" and "250" at the Canal St entrance
-//   - steel billboard structure on the roof, angled to face the corner,
-//     with a lit catwalk and a "NEW TRADITION" band under the ad panel
+//     black parapet above; "OPEN 7 DAYS" and "250" at the Lafayette St door
+//   - steel billboard structure low on the roof, turned to face north up
+//     Lafayette St, with a lit catwalk and a "NEW TRADITION" band
+// The bank is on the SE corner of Canal (north, front) and Lafayette (west,
+// +x); OSM: 21.8 m on Canal, ~21-23 m on Lafayette, roof 6.7 m.
 import * as THREE from 'three';
 import { textTexture, rand } from './textures.js';
 import { V, face, piece, wall, createKit } from './kit.js';
 
 export function buildPavilion(params) {
-  const { width: W = 21, depth: D = 19 } = params;
+  const { width: W = 21.8, depth: D = 21 } = params;
   const front = D / 2;
   const r = rand(250);
-  const glassTop = 4.9;
-  const fasciaH = 2.3;
-  const parapetH = 1.1;
+  const glassTop = 4.35;
+  const fasciaH = 1.75;
+  const parapetH = 0.6;
   const top = glassTop + fasciaH + parapetH;
 
   const g = new THREE.Group();
@@ -69,11 +71,11 @@ export function buildPavilion(params) {
     return bay;
   }
 
-  const Ff = face(0, -W / 2, 0, front); // Canal St (north), local x west -> east? (west at +x)
-  const Fl = face(-Math.PI / 2, -W / 2, 0, -D / 2); // Lafayette St (east, -x), runs south -> north
-  elevation(Ff, W, 5, 3, [0, 1]);
-  elevation(Fl, D, 5, -1, [0, 1, 2]);
-  add(wall(face(Math.PI / 2, W / 2, 0, front), D, top, [], black));
+  const Ff = face(0, -W / 2, 0, front); // Canal St (north); local x runs east -> the corner (+x)
+  const Fl = face(Math.PI / 2, W / 2, 0, front); // Lafayette St (west, +x); local x runs from the corner south
+  elevation(Ff, W, 5, 4, [0, 1]);
+  elevation(Fl, D, 5, 1, [3, 4]);
+  add(wall(face(-Math.PI / 2, -W / 2, 0, -D / 2), D, top, [], black));
   add(wall(face(Math.PI, W / 2, 0, -D / 2), W, top, [], black));
 
   // Green fascia wrapping the two street faces, with TD panels and lettering.
@@ -104,10 +106,9 @@ export function buildPavilion(params) {
       m.applyMatrix4(piece(F, x, y, 0.385, 1, 1, 1));
       add(m);
     };
-    sign(Ff, 4.2, 7.2, pFront);
-    sign(Ff, W - 3.0, 4.2, pBig);
-    sign(Fl, 4.0, 7.2, pFront);
-    sign(Fl, D - 2.4, 4.2, pBig);
+    sign(Ff, W * 0.42, 7.2, pFront); // Canal: TD 道明银行 mid-facade
+    sign(Fl, 3.0, 4.6, pBig); // Lafayette: big TD at the corner,
+    sign(Fl, D - 4.0, 7.2, pFront); // TD 道明银行 at the south end
     // Black parapet band with a thin coping.
     for (const [F, len] of [[Ff, W], [Fl, D]]) {
       const p = new THREE.Mesh(new THREE.BoxGeometry(len + 0.3, parapetH, 0.35), black);
@@ -117,12 +118,17 @@ export function buildPavilion(params) {
     // "OPEN 7 DAYS" and "250" on the glass by the Canal St entrance.
     const open = textTexture({ text: 'OPEN 7 DAYS', width: 512, height: 96, bg: 'rgba(0,0,0,0)', ink: '#ffffff', font: '600 64px "Helvetica Neue", Arial' });
     const o = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.42), new THREE.MeshBasicMaterial({ map: open, transparent: true, depthWrite: false }));
-    o.applyMatrix4(piece(Ff, 13.3, 3.9, -0.22, 1, 1, 1));
+    const doorX = 0.55 + 1.5 * ((D - 0.55) / 5);
+    o.applyMatrix4(piece(Fl, doorX, 3.5, -0.22, 1, 1, 1));
     add(o);
     const num = textTexture({ text: '250', width: 256, height: 128, bg: 'rgba(0,0,0,0)', ink: '#ffffff', font: '600 84px "Helvetica Neue", Arial' });
     const n = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.4), new THREE.MeshBasicMaterial({ map: num, transparent: true, depthWrite: false }));
-    n.applyMatrix4(piece(Ff, 13.3, 3.2, -0.22, 1, 1, 1));
+    n.applyMatrix4(piece(Fl, doorX, 2.85, -0.22, 1, 1, 1));
     add(n);
+    const o2 = o.clone();
+    o2.position.set(0, 0, 0); o2.rotation.set(0, 0, 0); o2.scale.set(1, 1, 1);
+    o2.applyMatrix4(piece(Ff, 0.55 + 4.5 * ((W - 0.55) / 5), 3.5, -0.22, 1, 1, 1));
+    add(o2);
   }
 
   // Roof.
@@ -137,15 +143,15 @@ export function buildPavilion(params) {
   // =====================================================================
   {
     const bb = new THREE.Group();
-    const bw = 17;
-    const bh = 6.2;
+    const bw = 14.6; // standard 14 x 48 ft bulletin
+    const bh = 4.3;
     const base = top - 0.4;
-    const y0 = base + 6.2; // bottom of the ad panel
+    const y0 = base + 3.6; // bottom of the ad panel (sits low, per photo)
     const S = (x, y, z, sx, sy, sz, q) => { const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), black); m.position.set(x, y, z); m.scale.set(sx, sy, sz); if (q) m.quaternion.copy(q); m.castShadow = true; bb.add(m); };
     for (const x of [-bw / 2 + 1.5, -2.2, 2.2, bw / 2 - 1.5]) {
       for (const z of [-2.4, -0.4]) S(x, base + (y0 - base) / 2, z, 0.28, y0 - base, 0.28);
       const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.7, 0, 0));
-      S(x, base + 2.4, -1.4, 0.12, 4.4, 0.12, q);
+      S(x, base + 1.6, -1.4, 0.12, 2.9, 0.12, q);
     }
     S(0, y0 - 0.15, -1.4, bw + 0.6, 0.25, 2.8); // catwalk
     for (let x = -bw / 2; x <= bw / 2; x += 1.1) S(x, y0 + 0.45, 0.85, 0.05, 1.0, 0.05); // railing posts
@@ -175,14 +181,18 @@ export function buildPavilion(params) {
         ctx.fillStyle = 'rgba(255,255,255,0.18)';
         ctx.beginPath(); ctx.arc(w * 0.47, h * 0.35, 46, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.arc(w * 0.55, h * 0.4, 46, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle'; ctx.font = '500 64px "Helvetica Neue", Arial, sans-serif';
+        ctx.textAlign = 'left'; ctx.fillText('Post the', w * 0.03, h * 0.3);
+        ctx.textAlign = 'right'; ctx.fillText('real ones', w * 0.97, h * 0.24);
+        ctx.font = '500 26px Arial'; ctx.fillText('from Meta', w * 0.97, h * 0.86);
       },
     });
     const adM = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, 0.35), [black, black, black, black, new THREE.MeshStandardMaterial({ map: ad, roughness: 0.6, emissive: '#ffffff', emissiveMap: ad, emissiveIntensity: 0.15 }), black]);
     adM.position.set(0, y0 + bh / 2 + 0.2, 0.9);
     adM.castShadow = true;
     bb.add(adM);
-    bb.rotation.y = -Math.PI / 5.5; // turned toward the corner
-    bb.position.set(-1.5, 0, front - 6.5);
+    bb.rotation.y = 0.75; // faces true north, up Lafayette St (satellite)
+    bb.position.set(2, 0, front - 6.5);
     add(bb);
   }
 
@@ -193,7 +203,7 @@ export function buildPavilion(params) {
     const y = v * top;
     switch (faceName) {
       case 'front': return V((u - 0.5) * W, y, front + 1.0);
-      case 'left': return V(-W / 2 - 1.0, y, (u - 0.5) * D);
+      case 'right': return V(W / 2 + 1.0, y, (0.5 - u) * D);
       case 'roof': return V((u - 0.5) * W, y, 0);
       default: return V(0, y, 0);
     }

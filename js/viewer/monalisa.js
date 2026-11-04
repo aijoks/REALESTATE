@@ -11,7 +11,9 @@ import { textTexture, rand } from './textures.js';
 import { V, piece, createKit } from './kit.js';
 
 export function buildMonaLisa(params) {
-  const { width: W = 46, depth: D = 30, tenantSign = 'gentle dental', number = '7225' } = params;
+  // Satellite: L-shaped footprint, a 57 x 29 m bar along Ina Rd plus a
+  // 24 x 15 m block behind its east (Mona Lisa Rd) end; total depth 44 m.
+  const { width: W = 57, depth: D = 44, barDepth: DB = 29, tenantSign = 'gentle dental', number = '7225' } = params;
   const front = D / 2;
   const r = rand(7225);
   const H = 8.6;
@@ -34,19 +36,49 @@ export function buildMonaLisa(params) {
     return add(m);
   };
 
-  // Main block (west two-thirds) and a slightly lower east wing.
-  const mainW = W * 0.68;
+  // Satellite + photo: the taller parapeted main block is the east 24 m
+  // (full 44 m depth along Mona Lisa Rd); the slightly lower west wing runs
+  // 33 m along Ina Rd, 29 m deep (L-shape, parking in the notch behind it).
+  const NW = 24;
+  const mainW = NW;
   const mx = W / 2 - mainW / 2;
+  const bz = front - DB / 2;
   box(stucco, mainW, H, D, mx, H / 2, 0);
   const wingW = W - mainW;
-  box(stucco, wingW, H - 0.6, D - 2, -W / 2 + wingW / 2, (H - 0.6) / 2, -1);
+  box(stucco, wingW, H - 0.6, DB - 1, -W / 2 + wingW / 2, (H - 0.6) / 2, bz - 0.5);
   // Red coping along the parapets.
-  box(redMat, mainW + 0.2, 0.3, D + 0.2, mx, H + 0.15, 0);
-  box(redMat, wingW + 0.2, 0.3, D - 1.8, -W / 2 + wingW / 2, H - 0.45, -1);
+  const coping = (w, d, x, y, z) => {
+    box(redMat, w + 0.2, 0.3, 0.5, x, y, z + d / 2 - 0.15);
+    box(redMat, w + 0.2, 0.3, 0.5, x, y, z - d / 2 + 0.15);
+    box(redMat, 0.5, 0.3, d, x - w / 2 + 0.15, y, z);
+    box(redMat, 0.5, 0.3, d, x + w / 2 - 0.15, y, z);
+  };
+  coping(mainW, D, mx, H + 0.15, 0);
+  coping(wingW, DB - 1, -W / 2 + wingW / 2, H - 0.45, bz - 0.5);
+  // Low clay-tile hip roofs behind the parapets (seen from above).
+  const tileTex = textTexture({
+    width: 256, height: 128, bg: '#b8543a',
+    draw(ctx, w, h) { for (let x = 0; x < w; x += 10) { const v = 0.8 + r() * 0.35; ctx.fillStyle = `rgb(${205 * v | 0},${92 * v | 0},${60 * v | 0})`; ctx.fillRect(x, 0, 8, h); } ctx.fillStyle = 'rgba(0,0,0,0.2)'; for (let y = 0; y < h; y += 22) ctx.fillRect(0, y, w, 3); },
+  });
+  tileTex.wrapS = tileTex.wrapT = THREE.RepeatWrapping;
+  tileTex.repeat.set(6, 3);
+  const tiles = new THREE.MeshStandardMaterial({ map: tileTex, roughness: 0.8 });
+  const hip = (w, d, h, x, y, z) => {
+    const geo = new THREE.ConeGeometry(Math.SQRT1_2, 1, 4, 1);
+    geo.rotateY(Math.PI / 4);
+    const m = new THREE.Mesh(geo, tiles);
+    m.scale.set(w, h, d);
+    m.position.set(x, y + h / 2, z);
+    m.castShadow = true;
+    return add(m);
+  };
+  hip(mainW - 0.9, D - 0.9, 2.8, mx, H - 0.9, 0);
+  hip(wingW - 0.3, DB - 1.9, 2.6, -W / 2 + wingW / 2 - 0.3, H - 1.5, bz - 0.5);
+  box(new THREE.MeshStandardMaterial({ color: '#a9c0c8', roughness: 0.7 }), 6, 0.3, 9, W / 2 - NW + 4, H + 0.2, -front + 7);
 
   // Curved mission parapet over the front of the main block.
   {
-    const pw = mainW * 0.62;
+    const pw = mainW * 0.82;
     const pts = [];
     const n = 40;
     for (let k = 0; k <= n; k++) {
@@ -62,7 +94,7 @@ export function buildMonaLisa(params) {
     s.lineTo(pw / 2, 0);
     s.closePath();
     const para = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: 0.6, bevelEnabled: false }), stucco);
-    const px = mx - mainW / 2 + pw / 2 + 1;
+    const px = mx - mainW / 2 + pw / 2 + 0.6;
     para.position.set(px, H, front - 0.3);
     para.castShadow = true;
     add(para);
@@ -79,11 +111,11 @@ export function buildMonaLisa(params) {
     // Quatrefoil medallion.
     const med = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.15, 24), stucco);
     med.rotation.x = Math.PI / 2;
-    med.position.set(px - pw * 0.22, H - 1.2, front + 0.1);
+    med.position.set(px - pw * 0.22, H + 0.2, front + 0.38);
     add(med);
     const inner = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.06, 4), redMat);
     inner.rotation.x = Math.PI / 2;
-    inner.position.set(px - pw * 0.22, H - 1.2, front + 0.2);
+    inner.position.set(px - pw * 0.22, H + 0.2, front + 0.48);
     add(inner);
     // Script sign.
     const tex = textTexture({
@@ -91,7 +123,7 @@ export function buildMonaLisa(params) {
       draw(ctx, w, h) { ctx.font = 'italic 600 150px "Brush Script MT", "Segoe Script", Georgia, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#6e7378'; ctx.fillText(tenantSign, w / 2 + 4, h / 2 + 4); ctx.fillStyle = '#e9edf0'; ctx.fillText(tenantSign, w / 2, h / 2); },
     });
     const sg = new THREE.Mesh(new THREE.PlaneGeometry(7, 1.75), new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 0.3, metalness: 0.5, depthWrite: false }));
-    sg.position.set(px + 2.5, H - 1.0, front + 0.05);
+    sg.position.set(px + 2.5, H + 0.45, front + 0.36);
     add(sg);
   }
 
@@ -119,7 +151,7 @@ export function buildMonaLisa(params) {
   };
   const Ff = new THREE.Matrix4().setPosition(-W / 2, 0, front);
   const Fe = new THREE.Matrix4().makeRotationY(Math.PI / 2).setPosition(W / 2, 0, front);
-  archRecess(Ff, W - 10.5, 7.5, H - 1.0);
+  archRecess(Ff, W - 8.5, 7.0, H - 1.0);
   archRecess(Fe, 10, 6.5, H - 1.0);
 
   // Ground-floor arcade of square piers with notched lintels.
@@ -136,8 +168,8 @@ export function buildMonaLisa(params) {
       I.glass.add(piece(F, x + 1.7, 1.7, 0.05, 2.2, 2.0, 1), '#5b6b78');
     }
   };
-  arcade(Ff, 1.5, W - 16, 1.1);
-  arcade(Fe, 15, D - 1, 1.1);
+  arcade(Ff, 1.5, W - 14.5, 1.1);
+  arcade(Fe, 15, D - 1.5, 1.1);
 
   // Paired upper windows in stucco surrounds.
   const pairs = (F, xs) => {
@@ -146,8 +178,16 @@ export function buildMonaLisa(params) {
       for (const dx of [-0.42, 0.42]) I.glass.add(piece(F, x + dx, 6.1, 0.13, 0.62, 1.8, 1), '#4a5866');
     }
   };
-  pairs(Ff, [3, 6, 9, 12, 17.5, 21, 24.5]);
-  pairs(Fe, [16.5, 19.5, 22.5, 25.5, 28.5]);
+  pairs(Ff, [3, 7, 11, 15, 19, 23, 27, 31, 35.5, 38.5, 41.5]);
+  pairs(Fe, [16.5, 20, 23.5, 27, 30.5, 34, 37.5, 41]);
+  // Rear (north) and west walls: plain paired windows on both floors.
+  const Fn = new THREE.Matrix4().makeRotationY(Math.PI).setPosition(W / 2, 0, -front);
+  const Fn2 = new THREE.Matrix4().makeRotationY(Math.PI).setPosition(W / 2 - NW, 0, front - DB);
+  const Fw = new THREE.Matrix4().makeRotationY(-Math.PI / 2).setPosition(-W / 2, 0, front - DB + 1);
+  for (const [F, xs] of [[Fn, [3, 7, 11, 15, 19]], [Fn2, [3, 7, 11, 15, 19, 23, 27, 31]], [Fw, [4, 8, 12, 16, 20, 24]]]) {
+    pairs(F, xs);
+    for (const x of xs) for (const dx of [-0.42, 0.42]) I.glass.add(piece(F, x + dx, 2.0, 0.13, 0.62, 1.8, 1), '#4a5866');
+  }
   // Corner address and wall lantern.
   {
     const num = textTexture({ text: number, width: 256, height: 96, bg: 'rgba(0,0,0,0)', ink: '#222222', font: '600 74px Georgia, serif' });
@@ -155,7 +195,40 @@ export function buildMonaLisa(params) {
     n.rotation.y = Math.PI / 2;
     n.position.set(W / 2 + 0.03, H - 0.8, front - 0.9);
     add(n);
-    I.trim.add(piece(Ff, W - 13.5, 3.2, 0.2, 0.3, 0.55, 0.3), '#1e1e1e');
+    I.trim.add(piece(Ff, W - 12.6, 3.2, 0.2, 0.3, 0.55, 0.3), '#1e1e1e');
+  }
+  // Tenant signage (listings / directories, see properties.js tenants).
+  {
+    const plate = (F, text, x, y, w, h, ink, bg = '#f4f2ee', font = 'bold 64px "Helvetica Neue", Arial, sans-serif') => {
+      const tex = textTexture({ width: 512, height: Math.round((512 * h) / w), bg, ink, draw(ctx, cw, ch) {
+        ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        const lines = text.split('\n');
+        lines.forEach((ln, i) => { ctx.font = i ? font.replace(/\d+px/, (m) => `${Math.round(parseInt(m) * 0.6)}px`) : font; ctx.fillText(ln, cw / 2, (ch * (i + 0.5)) / lines.length, cw - 24); });
+      } });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 }));
+      m.applyMatrix4(piece(F, x, y, 0.09, 1, 1, 1));
+      add(m);
+    };
+    // Second Gentle Dental sign high on the east wall (photo, far right).
+    const gd = textTexture({
+      width: 512, height: 160, bg: 'rgba(0,0,0,0)',
+      draw(ctx, w, h) { ctx.font = 'italic 600 96px "Brush Script MT", "Segoe Script", Georgia, cursive'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#2a8c9a'; ctx.fillText('gentle', w * 0.3, h / 2); ctx.fillStyle = '#d23c5a'; ctx.fillText('dental', w * 0.72, h / 2); },
+    });
+    const gs = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.0), new THREE.MeshStandardMaterial({ map: gd, transparent: true, roughness: 0.4, depthWrite: false }));
+    gs.applyMatrix4(piece(Fe, 21.75, H - 0.6, 0.08, 1, 1, 1));
+    add(gs);
+    // Ground-floor suites: window lettering in the arcade bays.
+    plate(Ff, 'BAYADA\nHome Health Care', 1.5 + 3.4 * 2 + 1.7, 2.3, 2.4, 0.75, '#00508f');
+    plate(Ff, 'Soreo Pathways', 1.5 + 3.4 * 4 + 1.7, 2.3, 2.4, 0.55, '#2f6f73');
+    plate(Ff, 'Arizona DES\nState of Arizona', 1.5 + 3.4 * 6 + 1.7, 2.3, 2.4, 0.75, '#1b365d');
+    plate(Fe, 'HomeWell\nCare Services', 15 + 3.4 * 2 + 1.7, 2.3, 2.4, 0.75, '#5b2a86');
+    plate(Fe, 'Spencer Construction', 15 + 3.4 * 5 + 1.7, 2.3, 2.4, 0.55, '#7a4a1e');
+    // Lobby directories inside both arched entries.
+    const dir = 'MONA LISA PLAZA\n101  Available\n200  Morgan, Cohen & Bach\n203  Gentle Dental\n1st fl  BAYADA · Soreo Pathways\nAZ DES · HomeWell · Spencer Constr.';
+    plate(Ff, dir, W - 8.5 + 1.6, 1.6, 1.0, 1.2, '#1e2a33', '#e9e5dc', 'bold 54px "Helvetica Neue", Arial, sans-serif');
+    plate(Fe, dir, 10 + 1.4, 1.6, 1.0, 1.2, '#1e2a33', '#e9e5dc', 'bold 54px "Helvetica Neue", Arial, sans-serif');
+    // Morgan, Cohen & Bach (Suite 200) lettering in an upper front window.
+    plate(Ff, 'MORGAN, COHEN & BACH\nAttorneys · Suite 200', 27, 6.1, 2.0, 0.55, '#1f3a5f');
   }
   // Low stucco screen wall and shrubs at the corner.
   box(stucco, 3.4, 1.6, 2.4, W / 2 + 2.6, 0.8, front - 13);

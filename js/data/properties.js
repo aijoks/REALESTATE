@@ -84,9 +84,11 @@ export const properties = [
       procedural: {
         generator: 'prewarBrick',
         floors: 15,
-        width: 18.3, // metres of street frontage (~60 ft)
-        depth: 30.5, // metres deep (~100 ft)
-        pavilionWidth: 4.4,
+        // OSM / NYC footprint: 19.8 m frontage (65 ft) x 30.7 m, roof 47 m.
+        width: 19.8,
+        depth: 30.7,
+        floorH: 2.95,
+        pavilionWidth: 4.9,
         pavilionProjection: 1.6,
         // Mirrors the vinyl banner on the building's west wall.
         leaseBanner: {
@@ -100,9 +102,11 @@ export const properties = [
         },
       },
       // Streetscape: neighbours + the avenue (eastLine = x of its east building line).
-      site: { id: 'e56-park', street: 'E 56 St', avenue: { kind: 'park', name: 'Park Av', eastLine: 56 } },
+      // 56th St is 60 ft (18.3 m) between building lines; Park Av's east
+      // building line is 49.7 m west of the building's centre.
+      site: { id: 'e56-park', street: 'E 56 St', walk: 4.0, road: 10.3, avenue: { kind: 'park', name: 'Park Av', eastLine: 49.7 } },
       tour: {
-        avenue: { label: 'From Park Avenue', pos: [80, 1.7, 25.75], target: [8, 13, 20.25], fov: 62 },
+        avenue: { label: 'From Park Avenue', pos: [77, 1.7, 24.5], target: [8, 13, 20], fov: 62 },
         westLabel: 'West side · lease banner',
       },
       hotspots: [
@@ -173,20 +177,23 @@ export const properties = [
       procedural: {
         generator: 'buffLoft',
         floors: 11,
-        width: 17.4, // metres of street frontage (~57 ft)
-        depth: 30.5, // metres deep (~100 ft)
+        // OSM / NYC footprint 15.7 m (51.5 ft) x 28.8 m; roof 46.3 m.
+        width: 15.7,
+        depth: 28.8,
         flag: ['OFFICE', 'SPACE', 'FOR LEASE'],
         address: '10',
       },
-      site: { id: 'e38-fifth', street: 'E 38 St', avenue: { kind: 'fifth', name: '5 Av', eastLine: 38.7 } },
+      // Mid-block: Fifth Av's east building line is 68.7 m west of the
+      // building's centre (Madison's west line 59.5 m east).
+      site: { id: 'e38-fifth', street: 'E 38 St', walk: 4.2, avenue: { kind: 'fifth', name: '5 Av', eastLine: 68.7 } },
       tour: {
-        avenue: { label: 'From Fifth Avenue', pos: [56, 1.7, 25.75], target: [7, 12, 20.25], fov: 62 },
+        avenue: { label: 'From Fifth Avenue', pos: [84, 1.7, 23.9], target: [6, 13, 18.5], fov: 50 },
         omit: ['crown'],
         extra: [
           { id: 'terrace', label: 'Roof terrace', pos: [-3, 55, 25], target: [0.5, 46.5, 6], fov: 48 },
           {
-            id: 'esb', label: 'Terrace view · Empire State', pos: [-4, 47.4, 10], target: [15.4, 76.1, -39], fov: 62,
-            fade: 'street', targets: [[133, 320, -335], [133, 160, -335]],
+            id: 'esb', label: 'Terrace view · Empire State', pos: [-4, 47.4, 10], target: [19.7, 76, -39], fov: 62,
+            fade: 'street', targets: [[163, 320, -336], [163, 160, -336], [163, 90, -336]],
           },
         ],
       },
@@ -249,20 +256,23 @@ export const properties = [
       procedural: {
         generator: 'classicOffice',
         floors: 12,
-        width: 21, // metres of street frontage (~70 ft)
-        depth: 30,
+        // OSM / NYC footprint 16.8 m (55 ft) x 27.1 m; roof 46.5 m.
+        width: 16.8,
+        depth: 27.1,
         flag: ['OFFICE', 'SPACE', 'FOR LEASE'],
       },
       // Front faces south onto 23rd St, so the streetscape is mirrored to put
       // Park Avenue South on the viewer's left. 23rd St is wide and two-way.
       site: {
-        id: 'e23-parksouth', street: 'E 23 St', mirror: true, streetTwoWay: true, road: 17, walk: 5,
-        avenue: { kind: 'parkSouth', name: 'Park Av S', eastLine: 52 },
+        // 23rd St is 100 ft (31 m) between building lines; Park Av S's east
+        // building line is 56.1 m west of the building's centre.
+        id: 'e23-parksouth', street: 'E 23 St', mirror: true, streetTwoWay: true, road: 20, walk: 5.5, blockSpacing: 91,
+        avenue: { kind: 'parkSouth', name: 'Park Av S', eastLine: 56.1 },
       },
       tour: {
         avenue: {
-          label: 'From Park Avenue South', pos: [-66.5, 1.7, 28.5], target: [-4, 15, 17], fov: 62,
-          targets: [[-9.5, 8, 16], [-9.5, 24, 16], [-9.5, 40, 16]],
+          label: 'From Park Avenue South', pos: [-70.5, 1.7, 29], target: [-3, 15, 15], fov: 62,
+          targets: [[-8.4, 8, 14], [-8.4, 24, 14], [-8.4, 40, 14]],
         },
         labels: {
           'front-west': 'Southeast corner', west: 'East side', 'rear-west': 'Northeast corner',
@@ -318,12 +328,14 @@ export const properties = [
     cover: 'assets/properties/133-w-21st/upper-facade.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'ladiesMile', floors: 12, width: 30, depth: 29, banner: ['SVA', 'NYC'] },
+      procedural: { generator: 'ladiesMile', floors: 12, width: 30, depth: 32, banner: ['SVA', 'NYC'] },
       // Faces south onto 21st St with Sixth Avenue to the east (viewer's right),
       // which is the streetscape's default orientation, so no mirroring.
-      site: { id: 'w21-sixth', street: 'W 21 St', avenue: { kind: 'fifth', name: '6 Av', eastLine: 75 } },
+      // Footprint 30 x 32 m, roof 46.6 m (NYC survey via OSM); the Sixth Avenue
+      // building line is ~98 m east of the east wall (satellite).
+      site: { id: 'w21-sixth', street: 'W 21 St', avenue: { kind: 'fifth', name: '6 Av', eastLine: 113 } },
       tour: {
-        avenue: { label: 'From Sixth Avenue', pos: [87, 1.7, 24.3], target: [12, 16, 17], fov: 62 },
+        avenue: { label: 'From Sixth Avenue', pos: [124, 1.7, 25.8], target: [4, 20, 16], fov: 34 },
         labels: {
           'front-west': 'Southeast corner', west: 'East side', 'rear-west': 'Northeast corner',
           east: 'West side', crown: 'Capitals & cornice',
@@ -332,7 +344,7 @@ export const properties = [
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'Carved stone entrance in the west bay.', at: [0.14, 0.06, 'front'] },
         { id: 'retail', label: 'Street retail', text: 'Shopfronts across three bays of the stone base.', at: [0.6, 0.05, 'front'] },
-        { id: 'cornice', label: 'Corbelled cornice', text: 'Brackets and lion-head bosses crown the three-storey base.', at: [0.38, 0.29, 'front'] },
+        { id: 'cornice', label: 'Corbelled cornice', text: 'Brackets and lion-head bosses crown the three-storey base.', at: [0.38, 0.27, 'front'] },
         { id: 'floors', label: 'Office floors', text: 'Four wide bays, four windows each, on every floor.', at: [0.8, 0.55, 'front'] },
         { id: 'crown', label: 'Capitals & cornice', text: 'Ornamented pier capitals and a deep cornice on the top floors.', at: [0.5, 0.95, 'front'] },
       ],
@@ -377,16 +389,18 @@ export const properties = [
     cover: 'assets/properties/102-w-38th/facade.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'narrowLoft', floors: 10, width: 12.5, depth: 30 },
+      procedural: { generator: 'narrowLoft', floors: 10, width: 12, depth: 30 },
       // Faces north onto 38th St with Sixth Avenue to the east (viewer's left),
       // so the streetscape is mirrored; Sixth Avenue traffic runs north.
+      // Footprint 12 x 30 m, roof 32.0 m (NYC survey via OSM); the Sixth Avenue
+      // building line is ~17.5 m east of the east wall.
       site: {
         id: 'w38-sixth', street: 'W 38 St', facing: 'north', mirror: true,
-        avenue: { kind: 'fifth', name: '6 Av', eastLine: 26, heading: -Math.PI / 2 },
+        avenue: { kind: 'fifth', name: '6 Av', eastLine: 23.5, heading: -Math.PI / 2 },
       },
       tour: {
         avenue: {
-          label: 'From Sixth Avenue', pos: [-38, 1.7, 24.3], target: [-3, 15, 17], fov: 62,
+          label: 'From Sixth Avenue', pos: [-35.5, 1.7, 24.3], target: [-3, 14, 17], fov: 62,
           targets: [[-5.2, 8, 16], [-5.2, 22, 16], [-5.2, 34, 16]],
         },
         crownLabel: 'Attic & cornice',
@@ -439,28 +453,33 @@ export const properties = [
     cover: 'assets/properties/8-w-36th/street.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'stoneBay', floors: 12, width: 10.5, depth: 30.5, garageH: 11 },
+      procedural: { generator: 'stoneBay', floors: 12, width: 10.1, depth: 27.3, garageH: 11.5 },
       // Faces north onto 36th St with Fifth Avenue to the east (viewer's left),
-      // so the streetscape is mirrored.
+      // so the streetscape is mirrored. Footprint 10.1 x 27.3 m, roof 34.5 m
+      // (NYC survey via OSM); Fifth Avenue is ~48 m east of the east wall.
       site: {
         id: 'w36-fifth', street: 'W 36 St', facing: 'north', mirror: true,
-        avenue: { kind: 'fifth', name: '5 Av', eastLine: 43 },
+        avenue: { kind: 'fifth', name: '5 Av', eastLine: 53 },
       },
       tour: {
         avenue: {
-          label: 'From Fifth Avenue', pos: [-56, 1.7, 24.3], target: [-3, 16, 17], fov: 62,
-          targets: [[-4.2, 8, 16], [-4.2, 24, 16], [-4.2, 38, 16]],
+          label: 'From Fifth Avenue', pos: [-65, 1.7, 22.7], target: [-3, 15, 15.5], fov: 50,
+          targets: [[-4, 7, 14.5], [-4, 19, 14.5], [-4, 30, 14.5]],
         },
-        westLabel: 'West side · banner',
+        // The garage next door is only ~15 m wide, so the default side-wall
+        // camera would sit inside No. 16; look at the banner from across
+        // 36th St instead, over the garage, as in the photo.
+        omit: ['west'],
+        extra: [{ id: 'west-banner', label: 'West side · banner', pos: [36, 6, 31], target: [5, 18, 1], fov: 48, hold: 2.5 }],
         // Keep the garage visible below the banner on the side-wall view.
-        fades: { west: [[5.4, 20, 11], [5.4, 32, 11], [5.4, 26, 4]] },
+        fades: { 'west-banner': [[5.2, 18, 10], [5.2, 28, 10], [5.2, 24, 4]] },
         crownLabel: 'Window bay & parapet',
       },
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'No. 8 entrance under a granite canopy.', at: [0.75, 0.06, 'front'] },
         { id: 'retail', label: 'Restaurant', text: 'Restaurant behind the dark granite storefront.', at: [0.28, 0.05, 'front'] },
         { id: 'bay', label: 'Window bay', text: 'Four black-framed windows across every office floor.', at: [0.5, 0.55, 'front'] },
-        { id: 'banner', label: 'First Pioneer banner', text: 'The west wall rises above the neighbouring garage.', at: [0.78, 0.5, 'right'] },
+        { id: 'banner', label: 'First Pioneer banner', text: 'The west wall rises above the neighbouring garage.', at: [0.78, 0.57, 'right'] },
       ],
     },
   },
@@ -506,12 +525,14 @@ export const properties = [
     cover: 'assets/properties/12-e-44th/facade.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'archLoft', floors: 7, width: 7.6, depth: 31 },
+      // OSM / NYC footprint: 8.0 m frontage x 27.5 m deep, roof 30.8 m.
+      procedural: { generator: 'archLoft', floors: 7, width: 8.0, depth: 27.5 },
       // Faces north onto 44th St; Fifth Avenue is to the west, the
-      // streetscape's default orientation.
-      site: { id: 'e44-fifth', street: 'E 44 St', facing: 'north', avenue: { kind: 'fifth', name: '5 Av', eastLine: 42 } },
+      // streetscape's default orientation. Fifth's east building line is
+      // 68 m west of the building (Madison's is 51.6 m east).
+      site: { id: 'e44-fifth', street: 'E 44 St', facing: 'north', avenue: { kind: 'fifth', name: '5 Av', eastLine: 72 } },
       tour: {
-        avenue: { label: 'From Fifth Avenue', pos: [57, 1.7, 25.3], target: [4, 12, 18], fov: 62 },
+        avenue: { label: 'From Fifth Avenue', pos: [74, 1.7, 22.5], target: [4, 13, 14], fov: 50 },
         crownLabel: 'Corbelled cornice',
         streetDist: 36, // shorter building: start closer
       },
@@ -550,7 +571,11 @@ export const properties = [
       'Retail frontage on both 51st Street and Ninth Avenue',
       "Steps from the Theater District and Hell's Kitchen dining",
     ],
-    tenants: [{ name: 'GQ Sushi', floor: 'Ground', kind: 'Restaurant' }],
+    tenants: [
+      { name: "'ritas", floor: 'Ground', kind: 'Restaurant · Ninth Ave' },
+      { name: 'Monkey Thief', floor: 'Ground', kind: 'Bar · 51st St corner' },
+      { name: 'Briciola', floor: 'Ground', kind: 'Restaurant · 51st St' },
+    ],
     availability: [],
     photos: [
       { src: 'assets/properties/370-w-51st/corner.jpg', caption: 'Corner of West 51st Street and Ninth Avenue', focus: 'center 45%' },
@@ -558,27 +583,34 @@ export const properties = [
     cover: 'assets/properties/370-w-51st/corner.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'walkup', floors: 6, width: 12, depth: 17 },
-      // Faces north onto 51st St; Ninth Avenue (one-way south) runs along the
-      // building's west wall. Low-rise neighbourhood.
+      // NYC / OSM footprint: 30.7 m along 51st St x 7.7 m on Ninth Ave (the
+      // eastern 23 m is 5.8 m deep), roof ~20 m.
+      procedural: { generator: 'walkup', floors: 6, width: 30.7, depth: 7.7 },
+      // Faces north onto 51st St (18.1 m between building lines); Ninth
+      // Avenue (one-way south, 30.5 m) runs along the building's west wall.
       site: {
-        id: 'w51-ninth', street: 'W 51 St', facing: 'north', streetDir: 'west', lowRise: true,
-        avenue: { kind: 'fifth', name: '9 Av', eastLine: 6.02 },
+        id: 'w51-ninth', frontVans: false, street: 'W 51 St', facing: 'north', streetDir: 'west', lowRise: true, walk: 3.75, road: 10.6,
+        avenue: { kind: 'fifth', name: '9 Av', eastLine: 15.37 },
       },
       tour: {
         avenue: {
-          label: 'From Ninth Avenue', pos: [19, 1.7, -21], target: [6, 10, 2], fov: 62,
-          targets: [[6.3, 5, 0], [6.3, 13, 0]],
+          label: 'Corner of 51st & Ninth', pos: [36, 1.7, 24], target: [9, 9, 0], fov: 62,
+          targets: [[15.6, 5, 3.9], [15.6, 14, 3.9], [8, 10, 4.2]],
         },
         westLabel: 'Ninth Avenue side',
         crownLabel: 'Parapet & fire escapes',
-        streetDist: 40,
+        streetDist: 44,
+        extra: [
+          { id: 'st51', label: '51st Street facade', fade: 'street', pos: [0, 3.4, 20.6], target: [0, 9, 3.85], fov: 74, targets: [[-10, 6, 4.2], [0, 10, 4.2], [10, 14, 4.2]] },
+          { id: 'av9', label: "Ninth Avenue facade ('ritas)", fade: 'street', pos: [43, 2, 0.6], target: [15.4, 10, 0.6], fov: 58, targets: [[15.6, 4, 0], [15.6, 12, 0], [15.6, 19, 0]] },
+        ],
       },
       hotspots: [
-        { id: 'retail', label: 'Corner retail', text: 'GQ Sushi wraps the corner of 51st Street and Ninth Avenue.', at: [0.8, 0.12, 'front'] },
-        { id: 'entrance', label: 'Residential entrance', text: 'Entrance to the 25 apartments upstairs, on 51st Street.', at: [0.1, 0.08, 'front'] },
-        { id: 'avenue', label: 'Ninth Avenue side', text: 'Fire escapes and the vertical NETWORK sign on the avenue.', at: [0.25, 0.55, 'right'] },
-        { id: 'floors', label: 'Apartments', text: 'Five residential floors above the shops.', at: [0.4, 0.6, 'front'] },
+        { id: 'retail', label: 'Monkey Thief', text: 'Bar with a neon monkey mural at the corner of 51st Street.', at: [0.88, 0.12, 'front'] },
+        { id: 'briciola', label: 'Briciola', text: 'Italian restaurant with a sidewalk cafe on 51st Street.', at: [0.28, 0.12, 'front'] },
+        { id: 'entrance', label: 'Residential entrance', text: 'Entrance to the 25 apartments upstairs, on 51st Street.', at: [0.45, 0.1, 'front'] },
+        { id: 'avenue', label: "'ritas", text: "Coral storefront on Ninth Avenue under the corner fire escape.", at: [0.45, 0.12, 'right'] },
+        { id: 'floors', label: 'Apartments', text: 'Five residential floors above the shops.', at: [0.6, 0.6, 'front'] },
       ],
     },
   },
@@ -624,19 +656,29 @@ export const properties = [
     cover: 'assets/properties/34-09-queens-blvd/corner-35th.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'industrial', floors: 4, width: 85, frontDepth: 40, rearDepth: 40 },
+      // Traced from satellite + OSM: 62 m frontage (the full block, 34th to
+      // 35th St), roof ~15.5 m; four-storey front block + west wing up 34th St,
+      // low dock buildings behind, the rear warehouse reaching the next street
+      // north (~152 m deep in all).
+      procedural: { generator: 'industrial', floors: 4, width: 62, depth: 152 },
       // Faces south onto Queens Blvd; 35th St (+x, east) is the side street
       // modelled as the avenue, 34th St is added along the west end.
       site: {
         id: 'qb-34-35', street: 'Queens Blvd', facing: 'south', streetTwoWay: true, road: 34, walk: 5,
-        blockSpacing: 170, lowRise: true,
-        avenue: { kind: 'narrow', name: '35 St', eastLine: 42.52 },
+        blockSpacing: 195.5, lowRise: true,
+        avenue: { kind: 'narrow', name: '35 St', eastLine: 31.02 },
       },
       tour: {
         avenue: {
-          label: 'Corner of 35th St', pos: [66, 1.7, 86], target: [30, 9, 34], fov: 60,
-          targets: [[40, 6, 40.5], [40, 11, 40.5], [43, 9, 30]],
+          label: 'Corner of 35th St', pos: [52, 1.7, 92], target: [8, 8.5, 66], fov: 60,
+          targets: [[31, 6, 76.5], [31, 11, 76.5], [20, 9, 70]],
         },
+        extra: [
+          { id: 'warehouse34', label: '34th St docks & rear warehouse', pos: [-44, 2.2, -36], target: [-24, 6, -2], fov: 62 },
+          { id: 'billboard', label: 'Rooftop billboard', pos: [24, 28, 92], target: [-17, 22, 52], fov: 50 },
+        ],
+        radius: 100,
+        omit: ['crown'],
         labels: {
           'front-west': 'Southeast corner', west: '35th Street side', 'rear-west': 'Northeast corner',
           back: 'Rear warehouse & docks', east: '34th Street side', crown: 'Rooftop billboard',
@@ -647,8 +689,8 @@ export const properties = [
       hotspots: [
         { id: 'retail', label: 'Street retail', text: 'Shops between every pilaster along Queens Boulevard.', at: [0.55, 0.12, 'front'] },
         { id: 'corner34', label: 'Pin Framing', text: 'Corner retail at 34th Street (34-09).', at: [0.06, 0.15, 'front'] },
-        { id: 'billboard', label: 'Rooftop billboard', text: 'Steel billboard frame with a First Pioneer panel.', at: [0.3, 1.6, 'roof'] },
-        { id: 'warehouse', label: 'Rear warehouse', text: 'Warehouse and loading docks behind the retail block.', at: [0.3, 0.5, 'back'] },
+        { id: 'billboard', label: 'Rooftop billboard', text: 'Steel billboard frame along 34th St with a First Pioneer panel facing east.', at: [0.5, 1.6, 'roof'] },
+        { id: 'warehouse', label: 'Loading docks', text: 'Pink loading-dock wing on a parking apron off 34th St, rear warehouse behind.', at: [0.5, 0.45, 'left'] },
       ],
     },
   },
@@ -657,7 +699,7 @@ export const properties = [
     address: '250 Canal Street',
     city: 'New York, NY 10013',
     neighborhood: 'Chinatown / SoHo',
-    crossStreets: 'Southwest corner of Lafayette Street',
+    crossStreets: 'Southeast corner of Lafayette Street',
     status: 'Leased',
     uses: ['Retail'],
     headline: '',
@@ -687,25 +729,28 @@ export const properties = [
     cover: 'assets/properties/250-canal/corner.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'pavilion', floors: 1, width: 21, depth: 19 },
-      // Faces north onto Canal St; Lafayette St (one-way north) runs along the
-      // east wall, so the streetscape is mirrored.
+      // OSM footprint: 21.8 m on Canal x ~21-23 m on Lafayette, roof 6.7 m.
+      procedural: { generator: 'pavilion', floors: 1, width: 21.8, depth: 21 },
+      // SE corner of the intersection (OSM + satellite): faces north onto
+      // Canal St (30 m between building lines); Lafayette St (one-way south,
+      // ~19 m) runs along the west wall — the streetscape's default layout.
       site: {
-        id: 'canal-lafayette', street: 'Canal St', facing: 'north', mirror: true, streetTwoWay: true, road: 18, walk: 5, lowRise: true,
-        avenue: { kind: 'fifth', name: 'Lafayette St', eastLine: 10.52, heading: -Math.PI / 2 },
+        id: 'canal-lafayette', street: 'Canal St', facing: 'north', streetTwoWay: true, road: 20, walk: 5, lowRise: true, blockSpacing: 75,
+        avenue: { kind: 'narrow', name: 'Lafayette St', eastLine: 10.92 },
       },
       tour: {
         avenue: {
-          label: 'Canal & Lafayette corner', pos: [-31, 1.7, 31], target: [-6, 7, 6], fov: 60,
-          targets: [[-10, 4, 10], [-6, 4, 10], [-10, 4, 4], [-4, 14, 4]],
+          label: 'Canal & Lafayette corner', pos: [33, 1.7, 31], target: [4, 5.5, 6], fov: 60,
+          targets: [[10, 4, 10], [6, 4, 10], [10, 4, 4], [4, 12, 4]],
         },
-        labels: { east: 'Lafayette Street side', crown: 'Rooftop billboard' },
+        labels: { west: 'Lafayette Street side', crown: 'Rooftop billboard' },
         streetDist: 34,
       },
       hotspots: [
-        { id: 'bank', label: 'TD Bank', text: 'Full-service TD Bank branch, open 7 days.', at: [0.6, 0.3, 'front'] },
-        { id: 'corner', label: 'Corner frontage', text: 'Glass and green signage wrap the Canal & Lafayette corner.', at: [0.05, 0.6, 'front'] },
-        { id: 'billboard', label: 'Rooftop billboard', text: 'Billboard structure facing the intersection.', at: [0.4, 1.7, 'roof'] },
+        { id: 'bank', label: 'TD Bank', text: 'Full-service TD Bank branch, open 7 days.', at: [0.4, 0.3, 'front'] },
+        { id: 'corner', label: 'Corner frontage', text: 'Glass and green signage wrap the Canal & Lafayette corner.', at: [0.95, 0.6, 'front'] },
+        { id: 'entrance', label: 'Lafayette St entrance', text: 'No. 250 door, open 7 days.', at: [0.3, 0.35, 'right'] },
+        { id: 'billboard', label: 'Rooftop billboard', text: 'Billboard structure facing north up Lafayette Street.', at: [0.6, 1.7, 'roof'] },
       ],
     },
   },
@@ -743,21 +788,29 @@ export const properties = [
     cover: 'assets/properties/2100-directors-row/front.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'flex', floors: 2, width: 32, depth: 110, tenant: 'AmerisourceBergen', number: '2100' },
-      // Suburban business park: parking lots, fenced yard and low warehouses
-      // instead of a city street grid.
-      site: { id: 'orlando-central-park', facing: 'north', suburban: true },
+      // Footprint traced from satellite / OSM / Orange County situs point:
+      // ~111 m west front x ~150 m north side, 1969 (~168-213k SF on ~8.5 ac).
+      // Local +z = west (office front on the west yard), -x = north (truck
+      // docks along Directors Row), +x = south (rail spur).
+      procedural: { generator: 'flex', floors: 2, width: 111, depth: 150, tenant: 'AmerisourceBergen', number: '2100' },
+      site: { id: 'orlando-central-park', facing: 'west', suburban: true, bare: true },
       tour: {
-        avenue: { label: 'Entrance & parking', pos: [-34, 2.2, 92], target: [0, 5, 50], fov: 55 },
-        labels: { 'front-west': 'Office corner', west: 'Landscaped side', east: 'Loading docks & yard', 'rear-west': 'Rear corner', crown: 'Office entrance' },
-        streetDist: 55,
-        radius: 70, // long, low building: keep corner views close
-        omit: ['base'],
+        avenue: { label: 'Office corner from the drive', pos: [-86, 2.2, 104], target: [-44, 5, 62], fov: 55 },
+        labels: { street: 'West yard & office front', roof: 'Aerial over Directors Row' },
+        streetDist: 32,
+        radius: 120,
+        omit: ['base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'crown'],
+        extra: [
+          { id: 'entrance', label: 'Office entrance', pos: [-24, 2.6, 96], target: [-38, 4.5, 75], fov: 50 },
+          { id: 'docks', label: 'Truck docks on Directors Row', pos: [-95, 7, -34], target: [-46, 3, -10], fov: 55 },
+          { id: 'east-lot', label: 'East parking lot', pos: [-84, 14, -128], target: [-10, 3, -40], fov: 50 },
+          { id: 'aerial-sw', label: 'Aerial from the south-west', pos: [95, 60, 175], target: [0, 0, 0], fov: 50 },
+        ],
       },
       hotspots: [
-        { id: 'entrance', label: 'Office entrance', text: 'Two-storey glass entry with a blue awning (No. 2100).', at: [0.62, 0.5, 'front'] },
-        { id: 'docks', label: 'Loading docks', text: 'Covered dock doors along the fenced side yard.', at: [0.7, 0.4, 'left'] },
-        { id: 'warehouse', label: 'Warehouse', text: 'Long single-storey distribution space with high windows.', at: [0.35, 0.8, 'left'] },
+        { id: 'entrance', label: 'Office entrance', text: 'Two-storey glass entry with a blue awning (No. 2100).', at: [0.157, 0.5, 'front'] },
+        { id: 'docks', label: 'Truck docks', text: 'Dock-high doors under a canopy along the recessed north wall, facing Directors Row.', at: [0.62, 0.4, 'left'] },
+        { id: 'yard', label: 'Building-products yard', text: 'Building-products yard and roll-up doors on the west side.', at: [0.52, 0.6, 'front'] },
       ],
     },
   },
@@ -794,11 +847,11 @@ export const properties = [
     cover: 'assets/properties/7877-e-snyder/front.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'drugstore', floors: 1, width: 40, depth: 32 },
-      site: { id: 'tucson-snyder', facing: 'north', suburban: true, desert: true },
+      procedural: { generator: 'drugstore', floors: 1, width: 41, depth: 35 },
+      site: { id: 'tucson-snyder', facing: 'south', suburban: true, desert: true, noSheds: true },
       tour: {
-        avenue: { label: 'Corner entrance', pos: [42, 2.5, 46], target: [14, 5, 10], fov: 55 },
-        labels: { 'front-west': 'Corner entrance tower', west: 'East side arcade', east: 'West side', crown: 'Entrance tower' },
+        avenue: { label: 'Corner entrance', pos: [40, 2.2, 25.5], target: [17, 4.8, 13], fov: 58 },
+        labels: { 'front-west': 'Corner entrance tower', west: 'East side arcade', 'rear-west': 'Northeast corner', back: 'North side & storage', east: 'West side & drive-thru', crown: 'Entrance tower' },
         streetDist: 46,
         radius: 58,
         omit: ['base'],
@@ -847,19 +900,21 @@ export const properties = [
     cover: 'assets/properties/415-e-university/pool.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'garden', floors: 3, width: 64, depth: 52 },
-      site: { id: 'tucson-university', facing: 'north', suburban: true, desert: true },
+      procedural: { generator: 'garden', floors: 3, width: 90, depth: 120 },
+      site: { id: 'tucson-university', facing: 'south', suburban: true, desert: true, noSheds: true },
       tour: {
-        avenue: { label: 'Pool courtyard', pos: [26, 2.0, 9.5], target: [2, 3.5, -8], fov: 62 },
-        labels: { 'front-west': 'Entrance & parking', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'Rooftops & mountains' },
-        streetDist: 48,
-        radius: 75,
-        omit: ['base'],
+        avenue: { label: 'Pool courtyard', pos: [2, 3.2, 6], target: [-16, 1.8, 2], fov: 62 },
+        labels: { street: 'University Blvd', west: 'Parking & east side', 'rear-west': 'Northeast corner', back: 'North side', crown: 'Entrance on University' },
+        extra: [{ id: 'fourth', label: '4th Ave side', pos: [-60, 4.5, 48], target: [-38, 4, 12], fov: 55 }],
+        streetDist: 14,
+        streetY: 5,
+        radius: 55,
+        omit: ['base', 'front', 'front-west', 'east'],
       },
       hotspots: [
         { id: 'pool', label: 'Pool courtyard', text: 'Fenced pool with lounge deck and a tiled ramada.', at: [0, 0, 'pool'] },
-        { id: 'sign', label: 'The Link at 4th Ave', text: 'Entrance and monument sign on University Blvd.', at: [0.44, 0.3, 'front'] },
-        { id: 'walkways', label: 'Apartments', text: 'Open walkways and stairs serve each building.', at: [0.3, 0.6, 'front'] },
+        { id: 'sign', label: 'The Link at 4th Ave', text: 'Entrance and monument sign on University Blvd.', at: [0.63, 0.3, 'front'] },
+        { id: 'walkways', label: 'Apartments', text: 'Open walkways and stairs serve each building.', at: [0.32, 0.6, 'front'] },
       ],
     },
   },
@@ -875,8 +930,8 @@ export const properties = [
     description:
       'A grocery-anchored neighbourhood shopping center in northeast Tucson, beneath the Santa Catalina ' +
       'Mountains. Fry’s Food & Drug anchors the center, with a pharmacy, bakery-deli and in-store services, ' +
-      'complemented by a free-standing restaurant pad (Potosino Mexican Food, No. 7865) and a large surface ' +
-      'parking field.',
+      'alongside an in-line strip, Burger King and Starbucks pads and a large surface parking field at Speedway ' +
+      'and Pantano; Potosino Mexican Food (No. 7865) faces the center across Speedway.',
     stats: [
       { label: 'Type', value: 'Grocery-anchored center' },
       { label: 'Anchor', value: 'Fry’s Food & Drug' },
@@ -890,11 +945,21 @@ export const properties = [
       'Santa Catalina Mountain views',
     ],
     tenants: [
-      { name: 'Fry’s Food & Drug', floor: 'Anchor', kind: 'Grocery' },
-      { name: 'Potosino Mexican Food', floor: 'Pad', kind: 'Restaurant' },
-      { name: 'Burger King', floor: 'Pad', kind: 'Restaurant' },
-      { name: 'Chase', floor: 'In-line', kind: 'Bank' },
-      { name: 'Simply Smiles Dentistry', floor: 'In-line', kind: 'Medical' },
+      { name: 'Fry’s Food & Drug', floor: 'Anchor · 7812', kind: 'Grocery' },
+      { name: 'Fry’s Pharmacy', floor: 'Anchor', kind: 'Pharmacy' },
+      { name: 'Starbucks (in Fry’s)', floor: 'Anchor', kind: 'Café' },
+      { name: 'Chase', floor: 'In-line · 7812', kind: 'Bank' },
+      { name: 'Dollar Tree', floor: 'In-line', kind: 'Variety' },
+      { name: 'Simply Smiles Dentistry', floor: 'In-line · 7780', kind: 'Medical' },
+      { name: 'Sally Beauty', floor: 'In-line · 7782', kind: 'Beauty supply' },
+      { name: 'Cost Cutters', floor: 'In-line · 7784', kind: 'Hair salon' },
+      { name: 'Splash Nail Spa', floor: 'In-line · 7790', kind: 'Nail salon' },
+      { name: 'Park Avenue Cleaners', floor: 'In-line · 7794', kind: 'Dry cleaning' },
+      { name: 'MY DR NOW', floor: 'Pad · 7760', kind: 'Medical' },
+      { name: 'Fry’s Fuel Center', floor: 'Pad · 7770', kind: 'Fuel' },
+      { name: 'Burger King', floor: 'Pad · 7880', kind: 'Restaurant' },
+      { name: 'Starbucks', floor: 'Pad · 7890', kind: 'Café' },
+      { name: 'Potosino Mexican Food', floor: 'Pad · 7865 (across Speedway)', kind: 'Restaurant' },
     ],
     availability: [],
     photos: [
@@ -908,14 +973,19 @@ export const properties = [
     cover: 'assets/properties/saguaro-vista/frys.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'center', floors: 1, width: 110, depth: 55 },
-      site: { id: 'tucson-saguaro-vista', facing: 'north', suburban: true, desert: true },
+      procedural: { generator: 'center', floors: 1, width: 136, depth: 58 },
+      site: { id: 'tucson-saguaro-vista', facing: 'north', suburban: true, desert: true, noSheds: true },
       tour: {
-        avenue: { label: 'Potosino pad', pos: [-56, 2.0, 70], target: [-77, 4, 47], fov: 55 },
-        labels: { 'front-west': 'Fry’s entrance', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'Fry’s gable' },
+        avenue: { label: 'Potosino pad', pos: [-59, 2.0, 189], target: [-68, 4.2, 214], fov: 55 },
+        labels: { front: 'From Speedway Blvd', 'front-west': 'In-line shops & Dollar Tree', 'rear-west': 'Rear corner', crown: 'Fry’s gable' },
+        extra: [
+          { id: 'strip', label: 'Simply Smiles & in-line strip', pos: [56, 2.6, 70], target: [79, 4.5, 74], fov: 55 },
+          { id: 'pads', label: 'Burger King & Starbucks pads', pos: [-52, 3.5, 100], target: [-104, 4, 126], fov: 52 },
+          { id: 'pantano', label: 'Pantano Rd pads', pos: [-72, 4, 58], target: [-106, 3, 62], fov: 55 },
+        ],
         streetDist: 62,
-        radius: 95,
-        omit: ['base'],
+        radius: 80,
+        omit: ['base', 'west', 'east'],
       },
       hotspots: [
         { id: 'frys', label: 'Fry’s Food & Drug', text: 'Grocery anchor with pharmacy and bakery-deli.', at: [0.5, 0.75, 'front'] },
@@ -960,19 +1030,33 @@ export const properties = [
     cover: 'assets/properties/1-parrott/entrance.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'labflex', floors: 1, width: 120, depth: 75, sign: 'CARA' },
-      site: { id: 'shelton-parrott', facing: 'north', suburban: true, noFence: true },
+      // Footprint traced from satellite / OSM (address node "1 Parrott Drive"
+      // inside it): ~168 m x 72 m in three stepped blocks along a NNE-SSW axis.
+      // Local +z = the WNW front, +x = toward SSW (CARA lobby and loop drive).
+      procedural: {
+        generator: 'labflex', floors: 1, width: 168, depth: 72, sign: 'CARA',
+        tenants: [
+          { name: 'ID PRODUCTS', sub: 'Suite 500', at: [-2.65, 6.2, 23.45], w: 6.5, bg: '#13294b', ink: '#ffffff' },
+        ],
+      },
+      site: { id: 'shelton-parrott', facing: 'west', suburban: true, noFence: true, bare: true },
       tour: {
-        avenue: { label: 'Entrance drive', pos: [24, 2.2, 66], target: [-4, 3, 36], fov: 60 },
-        labels: { 'front-west': 'Industrial wing', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'CARA entrance' },
-        streetDist: 70,
-        radius: 95,
-        omit: ['base'],
+        avenue: { label: 'CARA entrance & loop drive', pos: [93, 1.8, 43], target: [50, 3.5, 11], fov: 64 },
+        labels: { roof: 'Aerial over Parrott Drive' },
+        radius: 110,
+        omit: ['street', 'base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'crown'],
+        extra: [
+          { id: 'lobby', label: 'CARA lobby', pos: [74, 2.4, 26], target: [74, 3.8, 0], fov: 55 },
+          { id: 'office', label: 'Office wing', pos: [32, 2.4, 44], target: [30, 3.4, 23], fov: 60 },
+          { id: 'wing', label: 'Industrial wing entrance', pos: [8, 2.2, 38], target: [-6, 3, 23], fov: 55 },
+          { id: 'north', label: 'North end & truck doors', pos: [-122, 9, 6], target: [-70, 3, 4], fov: 55 },
+          { id: 'aerial-sw', label: 'Aerial from the south-west', pos: [170, 80, 120], target: [0, 0, 0], fov: 50 },
+        ],
       },
       hotspots: [
-        { id: 'lobby', label: 'Office entrance', text: 'Glazed lobby behind stone planters and the entry drive.', at: [0.56, 0.7, 'front'] },
-        { id: 'office', label: 'Office wing', text: 'Glass curtain-wall bays between round pilasters.', at: [0.2, 0.6, 'front'] },
-        { id: 'wing', label: 'Industrial wing', text: 'Block wing with a ribbon of windows and its own entrance.', at: [0.86, 0.6, 'front'] },
+        { id: 'lobby', label: 'CARA entrance', text: 'Glazed lobby behind stone planters, facing the circular drop-off drive.', at: [0.938, 0.7, 'front'] },
+        { id: 'office', label: 'Office wing', text: 'Glass curtain-wall bays between round pilasters.', at: [0.65, 0.6, 'front'] },
+        { id: 'wing', label: 'Industrial wing', text: 'Ribbed fascia over a ribbon of tall windows; ID Products (Suite 500).', at: [0.45, 0.6, 'front'] },
       ],
     },
   },
@@ -1003,7 +1087,20 @@ export const properties = [
       'Suites from small offices to ±5,000 SF',
       'Gated entry and brick-paved drive',
     ],
-    tenants: [],
+    // Building/suite from listings and directories (PICOR lease reports, Travelers,
+    // Psychology Today, practice websites); suite letter = building.
+    tenants: [
+      { name: 'Monier Insurance Agency', floor: 'Bldg D · D-430', kind: 'Insurance' },
+      { name: 'Desert Breeze Mental Health', floor: 'Bldg D · D-420', kind: 'Medical' },
+      { name: 'Liberation Counseling & Consulting', floor: 'Bldg D · D-420', kind: 'Medical' },
+      { name: 'Zola Healing CoLab', floor: 'Bldg C · C-320', kind: 'Medical' },
+      { name: 'Scarlet Rabbit Wellness', floor: 'Bldg F · F-600', kind: 'Medical' },
+      { name: 'Lucid Awakening', floor: 'Bldg F · F-640', kind: 'Medical' },
+      { name: 'Help and Hope Counseling', floor: 'Bldg F · F-640', kind: 'Medical' },
+      { name: 'Human Resource Network', floor: 'Bldg G', kind: 'Office' },
+      { name: 'Nutritional Services of Southern Arizona', floor: 'Bldg I · I-905', kind: 'Medical' },
+      { name: 'Sandra L. Reed, CPA', floor: '—', kind: 'Office' },
+    ],
     availability: [],
     photos: [
       { src: 'assets/properties/el-dorado-square/entrance.jpg', caption: 'Entrance on El Dorado Place', focus: 'center 60%' },
@@ -1012,19 +1109,32 @@ export const properties = [
     cover: 'assets/properties/el-dorado-square/entrance.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'mission', floors: 2, width: 70, depth: 60 },
-      site: { id: 'tucson-el-dorado', facing: 'north', suburban: true, noFence: true },
+      procedural: { generator: 'mission', floors: 2, width: 150, depth: 140 },
+      site: { id: 'tucson-el-dorado', facing: 'north', suburban: true, noFence: true, noSheds: true, desert: true },
       tour: {
-        avenue: { label: 'Entrance gate', pos: [52, 1.8, 58], target: [38, 2.5, 36], fov: 58 },
-        labels: { 'front-west': 'Entrance corner', west: 'East buildings', east: 'West buildings', 'rear-west': 'Rear corner', crown: 'Tower & loggia' },
-        streetDist: 46,
-        radius: 70,
-        omit: ['base'],
+        // Campus traced from satellite: origin = campus centre, +z = El Dorado Place (south).
+        avenue: { label: 'Entrance gate', pos: [-31, 1.7, 84], target: [-17, 2.2, 66], fov: 58 },
+        labels: { street: 'Campus from El Dorado Pl', roof: 'Campus from the south-west' },
+        streetY: 72,
+        streetDist: 62,
+        radius: 120,
+        omit: ['base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'crown'],
+        extra: [
+          { id: 'bldg-d', label: 'Building D', pos: [-55, 6.5, 15.3], target: [-55, 4.4, 0], fov: 68 },
+          { id: 'tower', label: 'Tower & loggia', pos: [-55, 3, 14.8], target: [-59, 7.5, 0], fov: 56 },
+          { id: 'north', label: 'Buildings E & F', pos: [8, 3, 4], target: [6, 5, -26], fov: 64 },
+          { id: 'eastbldgs', label: 'Buildings G & H', pos: [36, 5, 10], target: [74, 4, -22], fov: 62 },
+          { id: 'south', label: 'Buildings A & I', pos: [26, 2.5, 82], target: [20, 5, 45], fov: 62 },
+          { id: 'wilmot', label: 'From Wilmot Rd', pos: [-112, 2.2, 32], target: [-60, 5, 5], fov: 56 },
+        ],
       },
       hotspots: [
-        { id: 'gate', label: 'Entrance', text: 'Brick pillars, iron fence and the El Dorado Square sign.', at: [0, 0, 'gate'] },
-        { id: 'tower', label: 'Building D tower', text: 'Arched loggia tower with a small balcony.', at: [0.5, 0.95, 'front'] },
-        { id: 'balconies', label: 'Offices', text: 'Second-floor offices with wrought-iron balconies.', at: [0.7, 0.5, 'front'] },
+        { id: 'gate', label: 'Entrance', text: 'Brick pillars, iron fence, the El Dorado Square sign and the campus tenant directory.', at: [0, 0, 'gate'] },
+        { id: 'bldg-d', label: 'Building D (400)', text: 'Loggia tower with balcony. Monier Insurance Agency (D-430), Desert Breeze Mental Health and Liberation Counseling (D-420).', at: [0, 0.75, 'D'] },
+        { id: 'bldg-c', label: 'Building C (300)', text: 'Zola Healing CoLab (C-320).', at: [0, 0.6, 'C'] },
+        { id: 'bldg-f', label: 'Building F (600)', text: 'Scarlet Rabbit Wellness (F-600); Lucid Awakening and Help & Hope Counseling (F-640).', at: [0, 0.6, 'F'] },
+        { id: 'bldg-g', label: 'Building G (700)', text: 'Human Resource Network.', at: [0, 0.6, 'G'] },
+        { id: 'bldg-i', label: 'Building I (900)', text: 'Nutritional Services of Southern Arizona (I-905).', at: [0, 0.6, 'I'] },
       ],
     },
   },
@@ -1053,7 +1163,16 @@ export const properties = [
       'Arched entrances and shaded arcade',
       'Surface parking on site',
     ],
-    tenants: [{ name: 'Gentle Dental', floor: '—', kind: 'Medical' }],
+    // Listings (LoopNet/Crexi/First Pioneer), Yelp, MapQuest, Waze, Gentle Dental site.
+    tenants: [
+      { name: 'Gentle Dental', floor: '2nd · Ste 203', kind: 'Medical' },
+      { name: 'Morgan, Cohen & Bach', floor: '2nd · Ste 200', kind: 'Legal' },
+      { name: 'BAYADA Home Health Care', floor: '1st', kind: 'Medical' },
+      { name: 'Soreo Pathways', floor: '1st', kind: 'Medical' },
+      { name: 'Arizona Dept. of Economic Security', floor: '—', kind: 'Government' },
+      { name: 'HomeWell Care Services', floor: '—', kind: 'Medical' },
+      { name: 'Spencer Construction', floor: '—', kind: 'Office' },
+    ],
     availability: [],
     photos: [
       { src: 'assets/properties/7225-n-mona-lisa/corner.jpg', caption: 'Mona Lisa Plaza', focus: 'center 50%' },
@@ -1061,19 +1180,27 @@ export const properties = [
     cover: 'assets/properties/7225-n-mona-lisa/corner.jpg',
     model: {
       glb: null,
-      procedural: { generator: 'monalisa', floors: 2, width: 46, depth: 30, tenantSign: 'gentle dental', number: '7225' },
-      site: { id: 'tucson-mona-lisa', facing: 'north', suburban: true, noFence: true, trees: false },
+      // Satellite: L-shaped, 57 m along Ina Rd x 29 m, plus a 24 x 15 m block behind the east end.
+      procedural: { generator: 'monalisa', floors: 2, width: 57, depth: 44, barDepth: 29, tenantSign: 'gentle dental', number: '7225' },
+      site: { id: 'tucson-mona-lisa', facing: 'north', suburban: true, noFence: true, noSheds: true, desert: true, trees: false },
       tour: {
-        avenue: { label: 'Corner view', pos: [38, 1.7, 36], target: [6, 5.5, 6], fov: 60 },
-        labels: { 'front-west': 'Corner entrance', west: 'East side arcade', east: 'West wing', 'rear-west': 'Rear corner', crown: 'Mission parapet' },
-        streetDist: 46,
-        radius: 52,
-        omit: ['base'],
+        avenue: { label: 'Corner view', pos: [44, 1.7, 42], target: [12, 5.5, 12], fov: 60 },
+        labels: { street: 'From Ina Rd', 'front-west': 'Ina & Mona Lisa corner', west: 'Mona Lisa Rd side', east: 'West wing & carports', 'rear-west': 'Rear corner', back: 'Rear & apartments', crown: 'Mission parapet' },
+        streetDist: 50,
+        radius: 60,
+        omit: ['base', 'crown', 'back'],
+        extra: [
+          { id: 'rear', label: 'Rear & apartments', pos: [-14, 24, -100], target: [0, 3, 0], fov: 48 },
+          { id: 'tenants', label: 'Suites & tenants', pos: [-8, 2.4, 36.5], target: [-8, 3.2, 22], fov: 64 },
+          { id: 'parapet', label: 'Mission parapet', pos: [17, 7, 45], target: [15, 9, 22], fov: 48 },
+          { id: 'mall', label: 'Toward Foothills Mall', pos: [-30, 30, 120], target: [140, 0, -60], fov: 60 },
+        ],
       },
       hotspots: [
-        { id: 'parapet', label: 'Mission parapet', text: 'Curved parapet with red coping and the Gentle Dental sign.', at: [0.45, 0.95, 'front'] },
-        { id: 'entry', label: 'Arched entrance', text: 'Two-story arched entry recess with upper glazing.', at: [0.72, 0.45, 'front'] },
-        { id: 'arcade', label: 'Arcade', text: 'Shaded ground-floor arcade along the suites.', at: [0.6, 0.18, 'right'] },
+        { id: 'parapet', label: 'Gentle Dental (Suite 203)', text: 'Curved mission parapet with red coping and the Gentle Dental sign; the dental office is upstairs in Suite 203.', at: [0.45, 0.95, 'front'] },
+        { id: 'entry', label: 'Arched entrance', text: 'Two-story arched entry with the lobby directory: Morgan, Cohen & Bach (Suite 200), Gentle Dental (203); Suite 101 (2,170 SF) available.', at: [0.82, 0.45, 'front'] },
+        { id: 'suites', label: 'Ground-floor suites', text: 'BAYADA Home Health Care, Soreo Pathways and Arizona DES behind the arcade.', at: [0.3, 0.2, 'front'] },
+        { id: 'arcade', label: 'East arcade', text: 'Shaded arcade on the Mona Lisa Rd side: HomeWell Care Services, Spencer Construction.', at: [0.55, 0.18, 'right'] },
       ],
     },
   },

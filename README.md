@@ -48,6 +48,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/mission.js` | `mission` generator (El Dorado Square, Tucson: Spanish Colonial office campus) |
 | `js/viewer/monalisa.js` | `monalisa` generator (7225 N Mona Lisa Rd, Tucson: mission-revival office) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
+| `js/viewer/sites/<site-id>.js` | Real surroundings, pads and tenant signage for suburban sites (traced from satellite + OpenStreetMap) |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |
 | `assets/properties/<id>/` | Listing photos |

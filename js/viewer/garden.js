@@ -11,7 +11,7 @@ import { textTexture, rand } from './textures.js';
 import { V, piece, createKit } from './kit.js';
 
 export function buildGarden(params) {
-  const { width: W = 64, depth: D = 52 } = params;
+  const { width: W = 90, depth: D = 120 } = params;
   const r = rand(415);
   const FH = 2.9;
   const g = new THREE.Group();
@@ -83,36 +83,46 @@ export function buildGarden(params) {
     return { H };
   }
 
-  // Layout: front 3-storey block on the parking court, rear 3-storey block
-  // with a grey wing, 2-storey block on the west side of the courtyard.
-  block(-12, 16, 38, 11, 3, Math.PI, { solar: true });
-  box(greyWall, 6, 8.9, 11.2, 9.5, 4.45, 16); // grey end tower with slot windows
-  for (const y of [2, 4.9, 7.8]) I.trim.add(piece(new THREE.Matrix4(), 12.55, y, 16, 0.05, 1.2, 2.2), '#2b3138');
-  block(4, -20, 46, 11, 3, 0);
-  block(-26, -2, 28, 10, 2, Math.PI / 2);
+  // Layout traced from satellite/OSM (model frame = the whole parcel, 90 x 120 m,
+  // +z = south onto University Blvd, +x = east; 4th Ave is west of x = -49):
+  //   A, B  two 2-storey E-W blocks at the north end, walkways facing south
+  //   C     2-storey block along 4th Ave, walkway facing the courtyard
+  //   D     3-storey block with rooftop solar (OSM: 3 levels), walkways facing
+  //         the east parking lot, grey end tower by the pool
+  //   E     2-storey block west of D (802 N 4th Ave) with a diagonal wing
+  //   pool courtyard between B and D; the parking lot fills the east half.
+  block(-27, -46, 34, 12, 2, 0, { mansard: true });
+  block(-27, -23.5, 34, 12, 2, 0, { mansard: true });
+  block(-41.2, 12.6, 29, 7.4, 2, Math.PI / 2, { mansard: false });
+  block(-16.2, 38.6, 31, 13, 3, Math.PI / 2, { solar: true });
+  box(greyWall, 13.4, 9.5, 5, -16.2, 4.75, 21.6); // grey end tower with slot windows
+  for (const y of [2, 4.9, 7.8]) I.trim.add(piece(new THREE.Matrix4(), -16.2, y, 19.08, 2.2, 1.2, 0.05), '#2b3138');
+  block(-30.3, 40, 22, 8.4, 2, -Math.PI / 2, { mansard: false });
+  box(stucco, 3.2, 6.4, 11, -35.5, 3.2, 52.5, -0.75); // diagonal wing toward the 4th Ave corner
 
   // ---- pool courtyard ----
   {
     const deck = new THREE.MeshStandardMaterial({ color: '#efede8', roughness: 0.9 });
-    const px = 14, pz = 0;
-    box(deck, 30, 0.15, 24, px, 0.08, pz);
-    const water = new THREE.Mesh(new THREE.BoxGeometry(16, 0.1, 7), new THREE.MeshStandardMaterial({ color: '#2fc6d6', roughness: 0.05, metalness: 0.1, emissive: '#0b5d6b', emissiveIntensity: 0.25 }));
-    water.position.set(px - 1, 0.17, pz + 2);
+    const px = -15.8, pz = 2.5;
+    box(deck, 18, 0.15, 27, -16, 0.08, 2.5);
+    const water = new THREE.Mesh(new THREE.BoxGeometry(7.4, 0.1, 18.5), new THREE.MeshStandardMaterial({ color: '#2fc6d6', roughness: 0.05, metalness: 0.1, emissive: '#0b5d6b', emissiveIntensity: 0.25 }));
+    water.position.set(px, 0.17, pz);
     add(water);
-    box(new THREE.MeshStandardMaterial({ color: '#1f8fa3', roughness: 0.3 }), 16.4, 0.12, 7.4, px - 1, 0.13, pz + 2);
-    // Orange loungers.
+    box(new THREE.MeshStandardMaterial({ color: '#1f8fa3', roughness: 0.3 }), 7.8, 0.12, 18.9, px, 0.13, pz);
+    // Orange loungers along the east side of the pool.
     const orange = new THREE.MeshStandardMaterial({ color: '#f07a18', roughness: 0.6 });
-    for (const [x, z] of [[px + 9, pz + 6], [px + 10.6, pz + 6.5], [px + 8, pz - 4], [px + 9.5, pz - 4.3]]) {
-      box(orange, 0.75, 0.35, 2.0, x, 0.4, z);
-      const back = box(orange, 0.75, 0.9, 0.12, x, 0.85, z - 0.95);
-      back.rotation.x = -0.6;
+    for (const z of [4, 6, 8, 10, 12.5]) {
+      box(orange, 2.0, 0.35, 0.75, -10, 0.4, z);
+      const back = box(orange, 0.12, 0.9, 0.75, -9.05, 0.85, z);
+      back.rotation.z = 0.6;
     }
-    // Ramada with a hipped tile roof on brick piers.
+    // Ramada with a hipped tile roof on brick piers (NE corner of the deck).
     const brick = new THREE.MeshStandardMaterial({ color: '#9a5a44', roughness: 0.9 });
-    for (const [x, z] of [[px + 9, pz - 9], [px + 14, pz - 9], [px + 9, pz - 4.5], [px + 14, pz - 4.5]]) box(brick, 0.8, 3, 0.8, x, 1.5, z);
-    const hip = new THREE.Mesh(new THREE.ConeGeometry(4.6, 1.4, 4), tiles);
+    const rx = -10.2, rz = -6.2;
+    for (const [dx, dz] of [[-2.3, -2.2], [2.3, -2.2], [-2.3, 2.2], [2.3, 2.2]]) box(brick, 0.7, 3, 0.7, rx + dx, 1.5, rz + dz);
+    const hip = new THREE.Mesh(new THREE.ConeGeometry(4.4, 1.5, 4), new THREE.MeshStandardMaterial({ color: '#3f8f8a', roughness: 0.6 }));
     hip.rotation.y = Math.PI / 4;
-    hip.position.set(px + 11.5, 3.8, pz - 6.75);
+    hip.position.set(rx, 3.75, rz);
     hip.castShadow = true;
     add(hip);
     // Fence: black pickets between brick pillars around the deck.
@@ -124,20 +134,20 @@ export function buildGarden(params) {
       for (const y of [0.15, 1.45]) I.steel.add(piece(F, len / 2, y, 0, len, 0.05, 0.05));
       for (let s = 0; s <= len + 0.01; s += len / Math.max(1, Math.round(len / 5))) box(brick, 0.6, 1.9, 0.6, 0, 0.95, 0).applyMatrix4(new THREE.Matrix4().multiplyMatrices(F, new THREE.Matrix4().makeTranslation(s, 0, 0)));
     };
-    fence(px - 15, pz + 12, px + 15, pz + 12);
-    fence(px - 15, pz - 12, px - 15, pz + 12);
-    fence(px + 15, pz + 12, px + 15, pz - 12);
-    // Lawn with hammocks between the west block and the pool.
-    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(10, 18), new THREE.MeshStandardMaterial({ color: '#5fae3a', roughness: 1 }));
+    fence(-6.8, -11, -6.8, 16);
+    fence(-25, -11, -6.8, -11);
+    fence(-25, 16, -6.8, 16);
+    // Lawn with hammocks between block C and the pool.
+    const lawn = new THREE.Mesh(new THREE.PlaneGeometry(12.6, 25), new THREE.MeshStandardMaterial({ color: '#5fae3a', roughness: 1 }));
     lawn.rotation.x = -Math.PI / 2;
-    lawn.position.set(-15.5, 0.06, 0);
+    lawn.position.set(-30.9, 0.06, 2);
     add(lawn);
     const canvas = new THREE.MeshStandardMaterial({ color: '#f2efe6', roughness: 0.9, side: THREE.DoubleSide });
     for (const z of [-5, 1, 7]) {
-      for (const dx of [-2, 2]) box(new THREE.MeshStandardMaterial({ color: '#2a2d30' }), 0.1, 1.6, 0.1, -15.5 + dx, 0.8, z);
+      for (const dx of [-2, 2]) box(new THREE.MeshStandardMaterial({ color: '#2a2d30' }), 0.1, 1.6, 0.1, -29.5 + dx, 0.8, z);
       const h = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 3.8, 12, 1, true, Math.PI, Math.PI), canvas);
       h.rotation.z = Math.PI / 2;
-      h.position.set(-15.5, 1.0, z);
+      h.position.set(-29.5, 1.0, z);
       add(h);
     }
   }
@@ -157,13 +167,13 @@ export function buildGarden(params) {
       add(f);
     }
   };
-  for (const [x, z, h] of [[30, 14, 13], [31, -8, 15], [-30, 22, 12], [24, 22, 14], [-34, -16, 11]]) palm(x, z, h);
+  for (const [x, z, h] of [[-6, 27, 14], [-6, 47, 15], [-5.5, -9, 13], [-36, -9, 12], [-36, 15, 13], [-46.5, 32, 11], [-8, 56, 12]]) palm(x, z, h);
   const cyp = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 1.1, 11, 10), new THREE.MeshStandardMaterial({ color: '#2f5226', roughness: 1 }));
-  cyp.position.set(28, 5.5, -14);
+  cyp.position.set(-7.5, 5.5, 18);
   cyp.castShadow = true;
   add(cyp);
 
-  // Monument sign at the parking entrance.
+  // Monument sign at the parking entrance on University Blvd.
   {
     const sign = textTexture({
       width: 1024, height: 640, bg: '#5c6066',
@@ -175,9 +185,9 @@ export function buildGarden(params) {
         ['4', '1', '5'].forEach((n, i) => ctx.fillText(n, 880, 150 + i * 170));
       },
     });
-    const m = box(new THREE.MeshStandardMaterial({ map: sign, roughness: 0.6 }), 5.2, 3.2, 0.4, -4, 2.3, D / 2 + 6);
+    const m = box(new THREE.MeshStandardMaterial({ map: sign, roughness: 0.6 }), 5.2, 3.2, 0.4, 11.5, 2.3, 58.2);
     m.material = [greyWall, greyWall, greyWall, greyWall, new THREE.MeshStandardMaterial({ map: sign, roughness: 0.6 }), greyWall];
-    box(new THREE.MeshStandardMaterial({ color: '#9a5a44', roughness: 0.9 }), 6.4, 0.9, 1.6, -4, 0.45, D / 2 + 6.4);
+    box(new THREE.MeshStandardMaterial({ color: '#9a5a44', roughness: 0.9 }), 6.4, 0.9, 1.6, 11.5, 0.45, 58.6);
   }
 
   finish();
@@ -186,7 +196,7 @@ export function buildGarden(params) {
     const y = v * 9;
     switch (faceName) {
       case 'front': return V((u - 0.5) * W, y, D / 2 + 2);
-      case 'pool': return V(14, 2.5, 2);
+      case 'pool': return V(-16, 2.5, 2);
       case 'roof': return V((u - 0.5) * W, y, 0);
       default: return V(0, y, 0);
     }

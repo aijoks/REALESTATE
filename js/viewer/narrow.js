@@ -17,15 +17,16 @@ export function buildNarrowLoft(params) {
   const { width: W = 12.5, depth: D = 30 } = params;
 
   const r = rand(1910);
-  const g1 = 4.8;
-  const g2 = 4.0;
+  // Storey heights fitted to the surveyed roof height (NYC/OSM: 32.0 m).
+  const g1 = 4.3;
+  const g2 = 3.4;
   const baseH = g1 + g2;
-  const FH = 3.5;
+  const FH = 3.0;
   const floors = 7;
-  const atticH = 3.4;
+  const atticH = 2.7;
   const shaftTop = baseH + floors * FH;
   const atticTop = shaftTop + atticH;
-  const top = atticTop + 1.3;
+  const top = atticTop + 0.9;
 
   const g = new THREE.Group();
   g.name = 'building';
@@ -51,18 +52,18 @@ export function buildNarrowLoft(params) {
     { x: 4.75, y: 0.12 + 1.1, w: 0.95, h: 2.2, kind: 'panel', panel: '#3a3433', reveal: '#9c9384', rd: 0.12, sill: false },
     { x: 7.7, y: 0.12 + 1.6, w: 2.6, h: 3.2, kind: 'shop', room: 'shop', frame: '#9c7a2e', reveal: '#9c9384', rd: 0.25, sill: false },
     { x: 9.95, y: 0.12 + 1.6, w: 1.2, h: 3.2, kind: 'lobby', room: 'shop', frame: '#b48a2e', reveal: '#9c9384', rd: 0.25, sill: false },
-    { x: 1.2, y: g1 + 1.95, w: 1.1, h: 2.3, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' },
-    { x: W - 1.2, y: g1 + 1.95, w: 1.1, h: 2.3, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' },
+    { x: 1.2, y: g1 + 1.6, w: 1.1, h: 2.1, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' },
+    { x: W - 1.2, y: g1 + 1.6, w: 1.1, h: 2.1, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' },
   ];
-  for (const x of cx) baseHoles.push({ x, y: g1 + 1.95, w: cww, h: 2.6, kind: 'dh', frame, reveal: brown, rd: 0.3, sillColor: '#e2d8c6' });
+  for (const x of cx) baseHoles.push({ x, y: g1 + 1.6, w: cww, h: 2.4, kind: 'dh', frame, reveal: brown, rd: 0.3, sillColor: '#e2d8c6' });
   add(wall(Fb, W, baseH, baseHoles, matBase));
   baseHoles.forEach((o) => opening(Fb, o));
   // Dark frame and ornamented mullions around the 2nd-floor centre windows.
-  I.trim.add(piece(Fb, W / 2, g1 + 1.95, 0.03, cw + 0.3, 3.0, 0.06), brown);
-  for (let k = 1; k < 4; k++) I.trim.add(piece(Fb, W / 2 + (k - 2) * (cw / 4), g1 + 1.95, 0.08, 0.28, 2.7, 0.1), '#5b3d30');
+  I.trim.add(piece(Fb, W / 2, g1 + 1.6, 0.03, cw + 0.3, 2.8, 0.06), brown);
+  for (let k = 1; k < 4; k++) I.trim.add(piece(Fb, W / 2 + (k - 2) * (cw / 4), g1 + 1.6, 0.08, 0.28, 2.5, 0.1), '#5b3d30');
   // Carved corbels over the side windows and at the centre frame.
   for (const x of [0.55, 1.85, side + 0.2, W - side - 0.2, W - 1.85, W - 0.55]) {
-    I.trim.add(piece(Fb, x, g1 + 3.45, 0.16, 0.34, 0.75, 0.3), '#ddd2be');
+    I.trim.add(piece(Fb, x, g1 + g2 - 0.5, 0.16, 0.34, 0.75, 0.3), '#ddd2be');
   }
   // Modillion belt course over the base.
   stoneBox(W + 0.3, 0.45, 0.5, 0, baseH + 0.05, D / 2 + 0.2);
@@ -130,10 +131,10 @@ export function buildNarrowLoft(params) {
   const upperH = top - baseH;
   const Fs = face(0, -W / 2, baseH, D / 2);
   const sideHoles = [];
-  const wy = (f) => f * FH + 0.55 + 1.15;
+  const wy = (f) => f * FH + 0.5 + 1.1;
   for (let f = 0; f < floors; f++) {
     for (const x of [side / 2, W - side / 2]) {
-      sideHoles.push({ x, y: wy(f), w: 1.05, h: 2.3, kind: 'dh', frame, reveal: '#a59b8a', sillColor: '#e2d8c6', header: '#d6ccb8' });
+      sideHoles.push({ x, y: wy(f), w: 1.05, h: 2.1, kind: 'dh', frame, reveal: '#a59b8a', sillColor: '#e2d8c6', header: '#d6ccb8' });
     }
   }
   // Side piers are one wall with the centre bay cut out (and window holes).
@@ -144,7 +145,7 @@ export function buildNarrowLoft(params) {
   const Fc = face(0, -W / 2 + side, baseH, D / 2 - 0.35);
   const cHoles = [];
   for (let f = 0; f < floors; f++) {
-    for (const x of cx) cHoles.push({ x: x - side, y: wy(f) + 0.1, w: cww, h: 2.45, kind: 'dh', frame, reveal: '#3a2620', rd: 0.18, sill: false });
+    for (const x of cx) cHoles.push({ x: x - side, y: wy(f) + 0.05, w: cww, h: 2.25, kind: 'dh', frame, reveal: '#3a2620', rd: 0.18, sill: false });
   }
   const darkMat = new THREE.MeshStandardMaterial({ color: '#4e352b', roughness: 0.6, metalness: 0.25 });
   add(wall(Fc, cw, shaftTop - baseH, cHoles, darkMat));
@@ -169,14 +170,14 @@ export function buildNarrowLoft(params) {
   const atticY = shaftTop - baseH;
   const Fa = face(0, -W / 2, shaftTop, D / 2);
   const aHoles = [];
-  for (const x of cx) aHoles.push({ x, y: 1.3, w: cww * 0.9, h: 1.9, kind: 'dh', frame, reveal: '#9c9384', rd: 0.3, sillColor: '#e2d8c6' });
-  for (const x of [side / 2, W - side / 2]) aHoles.push({ x, y: 1.3, w: 0.9, h: 1.8, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' });
-  add(wall(Fa, W, atticH + 1.3, aHoles, matBase));
+  for (const x of cx) aHoles.push({ x, y: 1.05, w: cww * 0.9, h: 1.6, kind: 'dh', frame, reveal: '#9c9384', rd: 0.3, sillColor: '#e2d8c6' });
+  for (const x of [side / 2, W - side / 2]) aHoles.push({ x, y: 1.05, w: 0.9, h: 1.6, kind: 'dh', frame, reveal: '#9c9384', sillColor: '#e2d8c6' });
+  add(wall(Fa, W, atticH + 0.9, aHoles, matBase));
   aHoles.forEach((o) => opening(Fa, o));
   // Arched heads over the four centre attic windows, and a cartouche.
   for (const x of cx) {
     const arch = new THREE.Mesh(new THREE.TorusGeometry(cww * 0.48, 0.12, 8, 20, Math.PI), matStone);
-    arch.position.set(-W / 2 + x, shaftTop + 2.25, D / 2 + 0.06);
+    arch.position.set(-W / 2 + x, shaftTop + 1.85, D / 2 + 0.06);
     add(arch);
   }
   const cart = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.18, 24), matStone);
@@ -191,8 +192,8 @@ export function buildNarrowLoft(params) {
   cornice.castShadow = true;
   add(cornice);
   for (let x = -W / 2 + 0.3; x <= W / 2; x += (W - 0.6) / 5) {
-    const br = new THREE.Mesh(new THREE.BoxGeometry(0.42, 1.4, 1.6), matStone);
-    br.position.set(x, top - 1.0, D / 2 + 0.8);
+    const br = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.95, 1.6), matStone);
+    br.position.set(x, top - 0.8, D / 2 + 0.8);
     br.castShadow = true;
     add(br);
   }
@@ -219,10 +220,13 @@ export function buildNarrowLoft(params) {
     bulk.castShadow = true;
     add(bulk);
     const tank = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.75, 3.2, 24), new THREE.MeshStandardMaterial({ color: '#6e5038', roughness: 0.95 }));
+    // Grey steel tank with a domed lid, east of centre (satellite).
+    const steelTank = new THREE.MeshStandardMaterial({ color: '#9a9c9c', roughness: 0.5, metalness: 0.5 });
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(1.7, 1.7, 3.2, 24), steelTank);
     body.position.y = 4.4;
-    const lid = new THREE.Mesh(new THREE.ConeGeometry(1.9, 1.0, 24), new THREE.MeshStandardMaterial({ color: '#33302d', roughness: 0.9 }));
-    lid.position.y = 6.5;
+    const lid = new THREE.Mesh(new THREE.SphereGeometry(1.7, 24, 10, 0, Math.PI * 2, 0, Math.PI / 2), steelTank);
+    lid.scale.y = 0.45;
+    lid.position.y = 6.0;
     tank.add(body, lid);
     for (let k = 0; k < 4; k++) {
       const a = (k / 4) * Math.PI * 2 + Math.PI / 4;
@@ -231,7 +235,7 @@ export function buildNarrowLoft(params) {
       tank.add(leg);
     }
     tank.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    tank.position.set(-W / 2 + 3.4, top - 0.4, -D / 2 + 9);
+    tank.position.set(2.0, top - 0.4, -2.0);
     add(tank);
   }
 
