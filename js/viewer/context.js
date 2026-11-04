@@ -1348,7 +1348,9 @@ function buildSuburban(scene, { W, D, site }) {
     top.rotation.y = -Math.atan2(z1 - z0, x1 - x0);
     top.position.set((x0 + x1) / 2, 2.45, (z0 + z1) / 2);
   };
-  if (!desert) {
+  if (site.noFence) {
+    // Office campus: open lot, no fenced yard.
+  } else if (!desert) {
     fenceRun(lotX0 + 2, front - 2, -W / 2 - 1, front - 2);
     fenceRun(lotX0 + 2, front - 2, lotX0 + 2, -front);
   } else {

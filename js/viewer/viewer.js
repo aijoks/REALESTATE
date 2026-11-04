@@ -16,8 +16,9 @@ import { buildFlex } from './flex.js';
 import { buildDrugstore } from './drugstore.js';
 import { buildGarden } from './garden.js';
 import { buildCenter } from './center.js';
+import { buildLabFlex } from './labflex.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter, labflex: buildLabFlex };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';

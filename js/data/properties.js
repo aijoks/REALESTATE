@@ -126,16 +126,19 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: 'Loft office floors half a block from Fifth Avenue',
     description:
-      'A buff-brick loft building on East 38th Street, a few steps from Fifth Avenue. Wide floor plates ' +
-      'with original hardwood floors, high ceilings, exposed ductwork and eleven oversized windows across ' +
-      'every floor, plus a furnished shared roof terrace looking out to the Empire State Building.',
+      'An approximately 55,000 square foot loft office building located in Midtown South in Manhattan. ' +
+      'Centrally located between Madison and Fifth Avenues, the building is walking distance to Grand Central, ' +
+      'Penn Station, Bryant Park and Times Square. Individual floors are approximately 5,250 square feet, ' +
+      'providing a great full floor branding opportunity for tenants. Amenities include an attended lobby, two ' +
+      'automatic passenger elevators and a freight elevator. Notable tenants include Evergreen on 38th, ' +
+      'Stephan & Co., Opal Financial and Dermalogica.',
     // Public listings (Crexi, Office Freedom) give 1916 and ~68,000 SF; one database
     // lists 11 floors / 45 m. The model uses 11 storeys at loft floor heights.
     stats: [
       { label: 'Stories', value: '11' },
       { label: 'Built', value: '1916' },
-      { label: 'Building size', value: '±68,000 SF' },
-      { label: 'Class', value: 'B · Loft office' },
+      { label: 'Building size', value: '±55,000 SF' },
+      { label: 'Typical floor', value: '±5,250 SF' },
     ],
     highlights: [
       'Half a block from Fifth Avenue; short walk to Bryant Park and Grand Central',
@@ -143,7 +146,12 @@ export const properties = [
       'Eleven oversized windows across each floor',
       'Shared roof terrace with Empire State Building views',
     ],
-    tenants: [],
+    tenants: [
+      { name: 'Evergreen on 38th', floor: '—', kind: 'Restaurant' },
+      { name: 'Stephan & Co.', floor: '—', kind: 'Office' },
+      { name: 'Opal Financial', floor: '—', kind: 'Office' },
+      { name: 'Dermalogica', floor: '—', kind: 'Office' },
+    ],
     // SAMPLE availability — floor numbers match the 3D model's floors.
     availability: [
       { floor: 2, suite: 'Full floor', sf: 6000, use: 'Office / Showroom', rent: '$52 / SF' },
@@ -907,6 +915,58 @@ export const properties = [
         { id: 'frys', label: 'Fry’s Food & Drug', text: 'Grocery anchor with pharmacy and bakery-deli.', at: [0.5, 0.75, 'front'] },
         { id: 'pad', label: 'Potosino pad', text: 'Free-standing restaurant pad, No. 7865.', at: [0, 0, 'pad'] },
         { id: 'deli', label: 'Bakery-Deli', text: 'Bakery and deli department on the east wing.', at: [0.72, 0.5, 'front'] },
+      ],
+    },
+  },
+  {
+    id: '1-parrott',
+    address: '1 Parrott Drive',
+    city: 'Shelton, CT 06484',
+    neighborhood: 'Fairfield County',
+    crossStreets: 'Shelton, Connecticut',
+    status: 'Flex / Industrial',
+    uses: ['Industrial', 'Office'],
+    headline: '',
+    description:
+      'A single-story flex building in Shelton, Connecticut, combining about 39,500 SF of office with about ' +
+      '62,500 SF of industrial and warehouse space. A long glass-fronted office facade with a landscaped ' +
+      'drop-off drive leads to a block-and-metal industrial wing, with on-site parking throughout.',
+    // LoopNet / Crexi / ConnectCRE: ~102,000 SF, one story, built 1976, renovated 2002;
+    // office ~39,500 SF + industrial ~62,500 SF.
+    stats: [
+      { label: 'Stories', value: '1' },
+      { label: 'Built', value: '1976 · renovated 2002' },
+      { label: 'Building size', value: '±102,000 SF' },
+      { label: 'Office / industrial', value: '±39,500 / ±62,500 SF' },
+    ],
+    highlights: [
+      'Flex building with office and industrial space',
+      'Glass-fronted office facade and lobby',
+      'Landscaped entry drive and on-site parking',
+      'Fairfield County, near Route 8',
+    ],
+    tenants: [{ name: 'CARA', floor: 'Ground', kind: 'Office' }],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/1-parrott/entrance.jpg', caption: 'Office facade and entrance drive', focus: 'center 55%' },
+      { src: 'assets/properties/1-parrott/east-wing.jpg', caption: 'Industrial wing entrance' },
+    ],
+    cover: 'assets/properties/1-parrott/entrance.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'labflex', floors: 1, width: 120, depth: 75, sign: 'CARA' },
+      site: { id: 'shelton-parrott', facing: 'north', suburban: true, noFence: true },
+      tour: {
+        avenue: { label: 'Entrance drive', pos: [24, 2.2, 66], target: [-4, 3, 36], fov: 60 },
+        labels: { 'front-west': 'Industrial wing', west: 'East side', east: 'West side', 'rear-west': 'Rear corner', crown: 'CARA entrance' },
+        streetDist: 70,
+        radius: 95,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'lobby', label: 'Office entrance', text: 'Glazed lobby behind stone planters and the entry drive.', at: [0.56, 0.7, 'front'] },
+        { id: 'office', label: 'Office wing', text: 'Glass curtain-wall bays between round pilasters.', at: [0.2, 0.6, 'front'] },
+        { id: 'wing', label: 'Industrial wing', text: 'Block wing with a ribbon of windows and its own entrance.', at: [0.86, 0.6, 'front'] },
       ],
     },
   },
