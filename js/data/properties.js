@@ -970,6 +970,58 @@ export const properties = [
       ],
     },
   },
+  {
+    id: 'el-dorado-square',
+    address: '1200 N El Dorado Place',
+    city: 'Tucson, AZ 85715',
+    neighborhood: 'El Dorado Square · East Tucson',
+    crossStreets: 'Office park off Wilmot Rd',
+    status: 'For Lease',
+    uses: ['Office'],
+    headline: '',
+    description:
+      'El Dorado Square is a nine-building Spanish Colonial office campus in east Tucson. Two-story stucco ' +
+      'buildings with red clay-tile roofs, wrought-iron balconies and arched loggias are set around mature, ' +
+      'landscaped grounds, entered through brick-and-iron gates along a brick-paved drive.',
+    // CommercialSearch / CommercialCafe: built 1981, ~65,000–70,000 SF campus; nine buildings
+    // (Tucson.com / BizTucson).
+    stats: [
+      { label: 'Buildings', value: '9 · two-story' },
+      { label: 'Built', value: '1981' },
+      { label: 'Campus size', value: '±65,000–70,000 SF' },
+      { label: 'Style', value: 'Spanish Colonial' },
+    ],
+    highlights: [
+      'Nine-building office campus with landscaped grounds',
+      'Spanish Colonial architecture with clay-tile roofs',
+      'Suites from small offices to ±5,000 SF',
+      'Gated entry and brick-paved drive',
+    ],
+    tenants: [],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/el-dorado-square/entrance.jpg', caption: 'Entrance on El Dorado Place', focus: 'center 60%' },
+      { src: 'assets/properties/el-dorado-square/building-d.jpg', caption: 'Building D' },
+    ],
+    cover: 'assets/properties/el-dorado-square/entrance.jpg',
+    model: {
+      glb: null,
+      procedural: { generator: 'mission', floors: 2, width: 70, depth: 60 },
+      site: { id: 'tucson-el-dorado', facing: 'north', suburban: true, noFence: true },
+      tour: {
+        avenue: { label: 'Entrance gate', pos: [52, 1.8, 58], target: [38, 2.5, 36], fov: 58 },
+        labels: { 'front-west': 'Entrance corner', west: 'East buildings', east: 'West buildings', 'rear-west': 'Rear corner', crown: 'Tower & loggia' },
+        streetDist: 46,
+        radius: 70,
+        omit: ['base'],
+      },
+      hotspots: [
+        { id: 'gate', label: 'Entrance', text: 'Brick pillars, iron fence and the El Dorado Square sign.', at: [0, 0, 'gate'] },
+        { id: 'tower', label: 'Building D tower', text: 'Arched loggia tower with a small balcony.', at: [0.5, 0.95, 'front'] },
+        { id: 'balconies', label: 'Offices', text: 'Second-floor offices with wrought-iron balconies.', at: [0.7, 0.5, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

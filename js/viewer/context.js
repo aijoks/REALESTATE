@@ -1474,8 +1474,8 @@ function buildSuburban(scene, { W, D, site }) {
   };
   shed(lotX0 - 70, lotX0 - 6, -60, 20, 8, '#d8cdb6');
   shed(W / 2 + 46, W / 2 + 130, -90, 10, 9, '#e3ddd0');
-  shed(-120, -20, front + 64, front + 130, 7.5, '#cfc4ae');
-  shed(10, 120, front + 64, front + 140, 9, '#e6e1d6');
+  shed(-150, -40, front + 64, front + 130, 7.5, '#cfc4ae');
+  shed(40, 150, front + 64, front + 140, 9, '#e6e1d6');
   shed(-60, 60, -front - 90, -front - 25, 10, '#ddd4c2');
   return { fadeables: [] };
 }
