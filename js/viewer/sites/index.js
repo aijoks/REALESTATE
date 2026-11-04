@@ -6,6 +6,7 @@ import { site_shelton_parrott } from './shelton-parrott.js';
 import { site_tucson_el_dorado } from './tucson-el-dorado.js';
 import { site_tucson_mona_lisa } from './tucson-mona-lisa.js';
 import { site_tucson_speedway_1815 } from './tucson-speedway-1815.js';
+import { site_bayside_northern } from './bayside-northern.js';
 
 export const SITE_EXTRAS = {
   'orlando-central-park': site_orlando_central_park,
@@ -16,4 +17,5 @@ export const SITE_EXTRAS = {
   'tucson-el-dorado': site_tucson_el_dorado,
   'tucson-mona-lisa': site_tucson_mona_lisa,
   'tucson-speedway-1815': site_tucson_speedway_1815,
+  'bayside-northern': site_bayside_northern,
 };
