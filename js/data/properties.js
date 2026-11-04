@@ -755,6 +755,74 @@ export const properties = [
     },
   },
   {
+    id: '213-04-northern',
+    address: '213-04 Northern Blvd',
+    city: 'Bayside, NY 11361',
+    neighborhood: 'Bayside · Queens',
+    crossStreets: 'Northern Blvd at Bell Blvd',
+    status: 'Retail',
+    uses: ['Retail', 'Medical'],
+    headline: '',
+    // Sources: NYC PLUTO / PropertyShark (BBL 4-07313-0019, 212-20 – 213-20 Northern Blvd
+    // & 45-02 Bell Blvd: one-storey retail, 1996, 24,000 SF building, 49,239 SF lot,
+    // 3 commercial units), CVS store locator (#542, 212-20 Northern Blvd),
+    // AFC Urgent Care Bayside (213-04 Northern Blvd, open daily 8 am – 8 pm), OSM, photos.
+    description:
+      'A one-storey neighbourhood retail building on Northern Boulevard at the corner of Bell Boulevard ' +
+      'in Bayside, Queens. Built in 1996, the brick-and-glass strip of about 24,000 SF sits at the back of ' +
+      'a lot of about 49,000 SF, behind its own parking lot facing Northern Boulevard. CVS Pharmacy anchors ' +
+      'the east end, with a Santander ATM inside, and AFC Urgent Care (No. 213-04) occupies the west end.',
+    stats: [
+      { label: 'Building', value: '±24,000 SF · 1 storey' },
+      { label: 'Lot', value: '±49,239 SF' },
+      { label: 'Built', value: '1996' },
+      { label: 'Market', value: 'Bayside, Queens' },
+    ],
+    highlights: [
+      'Corner of Northern Blvd and Bell Blvd',
+      'Anchored by CVS Pharmacy',
+      'AFC Urgent Care, open 7 days',
+      'On-site parking lot on Northern Blvd',
+    ],
+    tenants: [
+      { name: 'CVS Pharmacy', floor: 'Anchor · 212-20', kind: 'Pharmacy' },
+      { name: 'Santander ATM (in CVS)', floor: 'Anchor', kind: 'Bank ATM' },
+      { name: 'AFC Urgent Care Bayside', floor: 'In-line · 213-04', kind: 'Medical' },
+    ],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/213-04-northern/cvs.jpg', caption: 'CVS Pharmacy at the corner of the strip', focus: 'center 55%' },
+      { src: 'assets/properties/213-04-northern/afc-urgent-care.jpg', caption: 'AFC Urgent Care (No. 213-04)' },
+    ],
+    cover: 'assets/properties/213-04-northern/cvs.jpg',
+    model: {
+      glb: null,
+      // Satellite / OSM / NYC records: 200 x 120 ft box (62 x 36 m, 6.3 m) at the back of
+      // a 295 x 200 ft lot; parking in front on Northern Blvd; teal 45-18 Bell Blvd to the
+      // east, 4-storey 212-14 Northern Blvd to the west, 45th Road behind.
+      procedural: { generator: 'stripRetail', floors: 1, width: 62.1, depth: 36.3 },
+      site: { id: 'bayside-northern', facing: 'north', suburban: true, bare: true, noSheds: true, noFence: true },
+      tour: {
+        avenue: { label: 'From Northern Blvd', pos: [5.5, 3.4, 62], target: [2, 3.6, 18], fov: 56 },
+        radius: 70,
+        omit: ['street', 'base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'roof', 'crown'],
+        extra: [
+          { id: 'cvs', label: 'CVS corner', pos: [-50, 1.7, 26], target: [-26, 3.2, 15], fov: 55 },
+          { id: 'afc', label: 'AFC Urgent Care', pos: [20, 1.7, 30], target: [28.5, 2.9, 17.5], fov: 56 },
+          { id: 'lot', label: 'Parking lot', pos: [-35, 12, 47], target: [2, 1, 23], fov: 56 },
+          { id: 'bell', label: 'Northern Blvd & Bell Blvd', pos: [-72, 9, 82], target: [-36, 2, 24], fov: 55 },
+          { id: 'aerial', label: 'Aerial from the north-east', pos: [-95, 72, 125], target: [-5, 0, 8], fov: 50 },
+        ],
+      },
+      hotspots: [
+        { id: 'cvs', label: 'CVS Pharmacy', text: 'Anchor store #542 (212-20 Northern Blvd), wrapping the corner toward Bell Blvd.', at: [0.13, 0.55, 'front'] },
+        { id: 'atm', label: 'Santander ATM', text: 'Santander “ATM inside” in the CVS east window, beside the accessible ramp.', at: [0.6, 0.2, 'east'] },
+        { id: 'afc', label: 'AFC Urgent Care', text: 'No. 213-04: walk-in urgent care with X-ray and lab on site, open 7 days.', at: [0.88, 0.55, 'front'] },
+        { id: 'parking', label: 'On-site parking', text: 'Parking lot between the shops and Northern Blvd.', at: [0.4, 0.15, 'lot'] },
+      ],
+    },
+  },
+  {
     id: '2100-directors-row',
     address: '2100 Directors Row',
     city: 'Orlando, FL 32809',
@@ -1266,74 +1334,6 @@ export const properties = [
         { id: 'walkways', label: 'Apartments', text: 'Two-storey buildings with open-air walkways and teal doors around each courtyard.', at: [0, 0, 'courtyard'] },
         { id: 'parking', label: 'On-site parking', text: 'Parking lot between the front and rear buildings.', at: [0.5, 0, 'parking'] },
         { id: 'speedway', label: 'Speedway frontage', text: 'Just west of Campbell Ave, near the University of Arizona.', at: [0.3, 0.55, 'front'] },
-      ],
-    },
-  },
-  {
-    id: '213-04-northern',
-    address: '213-04 Northern Blvd',
-    city: 'Bayside, NY 11361',
-    neighborhood: 'Bayside · Queens',
-    crossStreets: 'Northern Blvd at Bell Blvd',
-    status: 'Retail',
-    uses: ['Retail', 'Medical'],
-    headline: '',
-    // Sources: NYC PLUTO / PropertyShark (BBL 4-07313-0019, 212-20 – 213-20 Northern Blvd
-    // & 45-02 Bell Blvd: one-storey retail, 1996, 24,000 SF building, 49,239 SF lot,
-    // 3 commercial units), CVS store locator (#542, 212-20 Northern Blvd),
-    // AFC Urgent Care Bayside (213-04 Northern Blvd, open daily 8 am – 8 pm), OSM, photos.
-    description:
-      'A one-storey neighbourhood retail building on Northern Boulevard at the corner of Bell Boulevard ' +
-      'in Bayside, Queens. Built in 1996, the brick-and-glass strip of about 24,000 SF sits at the back of ' +
-      'a lot of about 49,000 SF, behind its own parking lot facing Northern Boulevard. CVS Pharmacy anchors ' +
-      'the east end, with a Santander ATM inside, and AFC Urgent Care (No. 213-04) occupies the west end.',
-    stats: [
-      { label: 'Building', value: '±24,000 SF · 1 storey' },
-      { label: 'Lot', value: '±49,239 SF' },
-      { label: 'Built', value: '1996' },
-      { label: 'Market', value: 'Bayside, Queens' },
-    ],
-    highlights: [
-      'Corner of Northern Blvd and Bell Blvd',
-      'Anchored by CVS Pharmacy',
-      'AFC Urgent Care, open 7 days',
-      'On-site parking lot on Northern Blvd',
-    ],
-    tenants: [
-      { name: 'CVS Pharmacy', floor: 'Anchor · 212-20', kind: 'Pharmacy' },
-      { name: 'Santander ATM (in CVS)', floor: 'Anchor', kind: 'Bank ATM' },
-      { name: 'AFC Urgent Care Bayside', floor: 'In-line · 213-04', kind: 'Medical' },
-    ],
-    availability: [],
-    photos: [
-      { src: 'assets/properties/213-04-northern/cvs.jpg', caption: 'CVS Pharmacy at the corner of the strip', focus: 'center 55%' },
-      { src: 'assets/properties/213-04-northern/afc-urgent-care.jpg', caption: 'AFC Urgent Care (No. 213-04)' },
-    ],
-    cover: 'assets/properties/213-04-northern/cvs.jpg',
-    model: {
-      glb: null,
-      // Satellite / OSM / NYC records: 200 x 120 ft box (62 x 36 m, 6.3 m) at the back of
-      // a 295 x 200 ft lot; parking in front on Northern Blvd; teal 45-18 Bell Blvd to the
-      // east, 4-storey 212-14 Northern Blvd to the west, 45th Road behind.
-      procedural: { generator: 'stripRetail', floors: 1, width: 62.1, depth: 36.3 },
-      site: { id: 'bayside-northern', facing: 'north', suburban: true, bare: true, noSheds: true, noFence: true },
-      tour: {
-        avenue: { label: 'From Northern Blvd', pos: [5.5, 3.4, 62], target: [2, 3.6, 18], fov: 56 },
-        radius: 70,
-        omit: ['street', 'base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'roof', 'crown'],
-        extra: [
-          { id: 'cvs', label: 'CVS corner', pos: [-50, 1.7, 26], target: [-26, 3.2, 15], fov: 55 },
-          { id: 'afc', label: 'AFC Urgent Care', pos: [20, 1.7, 30], target: [28.5, 2.9, 17.5], fov: 56 },
-          { id: 'lot', label: 'Parking lot', pos: [-35, 12, 47], target: [2, 1, 23], fov: 56 },
-          { id: 'bell', label: 'Northern Blvd & Bell Blvd', pos: [-72, 9, 82], target: [-36, 2, 24], fov: 55 },
-          { id: 'aerial', label: 'Aerial from the north-east', pos: [-95, 72, 125], target: [-5, 0, 8], fov: 50 },
-        ],
-      },
-      hotspots: [
-        { id: 'cvs', label: 'CVS Pharmacy', text: 'Anchor store #542 (212-20 Northern Blvd), wrapping the corner toward Bell Blvd.', at: [0.13, 0.55, 'front'] },
-        { id: 'atm', label: 'Santander ATM', text: 'Santander “ATM inside” in the CVS east window, beside the accessible ramp.', at: [0.6, 0.2, 'east'] },
-        { id: 'afc', label: 'AFC Urgent Care', text: 'No. 213-04: walk-in urgent care with X-ray and lab on site, open 7 days.', at: [0.88, 0.55, 'front'] },
-        { id: 'parking', label: 'On-site parking', text: 'Parking lot between the shops and Northern Blvd.', at: [0.4, 0.15, 'lot'] },
       ],
     },
   },
