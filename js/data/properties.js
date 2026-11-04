@@ -892,12 +892,18 @@ export const properties = [
     tenants: [
       { name: 'Fry’s Food & Drug', floor: 'Anchor', kind: 'Grocery' },
       { name: 'Potosino Mexican Food', floor: 'Pad', kind: 'Restaurant' },
+      { name: 'Burger King', floor: 'Pad', kind: 'Restaurant' },
+      { name: 'Chase', floor: 'In-line', kind: 'Bank' },
+      { name: 'Simply Smiles Dentistry', floor: 'In-line', kind: 'Medical' },
     ],
     availability: [],
     photos: [
       { src: 'assets/properties/saguaro-vista/frys.jpg', caption: 'Fry’s Food & Drug anchor', focus: 'center 45%' },
       { src: 'assets/properties/saguaro-vista/potosino-pad.jpg', caption: 'Potosino Mexican Food pad (No. 7865)' },
       { src: 'assets/properties/saguaro-vista/frys-night.jpg', caption: 'Fry’s entrance at night' },
+      { src: 'assets/properties/saguaro-vista/burger-king.jpg', caption: 'Burger King pad (No. 7880)' },
+      { src: 'assets/properties/saguaro-vista/chase-pharmacy-night.jpg', caption: 'Chase and Fry’s pharmacy at night' },
+      { src: 'assets/properties/saguaro-vista/simply-smiles.jpg', caption: 'Simply Smiles Dentistry' },
     ],
     cover: 'assets/properties/saguaro-vista/frys.jpg',
     model: {
