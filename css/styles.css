@@ -140,6 +140,16 @@ nav a:hover { color: var(--ink); }
   font-size: clamp(20px, 2.3vw, 34px); text-transform: uppercase; letter-spacing: 0.04em; line-height: 1.1;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
+/* Exited holdings: grey tint, small "Sold" tag, not clickable. */
+.tile-sold { cursor: default; }
+.tile-sold img { filter: grayscale(0.6) brightness(0.96); }
+.tile-sold::before { content: ""; position: absolute; inset: 0; z-index: 0; background: rgba(128, 128, 128, 0.16); pointer-events: none; }
+.tile-sold:hover img { transform: none; }
+.tile-sold:hover::after { background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.62)); }
+.tile-sold-tag {
+  display: block; margin-top: 8px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.24em; opacity: 0.9;
+}
 @media (max-width: 700px) { .tiles { grid-template-columns: 1fr; } .tile { aspect-ratio: 16 / 9; } }
 
 /* ---------- listing grid ---------- */

@@ -1,4 +1,4 @@
-import { company, properties, notableTenants } from './data/properties.js';
+import { company, properties, soldProperties, notableTenants } from './data/properties.js';
 
 document.querySelectorAll('[data-company]').forEach((el) => (el.textContent = company.name));
 document.querySelectorAll('[data-phone]').forEach((el) => (el.textContent = company.phone));
@@ -26,11 +26,22 @@ function card(p) {
   return a;
 }
 
+// Sold tile: same layout, greyed out, not a link.
+function soldCard(p) {
+  const d = document.createElement('div');
+  d.className = 'tile tile-sold reveal';
+  d.setAttribute('aria-label', `${p.address} (sold)`);
+  d.innerHTML = `
+    <img src="${p.photo}" alt="${p.address}" loading="lazy" />
+    <span class="tile-label">${p.address}<small class="tile-sold-tag">Sold</small></span>`;
+  return d;
+}
+
 function render(use = 'all') {
   grid.innerHTML = '';
-  properties
-    .filter((p) => use === 'all' || p.uses.includes(use))
-    .forEach((p) => grid.appendChild(card(p)));
+  const match = (p) => use === 'all' || p.uses.includes(use);
+  properties.filter(match).forEach((p) => grid.appendChild(card(p)));
+  soldProperties.filter(match).forEach((p) => grid.appendChild(soldCard(p)));
   observeReveals();
 }
 

@@ -1339,6 +1339,20 @@ export const properties = [
   },
 ];
 
+// Former holdings: shown in the portfolio as "Sold" tiles only (no property
+// page, no 3D model, no leasing information).
+export const soldProperties = [
+  {
+    id: '615-w-131st',
+    address: '615 W 131st Street',
+    name: 'The Studebaker Building',
+    city: 'New York, NY 10027',
+    note: 'Columbia University · Manhattanville',
+    uses: ['Office'],
+    photo: 'assets/properties/615-w-131st/facade.jpg',
+  },
+];
+
 export function getProperty(id) {
   return properties.find((p) => p.id === id);
 }
