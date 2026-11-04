@@ -47,8 +47,10 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/labflex.js` | `labflex` generator (1 Parrott Drive, Shelton CT: flex office/industrial) |
 | `js/viewer/mission.js` | `mission` generator (El Dorado Square, Tucson: Spanish Colonial office campus) |
 | `js/viewer/monalisa.js` | `monalisa` generator (7225 N Mona Lisa Rd, Tucson: mission-revival office) |
+| `js/viewer/courtyard.js` | `courtyard` generator (1815 E Speedway Blvd, Tucson: Palm Shadows, two-storey courtyard apartments + pool) |
 | `js/viewer/context.js` | Street, avenue (Park / Fifth) and real neighbours per `site.id` |
 | `js/viewer/sites/<site-id>.js` | Real surroundings, pads and tenant signage for suburban sites (traced from satellite + OpenStreetMap) |
+| `js/viewer/sites/tucson-speedway-1815.js` | Speedway & Campbell surroundings for 1815 E Speedway (twin complex, Babcock, Taco Bell, Aloft, Chipotle strip...) |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |
 | `assets/properties/<id>/` | Listing photos |

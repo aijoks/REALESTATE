@@ -1204,6 +1204,71 @@ export const properties = [
       ],
     },
   },
+  {
+    id: '1815-e-speedway',
+    address: '1815 E Speedway Blvd',
+    city: 'Tucson, AZ 85719',
+    neighborhood: 'North University · Tucson',
+    crossStreets: 'Speedway Blvd just west of Campbell Ave',
+    status: 'Residential',
+    uses: ['Residential'],
+    headline: '',
+    // Sources: Pima County / LoopNet property record (apartment use, 1.16 AC),
+    // Walk Score / Yardi Matrix / Apartments.com (Palm Shadows), satellite imagery.
+    description:
+      'Palm Shadows is an apartment community on Speedway Boulevard, just west of the Speedway and ' +
+      'Campbell Avenue intersection and steps from the University of Arizona. Two-storey stucco buildings ' +
+      'with teal trim and open-air walkways wrap two courtyards, one with a fenced swimming pool, around ' +
+      'on-site parking on a lot of about 1.16 acres.',
+    stats: [
+      { label: 'Property', value: 'Palm Shadows' },
+      { label: 'Buildings', value: '2 stories' },
+      { label: 'Lot', value: '±1.16 acres' },
+      { label: 'Market', value: 'Tucson, AZ' },
+    ],
+    highlights: [
+      'Steps from the University of Arizona',
+      'Fenced pool courtyard with lounge deck',
+      'Open-air walkways around two courtyards',
+      'On-site surface parking',
+    ],
+    tenants: [],
+    availability: [],
+    photos: [
+      { src: 'assets/properties/1815-e-speedway/pool.jpg', caption: 'Pool courtyard', focus: 'center 60%' },
+      { src: 'assets/properties/1815-e-speedway/living-room.jpg', caption: 'Apartment interior' },
+    ],
+    cover: 'assets/properties/1815-e-speedway/pool.jpg',
+    model: {
+      glb: null,
+      // Satellite: parcel 42 x 112 m; front and rear 2-storey courtyard buildings
+      // (each ~41 x 38 m) with the parking lot between them; twin complex to the west.
+      procedural: { generator: 'courtyard', floors: 2, width: 42, depth: 112 },
+      site: { id: 'tucson-speedway-1815', facing: 'south', suburban: true, desert: true, noSheds: true },
+      tour: {
+        avenue: { label: 'Speedway & Campbell', pos: [66, 7, 70], target: [6, 3, 34], fov: 55 },
+        labels: { street: 'From Speedway' },
+        streetDist: 30,
+        streetY: 3,
+        radius: 90,
+        omit: ['base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'roof', 'crown'],
+        extra: [
+          { id: 'pool', label: 'Pool courtyard', pos: [6.8, 1.7, -15.0], target: [-5.5, 3.2, -37], fov: 66 },
+          { id: 'courtyard', label: 'Front courtyard', pos: [-6, 30, 12], target: [3, 0, 34], fov: 55 },
+          { id: 'parking', label: 'Central parking', pos: [-24, 2.4, 6.1], target: [12, 3, 6.1], fov: 62 },
+          { id: 'aerial', label: 'Aerial from the south-east', pos: [95, 75, 135], target: [-5, 0, 5], fov: 50 },
+          { id: 'rear', label: 'Rear building & Helen St', pos: [30, 28, -100], target: [0, 2, -30], fov: 52 },
+          { id: 'overhead', label: 'Overhead', pos: [0, 175, 12], target: [0, 0, 8], fov: 50 },
+        ],
+      },
+      hotspots: [
+        { id: 'pool', label: 'Pool courtyard', text: 'Fenced pool with terracotta coping, loungers and a lounge deck.', at: [0, 0, 'pool'] },
+        { id: 'walkways', label: 'Apartments', text: 'Two-storey buildings with open-air walkways and teal doors around each courtyard.', at: [0, 0, 'courtyard'] },
+        { id: 'parking', label: 'On-site parking', text: 'Parking lot between the front and rear buildings.', at: [0.5, 0, 'parking'] },
+        { id: 'speedway', label: 'Speedway frontage', text: 'Just west of Campbell Ave, near the University of Arizona.', at: [0.3, 0.55, 'front'] },
+      ],
+    },
+  },
 ];
 
 export function getProperty(id) {

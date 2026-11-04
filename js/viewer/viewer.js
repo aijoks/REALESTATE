@@ -19,8 +19,9 @@ import { buildCenter } from './center.js';
 import { buildLabFlex } from './labflex.js';
 import { buildMission } from './mission.js';
 import { buildMonaLisa } from './monalisa.js';
+import { buildCourtyard } from './courtyard.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter, labflex: buildLabFlex, mission: buildMission, monalisa: buildMonaLisa };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter, labflex: buildLabFlex, mission: buildMission, monalisa: buildMonaLisa, courtyard: buildCourtyard };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
