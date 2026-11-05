@@ -327,3 +327,33 @@ html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic
 
 /* About Us page (placeholder copy until the full page is built). */
 .about-copy p { font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; color: var(--ink); max-width: 860px; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.75; margin: 0; }
+
+/* About Us: "Our Approach" band with the home-page diamond, and the team. */
+.section.page-top.about-page { min-height: 0; padding-bottom: 72px; }
+.approach { background: linear-gradient(180deg, #e9eaec, #f1f2f3 30%, #eeeff0); padding: 88px 0; }
+.approach-grid { display: grid; grid-template-columns: 1fr minmax(260px, 340px) 1fr; align-items: center; gap: 56px; }
+.approach-grid p { font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; color: var(--ink); font-size: clamp(18px, 1.5vw, 21px); line-height: 1.75; margin: 0; }
+.approach-diamond { position: relative; display: grid; place-items: center; aspect-ratio: 1; }
+.approach-diamond::before {
+  content: ""; position: absolute; width: 70.7%; aspect-ratio: 1; transform: rotate(45deg);
+  background: rgba(22, 22, 20, 0.74); outline: 6px solid #fff; outline-offset: 0;
+  box-shadow: 0 0 0 7px rgba(22, 22, 20, 0.08);
+}
+.approach-diamond h2 {
+  position: relative; margin: 0; text-align: center; color: #fff;
+  font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-weight: 400;
+  text-transform: uppercase; letter-spacing: -0.01em; line-height: 1.04; font-size: clamp(30px, 3.2vw, 44px);
+}
+.approach-diamond h2 span { display: block; }
+.team { background: #fff; padding: 88px 0 104px; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 48px; }
+.person img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; margin-bottom: 24px; background: #e6e6e8; }
+.person h3, .person p { font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; color: var(--ink); }
+.person h3 { font-weight: 400; text-transform: uppercase; font-size: clamp(22px, 2vw, 28px); letter-spacing: 0.02em; margin: 0 0 6px; }
+.person .person-role { font-family: inherit; font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 0 0 18px; }
+.person p { font-size: 17px; line-height: 1.75; margin: 0; }
+@media (max-width: 900px) {
+  .approach-grid { grid-template-columns: 1fr; gap: 32px; }
+  .approach-diamond { width: min(300px, 80vw); margin: 0 auto; order: -1; }
+  .team-grid { grid-template-columns: 1fr; max-width: 520px; }
+}
