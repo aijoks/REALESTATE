@@ -296,8 +296,8 @@ export const properties = [
     city: 'New York, NY 10011',
     neighborhood: 'Chelsea / Flatiron',
     crossStreets: 'Between Sixth Ave & Seventh Ave',
-    status: 'For Lease',
-    uses: ['Office', 'Retail'],
+    status: 'Net Lease',
+    uses: ['Net Lease'],
     headline: '',
     description:
       'An approximately 120,000 square foot loft office building located in Manhattan’s trendy Chelsea ' +
