@@ -1376,7 +1376,7 @@ export const properties = [
       { src: 'assets/properties/1802-s-nova/aerial-outline.jpg', caption: 'Aerial with the tract outlined' },
       { src: 'assets/properties/1802-s-nova/street-view.jpg', caption: 'Approaching the Nova Rd / Big Tree Rd signal' },
     ],
-    cover: 'assets/properties/1802-s-nova/aerial-outline.jpg',
+    cover: 'assets/properties/1802-s-nova/street-view.jpg',
     model: {
       glb: null,
       // Outline traced from the Volusia County GIS parcels (matches the owner's
