@@ -404,3 +404,11 @@ html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic
 .fp-pop span { color: var(--muted); font-size: 12px; }
 .map .leaflet-control-zoom a { color: var(--ink); }
 .map .leaflet-control-attribution { font-size: 10px; }
+
+/* Property pages: square-edged boxes; breadcrumb in the description's font, black. */
+.crumbs { color: var(--ink); font-size: 1rem; font-family: inherit; }
+.crumbs a { color: var(--ink); }
+.crumbs a:hover { text-decoration: underline; }
+.viewer-shell, .panel, .stat, .map-wrap, .gallery img, .gallery figure,
+form.contact input, form.contact textarea { border-radius: 0; }
+.map-switch, .map-switch button { border-radius: 0; }
