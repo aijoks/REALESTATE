@@ -299,3 +299,27 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .service h3 { font-weight: 400; text-transform: uppercase; font-size: clamp(24px, 2.4vw, 32px); letter-spacing: 0.02em; margin: 0 0 16px; }
 .service p { font-size: clamp(17px, 1.4vw, 19px); line-height: 1.75; margin: 0; }
 @media (max-width: 760px) { .service-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Page transitions: old page slides out left, new slides in from the right ---------- */
+@view-transition { navigation: auto; }
+/* The header stays put while the page underneath slides. */
+.site-header { view-transition-name: site-header; }
+::view-transition-group(root) { animation-duration: 0.55s; }
+::view-transition-old(root) { animation: fp-out-left 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
+::view-transition-new(root) { animation: fp-in-right 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
+html:active-view-transition-type(back)::view-transition-old(root) { animation-name: fp-out-right; }
+html:active-view-transition-type(back)::view-transition-new(root) { animation-name: fp-in-left; }
+@keyframes fp-out-left { to { transform: translateX(-100%); } }
+@keyframes fp-in-right { from { transform: translateX(100%); } }
+@keyframes fp-out-right { to { transform: translateX(100%); } }
+@keyframes fp-in-left { from { transform: translateX(-100%); } }
+
+/* Script fallback for browsers without cross-document view transitions. */
+html.fp-leave, html.fp-enter, html.fp-enter-back { overflow-x: hidden; }
+html.fp-leave body > :not(.site-header) { animation: fp-out-left 0.38s cubic-bezier(0.65, 0, 0.35, 1) both; }
+html.fp-enter body > :not(.site-header) { animation: fp-in-right 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
+html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
