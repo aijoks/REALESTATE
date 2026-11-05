@@ -348,7 +348,7 @@ export const properties = [
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'Carved stone entrance in the west bay.', at: [0.14, 0.06, 'front'] },
         { id: 'retail', label: 'Street retail', text: 'Shopfronts across three bays of the stone base.', at: [0.6, 0.05, 'front'] },
-        { id: 'cornice', label: 'Corbelled cornice', text: 'Brackets and lion-head bosses crown the three-storey base.', at: [0.38, 0.27, 'front'] },
+        { id: 'cornice', label: 'Corbelled cornice', text: 'A fluted cove cornice on long console brackets, with carved shells over the piers, crowns the three-storey base.', at: [0.38, 0.27, 'front'] },
         { id: 'floors', label: 'Office floors', text: 'Four wide bays, four windows each, on every floor.', at: [0.8, 0.55, 'front'] },
         { id: 'crown', label: 'Capitals & cornice', text: 'Ornamented pier capitals and a deep cornice on the top floors.', at: [0.5, 0.95, 'front'] },
       ],
