@@ -1230,9 +1230,10 @@ export const properties = [
     uses: ['Office', 'Medical'],
     headline: '',
     description:
-      'Mona Lisa Plaza is a two-story mission-revival office building at the northwest corner of Mona Lisa ' +
-      'and Ina Roads, one block west of the Foothills Mall. A curved parapet, deep arched entrances and a ' +
-      'shaded ground-floor arcade front professional and medical suites, with surface parking around the building.',
+      'An approximately 30,000 square foot 2 story office building located in Northwest Tucson at the ' +
+      'northwest corner of Ina Road and Mona Lisa Road. Ideally located in a prime location one block ' +
+      'west of the Foothills Mall and just minutes from I-10. The building serves medical, professional ' +
+      'and general office tenants. Notable tenants include the State of Arizona and Gentle Dental.',
     stats: [
       { label: 'Stories', value: '2' },
       { label: 'Type', value: 'Office / medical' },
