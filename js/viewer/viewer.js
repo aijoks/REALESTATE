@@ -21,8 +21,9 @@ import { buildMission } from './mission.js';
 import { buildMonaLisa } from './monalisa.js';
 import { buildCourtyard } from './courtyard.js';
 import { buildStrip } from './strip.js';
+import { buildLand } from './land.js';
 
-const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter, labflex: buildLabFlex, mission: buildMission, monalisa: buildMonaLisa, courtyard: buildCourtyard, stripRetail: buildStrip };
+const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, classicOffice: buildClassicOffice, ladiesMile: buildLadiesMile, narrowLoft: buildNarrowLoft, stoneBay: buildStoneBay, archLoft: buildArchLoft, walkup: buildWalkup, industrial: buildIndustrial, pavilion: buildPavilion, flex: buildFlex, drugstore: buildDrugstore, garden: buildGarden, center: buildCenter, labflex: buildLabFlex, mission: buildMission, monalisa: buildMonaLisa, courtyard: buildCourtyard, stripRetail: buildStrip, land: buildLand };
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
@@ -52,8 +53,11 @@ export class BuildingViewer {
     this.renderer.toneMappingExposure = 1.05;
     container.appendChild(this.renderer.domElement);
 
+    // Large sites (e.g. raw land) may widen the fog, zoom range and shadow
+    // area through model.view = { fog: [near, far], maxDistance, shadow }.
+    this.view = property.model.view ?? {};
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog('#cfdbe6', 260, 900);
+    this.scene.fog = new THREE.Fog('#cfdbe6', this.view.fog?.[0] ?? 260, this.view.fog?.[1] ?? 900);
 
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.3, 2000);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -63,7 +67,7 @@ export class BuildingViewer {
     // _frame keeps the camera from going below street level.
     this.controls.maxPolarAngle = Math.PI - 0.12;
     this.controls.minDistance = 4;
-    this.controls.maxDistance = 360;
+    this.controls.maxDistance = this.view.maxDistance ?? 360;
 
     this.clock = new THREE.Clock();
     this.tour = { playing: false, index: 0, t: 0, from: null };
@@ -178,8 +182,10 @@ export class BuildingViewer {
     sun.position.set(-45, 95, 80);
     sun.castShadow = true;
     sun.shadow.mapSize.set(this.coarse ? 2048 : 4096, this.coarse ? 2048 : 4096);
-    const s = 60;
-    Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 10, far: 320 });
+    const s = this.view.shadow ?? 60;
+    const k = Math.max(1, s / 60);
+    sun.position.multiplyScalar(k);
+    Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 10, far: 320 * k });
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = 0.03;
     this.scene.add(sun);
