@@ -12,7 +12,7 @@ const fill = (sel, v) => document.querySelectorAll(sel).forEach((el) => (el.text
 fill('[data-company]', company.name);
 fill('[data-phone]', company.phone);
 fill('[data-address]', p.address);
-fill('[data-location]', `${p.city} · ${p.neighborhood} · ${p.crossStreets}`);
+fill('[data-city]', p.city);
 fill('[data-status]', p.status);
 fill('[data-headline]', p.headline);
 document.querySelectorAll('[data-headline]').forEach((el) => (el.hidden = !p.headline));
@@ -28,15 +28,8 @@ tenantsEl.closest('.panel').hidden = !p.tenants?.length;
 document.querySelector('[data-gallery]').innerHTML = p.photos
   .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /><figcaption>${ph.caption}</figcaption></figure>`).join('');
 
-const tbody = document.querySelector('[data-availability]');
-// Hide the availability table (and its button) when a property lists none.
-if (!p.availability?.length) {
-  document.getElementById('availability').hidden = true;
-  document.querySelector('a[href="#availability"]')?.setAttribute('hidden', '');
-}
-tbody.innerHTML = (p.availability ?? [])
-  .map((a) => `<tr data-floor="${a.floor}"><td>${a.floor}</td><td>${a.suite}</td><td>${a.sf.toLocaleString()} SF</td><td>${a.use}</td><td>${a.rent}</td></tr>`)
-  .join('');
+// ---------- Location map (Leaflet, loaded on demand) ----------
+import('./map.js').then((m) => m.initMap(p)).catch(() => { document.getElementById('location').hidden = true; });
 
 // ---------- 3D viewer ----------
 const el = document.getElementById('viewer');
@@ -119,20 +112,6 @@ document.getElementById('tooltip-close').addEventListener('click', () => { toolt
   }
   requestAnimationFrame(trackTooltip);
 })();
-
-// Floor table → highlight + fly.
-tbody.addEventListener('click', (e) => {
-  const tr = e.target.closest('tr[data-floor]');
-  if (!tr) return;
-  const n = Number(tr.dataset.floor);
-  const already = tr.classList.contains('active');
-  tbody.querySelectorAll('tr').forEach((r) => r.classList.remove('active'));
-  if (already) { viewer.clearFloor(); return; }
-  tr.classList.add('active');
-  viewer.focusFloor(n);
-  syncState();
-  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-});
 
 // Keyboard: space = play/pause, arrows = chapters.
 window.addEventListener('keydown', (e) => {

@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Property — First Pioneer Properties</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <link rel="stylesheet" href="css/styles.css" />
   <script src="js/transitions.js"></script>
   <script type="importmap">
@@ -34,10 +35,9 @@
       <div>
         <span class="status" data-status></span>
         <h1 data-address></h1>
-        <div class="addr" data-location></div>
       </div>
       <div class="cta">
-        <a class="btn" href="#availability">See availability</a>
+        <a class="btn" href="https://firstpioneerrealty.net/listings/" target="_blank" rel="noopener">See availability</a>
         <a class="btn primary" href="#contact">Request a showing</a>
       </div>
     </div>
@@ -70,11 +70,29 @@
         </div>
         <div class="panel" id="availability">
           <h3>Availability</h3>
-          <table>
-            <thead><tr><th>Floor</th><th>Suite</th><th>Size</th><th>Use</th><th>Asking rent</th></tr></thead>
-            <tbody data-availability></tbody>
-          </table>
-          <div class="table-note">Click a floor to see it highlighted on the building. Sizes and rents are sample figures pending verification.</div>
+          <p class="avail-text">For current availability, floor plans and asking rents, view our live listings.</p>
+          <a class="btn primary avail-link" href="https://firstpioneerrealty.net/listings/" target="_blank" rel="noopener">View current listings <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="panel" id="location">
+          <div class="map-head">
+            <h3>Location</h3>
+            <div class="map-switch" role="group" aria-label="Map style">
+              <button type="button" class="active" data-layer="map">Map</button>
+              <button type="button" data-layer="satellite">Satellite</button>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <div class="map" id="map" aria-label="Map showing the property location"></div>
+            <div class="map-hint" id="map-hint">Click the map to zoom with scroll</div>
+          </div>
+          <div class="map-foot">
+            <div class="map-addr"><b data-address></b><span data-city></span></div>
+            <div class="map-actions">
+              <button type="button" class="btn small" id="map-recenter">Recenter</button>
+              <a class="btn small" id="map-open" target="_blank" rel="noopener">Open in Google Maps</a>
+              <a class="btn small primary" id="map-directions" target="_blank" rel="noopener">Directions</a>
+            </div>
+          </div>
         </div>
         <div class="panel">
           <h3>Photos</h3>

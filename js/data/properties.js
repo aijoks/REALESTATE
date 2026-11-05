@@ -31,6 +31,7 @@ export const notableTenants = [
 export const properties = [
   {
     id: '120-e-56th',
+    coords: [40.760427, -73.970652], // map pin (lat, lon)
     address: '120 E 56th Street',
     city: 'New York, NY 10022',
     neighborhood: 'Midtown East',
@@ -120,6 +121,7 @@ export const properties = [
   },
   {
     id: '10-e-38th',
+    coords: [40.750405, -73.981995], // map pin (lat, lon)
     address: '10 E 38th Street',
     city: 'New York, NY 10016',
     neighborhood: 'Murray Hill',
@@ -205,6 +207,7 @@ export const properties = [
   },
   {
     id: '115-e-23rd',
+    coords: [40.740001, -73.985502], // map pin (lat, lon)
     address: '115 E 23rd Street',
     city: 'New York, NY 10010',
     neighborhood: 'Gramercy / Flatiron',
@@ -288,6 +291,7 @@ export const properties = [
   },
   {
     id: '133-w-21st',
+    coords: [40.742267, -73.995003], // map pin (lat, lon)
     address: '133 W 21st Street',
     city: 'New York, NY 10011',
     neighborhood: 'Chelsea / Flatiron',
@@ -352,6 +356,7 @@ export const properties = [
   },
   {
     id: '102-w-38th',
+    coords: [40.752406, -73.986412], // map pin (lat, lon)
     address: '102 W 38th Street',
     city: 'New York, NY 10018',
     neighborhood: 'Garment District',
@@ -417,6 +422,7 @@ export const properties = [
   },
   {
     id: '8-w-36th',
+    coords: [40.749856, -73.984494], // map pin (lat, lon)
     address: '8 W 36th Street',
     city: 'New York, NY 10018',
     neighborhood: 'Midtown South',
@@ -488,6 +494,7 @@ export const properties = [
   },
   {
     id: '12-e-44th',
+    coords: [40.754218, -73.979165], // map pin (lat, lon)
     address: '12 E 44th Street',
     city: 'New York, NY 10017',
     neighborhood: 'Midtown · Grand Central',
@@ -551,6 +558,7 @@ export const properties = [
   },
   {
     id: '370-w-51st',
+    coords: [40.763942, -73.988335], // map pin (lat, lon)
     address: '370 W 51st Street',
     city: 'New York, NY 10019',
     neighborhood: "Hell's Kitchen",
@@ -621,6 +629,7 @@ export const properties = [
   },
   {
     id: '34-09-queens-blvd',
+    coords: [40.74518, -73.93011], // map pin (lat, lon)
     address: '34-09 Queens Blvd',
     city: 'Long Island City, NY 11101',
     neighborhood: 'Long Island City / Sunnyside',
@@ -700,6 +709,7 @@ export const properties = [
   },
   {
     id: '250-canal',
+    coords: [40.718169, -74.000515], // map pin (lat, lon)
     address: '250 Canal Street',
     city: 'New York, NY 10013',
     neighborhood: 'Chinatown / SoHo',
@@ -760,6 +770,7 @@ export const properties = [
   },
   {
     id: '213-04-northern',
+    coords: [40.75976, -73.7699], // map pin (lat, lon)
     address: '213-04 Northern Blvd',
     city: 'Bayside, NY 11361',
     neighborhood: 'Bayside · Queens',
@@ -831,6 +842,7 @@ export const properties = [
   },
   {
     id: '2100-directors-row',
+    coords: [28.458, -81.4088], // map pin (lat, lon)
     address: '2100 Directors Row',
     city: 'Orlando, FL 32809',
     neighborhood: 'Orlando Central Park',
@@ -892,6 +904,7 @@ export const properties = [
   },
   {
     id: '7877-e-snyder',
+    coords: [32.294948, -110.824939], // map pin (lat, lon)
     address: '7877 E Snyder Rd',
     city: 'Tucson, AZ 85750',
     neighborhood: 'Catalina Foothills',
@@ -942,6 +955,7 @@ export const properties = [
   },
   {
     id: '415-e-university',
+    coords: [32.231731, -110.96529], // map pin (lat, lon)
     address: '415 E University Blvd',
     city: 'Tucson, AZ 85705',
     neighborhood: 'The Link at 4th Ave · near the University of Arizona',
@@ -999,6 +1013,7 @@ export const properties = [
   },
   {
     id: 'saguaro-vista',
+    coords: [32.23406, -110.82551], // map pin (lat, lon)
     address: 'Saguaro Vista Shopping Center',
     city: 'Tucson, AZ',
     neighborhood: 'Northeast Tucson · Catalina Foothills',
@@ -1077,6 +1092,7 @@ export const properties = [
   },
   {
     id: '1-parrott',
+    coords: [41.272162, -73.129641], // map pin (lat, lon)
     address: '1 Parrott Drive',
     city: 'Shelton, CT 06484',
     neighborhood: 'Fairfield County',
@@ -1143,6 +1159,7 @@ export const properties = [
   },
   {
     id: 'el-dorado-square',
+    coords: [32.238152, -110.857251], // map pin (lat, lon)
     address: '1200 N El Dorado Place',
     city: 'Tucson, AZ 85715',
     neighborhood: 'El Dorado Square · East Tucson',
@@ -1222,6 +1239,7 @@ export const properties = [
   },
   {
     id: '7225-n-mona-lisa',
+    coords: [32.3377, -111.0212], // map pin (lat, lon)
     address: '7225 N Mona Lisa Rd',
     city: 'Tucson, AZ 85741',
     neighborhood: 'Mona Lisa Plaza · Northwest Tucson',
@@ -1289,6 +1307,7 @@ export const properties = [
   },
   {
     id: '1815-e-speedway',
+    coords: [32.2363447, -110.944563], // map pin (lat, lon)
     address: '1815 E Speedway Blvd',
     city: 'Tucson, AZ 85719',
     neighborhood: 'North University · Tucson',
@@ -1358,6 +1377,7 @@ export const properties = [
   },
   {
     id: '1802-s-nova',
+    coords: [29.163102, -81.025928], // map pin (lat, lon)
     address: '1802 S Nova Rd',
     city: 'South Daytona, FL 32119',
     neighborhood: 'City of Daytona Beach · Volusia County',
