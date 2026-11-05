@@ -44,8 +44,6 @@ export const properties = [
       'renovated lobby, modernized elevators, flexible lease terms, operable windows, usable terraces, ' +
       '24/7 access, concierge attended lobby, and direct electric. Notable tenants include Truman’s ' +
       'Gentleman’s Groomers, Montebello Italian Restaurant, and Pomellato.',
-    // Public listings (Metro Manhattan, Showcase, Compass) report 1926, Rosario Candela,
-    // ~86,000 SF; story count is listed as 15 or 16 depending on the source.
     stats: [
       { label: 'Stories', value: '15' },
       { label: 'Built', value: '1926' },
@@ -131,13 +129,11 @@ export const properties = [
     headline: 'Loft office floors half a block from Fifth Avenue',
     description:
       'An approximately 55,000 square foot loft office building located in Midtown South in Manhattan. ' +
-      'Centrally located between Madison and Fifth Avenues, the building is walking distance to Grand Central, ' +
-      'Penn Station, Bryant Park and Times Square. Individual floors are approximately 5,250 square feet, ' +
-      'providing a great full floor branding opportunity for tenants. Amenities include an attended lobby, two ' +
-      'automatic passenger elevators and a freight elevator. Notable tenants include Evergreen on 38th, ' +
-      'Stephan & Co., Opal Financial and Dermalogica.',
-    // Public listings (Crexi, Office Freedom) give 1916 and ~68,000 SF; one database
-    // lists 11 floors / 45 m. The model uses 11 storeys at loft floor heights.
+      'Centrally located between Madison and Fifth Avenues, the building is walking distance to Grand ' +
+      'Central, Penn Station, Bryant Park and Times Square. Individual floors are approximately 5,250 ' +
+      'square feet, providing a great full floor branding opportunity for tenants. Amenities include an ' +
+      'attended lobby, two automatic passenger elevators and a freight elevator. Notable tenants ' +
+      'include Evergreen on 38th, Stephan & Co., Opal Financial and Dermalogica.',
     stats: [
       { label: 'Stories', value: '11' },
       { label: 'Built', value: '1916' },
@@ -217,11 +213,13 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: '',
     description:
-      'A 12-story classical office building on East 23rd Street, steps from Park Avenue South and ' +
-      'Madison Square Park. A three-story limestone base with a full-height retail frontage supports ' +
-      'a cream-brick shaft of generous windows, crowned by a rosette frieze and cornice.',
-    // Public listings (LoopNet, CommercialSearch, LiquidSpace) give 12 stories, built 1913,
-    // ~160 ft tall; size is listed as 93,680 SF or 72,000 SF depending on the source.
+      'Conveniently located in the Gramercy/Flatiron District of Manhattan between Park Avenue South ' +
+      'and Lexington Avenue. An approximately 72,000 square foot loft office building with ' +
+      'approximately 6,140 square foot floors. Newly renovated attended lobby, 24/7 access. Full floor ' +
+      'identity opportunity. Steps from the No. 6 Subway. Neighbours include Bank of America, Bath & ' +
+      'Body Works, Walgreen’s, The Vitamin Shoppe, Pret a Manger, Duane Reade, Starbucks, WeWork, NY ' +
+      'Sports Club, HBO Productions, and Credit Suisse First Boston Headquarters. Notable tenants ' +
+      'include Beeby Clark & Meyler, Cowork.rs and Psychology Today Magazine.',
     stats: [
       { label: 'Stories', value: '12' },
       { label: 'Built', value: '1913' },
@@ -298,10 +296,12 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: '',
     description:
-      'A turn-of-the-century loft building on West 21st Street, a short walk from Sixth Avenue. A rusticated ' +
-      'stone base with a carved entrance and corbelled cornice supports a grey-tan brick shaft of four wide ' +
-      'bays, each with four windows per floor, finished with ornamented capitals and a deep cornice.',
-    // Stories counted from the facade; size from a PropertyShark neighbour table (unverified).
+      'An approximately 120,000 square foot loft office building located in Manhattan’s trendy Chelsea ' +
+      'neighborhood between Avenue of the Americas and 7th Avenue. Multiple new residential ' +
+      'developments are located on the block with a good mix of office, residential and retail in the ' +
+      'immediate area. The building features approximately 10,000 square foot floor plates and is ' +
+      'currently net leased to The School of Visual Arts, New York’s premier institution for the study ' +
+      'of art and design.',
     stats: [
       { label: 'Stories', value: '12' },
       { label: 'Building size', value: '±115,900 SF' },
@@ -360,10 +360,12 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: '',
     description:
-      'A Beaux-Arts loft building on West 38th Street, steps from Sixth Avenue and Bryant Park. A limestone ' +
-      'base with a carved entrance carries a recessed bronze-brown centre bay of wide windows between light ' +
-      'stone piers, topped by arched attic windows and a deep bracketed cornice. Managed by First Pioneer Properties.',
-    // Size from a CommercialSearch listing (42,000 SF); storeys counted from the facade.
+      'An approximately 42,000 square foot loft office building between Avenue of the Americas and ' +
+      'Broadway. Centrally located, the building is walking distance to Penn Station, Bryant Park & ' +
+      'Times Square with convenient access to the B, D, F, M, N, Q, R & 7 trains. Individual floors are ' +
+      'approximately 4,700 square feet. The building offers a great full floor branding opportunity for ' +
+      'tenants. Additional amenities include an attended lobby and on site storage available for rent ' +
+      'by tenants. Notable tenants include Solaire Generation, Nimbo and Prestige Global of New York.',
     stats: [
       { label: 'Stories', value: '10' },
       { label: 'Building size', value: '±42,000 SF' },
@@ -423,11 +425,12 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: '',
     description:
-      'A 12-story boutique office building on West 36th Street, a few doors from Fifth Avenue and the ' +
-      'Gorham Building. Built in 1910 and renovated in 2022, its grey stone facade frames a wide bay of ' +
-      'black-framed windows on every floor, above a dark granite base with a restaurant at grade.',
-    // LoopNet: 12 stories, built 1910, renovated 2022, 35,000 SF, ~3,460 SF floors
-    // (PropertyShark lists 30,776 SF).
+      'An approximately 33,000 square foot loft office building in Midtown South located between 5th ' +
+      'and 6th Avenues. Centrally located just steps from Fifth Avenue. The building is walking ' +
+      'distance to Penn Station, Grand Central and Port Authority with convenient access to the B, D, ' +
+      'F, M, N, Q, R & 7 trains. Individual floors are approximately 3,460 square feet. The building ' +
+      'offers a great full floor branding opportunity for tenants. Notable tenants include Kristalbelli ' +
+      'Restaurant, CW Communications, Joseph J. Blake & Associates, Inc. and Leggiadro.',
     stats: [
       { label: 'Stories', value: '12' },
       { label: 'Built', value: '1910 · renovated 2022' },
@@ -493,10 +496,12 @@ export const properties = [
     uses: ['Office', 'Retail'],
     headline: '',
     description:
-      'A seven-story loft building on East 44th Street, steps from Fifth Avenue and a short walk to Grand ' +
-      'Central. A grand arched storefront and carved stone second floor support five floors of pale glazed ' +
-      'brick with large windows, finished with a corbelled brick cornice.',
-    // Size from a PropertyShark neighbour table (unverified); storeys counted from the facade.
+      'An approximately 22,500 square foot loft office building located in the heart of Manhattan just ' +
+      'steps from Grand Central Terminal. Ideally located between Madison and Fifth Avenues, the ' +
+      'building is also walking distance to Bryant Park. Individual floors are approximately 2,500 ' +
+      'square feet, providing a unique full floor branding opportunity for small to mid-size tenants. ' +
+      'Amenities include a renovated attended lobby, a modernized passenger elevator and a video ' +
+      'intercom system for after hours access and security.',
     stats: [
       { label: 'Stories', value: '7' },
       { label: 'Building size', value: '±17,700 SF' },
@@ -554,11 +559,11 @@ export const properties = [
     uses: ['Residential', 'Retail'],
     headline: '',
     description:
-      "A six-story pre-war walk-up on the corner of West 51st Street and Ninth Avenue in Hell's Kitchen, " +
-      'built in 1920. Twenty-five rental apartments sit above ground-floor retail that wraps the corner, ' +
-      'a short walk from the Theater District and Restaurant Row.',
-    // CityRealty / Corcoran: 1920, 6 floors, 25 rental units; PropertyShark: 12,432 SF
-    // (Compass lists 5 stories / 26 units).
+      'mid-rise residential building located in the heart of Hell\'s Kitchen, Manhattan, just steps from ' +
+      'the Theater District and Columbus Circle. Ideally positioned between Eighth and Ninth Avenues, ' +
+      'the property is also within walking distance of Central Park and Hudson Yards. Built in 1900, ' +
+      'the classic pre-war building offers distinct multi-family residential character with convenient ' +
+      'access to multiple subway lines (A, C, E, 1, 2, B, D).',
     stats: [
       { label: 'Stories', value: '6' },
       { label: 'Built', value: '1920' },
@@ -624,12 +629,11 @@ export const properties = [
     uses: ['Retail', 'Industrial', 'Office'],
     headline: '',
     description:
-      'A block-long commercial and warehouse property on Queens Boulevard between 34th and 35th Streets. ' +
-      'A four-story pilastered brick building lines the boulevard with street-level retail and loft space ' +
-      'above, backed by a warehouse with loading docks, on a lot of about 2.3 acres. Its rooftop billboard ' +
-      'is a Queens Boulevard landmark, steps from the 7 train.',
-    // PropertyShark: 4 stories, 149,121 SF, fireproof warehouse, ~100,000 SF lot,
-    // two buildings; listing sites: ~160,000 SF on a 2.3-acre lot.
+      'This full city block lot contains a 4-story loft industrial/office building with retail on ' +
+      'ground floor, several warehouse sections, parking and loading docks. Originally built as a ' +
+      'Breyers Ice Cream factory, 34-09 Queens Blvd is an approximately 160,000 sq ft mixed-use ' +
+      'property with long term development potential. Notable tenants in include the City of New York, ' +
+      'Artist & Craftsman and Altelier 4.',
     stats: [
       { label: 'Stories', value: '4' },
       { label: 'Building size', value: '±150,000 SF' },
@@ -704,10 +708,10 @@ export const properties = [
     uses: ['Retail'],
     headline: '',
     description:
-      'A one-story corner retail pavilion at Canal and Lafayette Streets, leased to TD Bank. Full-height ' +
-      'glass on both street frontages, a wraparound signage band and a rooftop billboard give it some of ' +
-      'the highest visibility on Canal Street, steps from the Canal Street subway station.',
-    // Traded.co loan record: 4,144 SF (TD Bank refinance, 2023); one storey per photos.
+      'A prime retail site at the corner of Canal & Lafayette Streets. A highly visible location with ' +
+      'estimated 50,000 daily pedestrian count. Eight subway lines are at the foot of the building: J, ' +
+      'M, N, Q, R, Z & 6. Average daily rider count is estimated at over 45,000. The site can be ' +
+      'developed into an approximately 22,500 square foot mixed use building.',
     stats: [
       { label: 'Stories', value: '1' },
       { label: 'Building size', value: '±4,100 SF' },
@@ -768,10 +772,13 @@ export const properties = [
     // 3 commercial units), CVS store locator (#542, 212-20 Northern Blvd),
     // AFC Urgent Care Bayside (213-04 Northern Blvd, open daily 8 am – 8 pm), OSM, photos.
     description:
-      'A one-storey neighbourhood retail building on Northern Boulevard at the corner of Bell Boulevard ' +
-      'in Bayside, Queens. Built in 1996, the brick-and-glass strip of about 24,000 SF sits at the back of ' +
-      'a lot of about 49,000 SF, behind its own parking lot facing Northern Boulevard. CVS Pharmacy anchors ' +
-      'the east end, with a Santander ATM inside, and AFC Urgent Care (No. 213-04) occupies the west end.',
+      'An approximately 24,000 square foot commercial building located in the heart of Bayside, Queens, ' +
+      'just steps from the vibrant Bell Boulevard corridor. Ideally positioned directly on Northern ' +
+      'Boulevard, the property is within short walking distance to the LIRR Bayside Commuter Rail ' +
+      'Station. It offers excellent street-level visibility and multi-tenant flexibility, providing a ' +
+      'premier branding and retail opportunity for medical, professional, or retail users. Amenities ' +
+      'include dedicated front-facing vehicle parking, seamless access to regional bus lines, and fully ' +
+      'accessible building entrances and facilities',
     stats: [
       { label: 'Building', value: '±24,000 SF · 1 storey' },
       { label: 'Lot', value: '±49,239 SF' },
@@ -832,10 +839,11 @@ export const properties = [
     uses: ['Net Lease', 'Industrial', 'Office'],
     headline: '',
     description:
-      'A single-tenant net-leased distribution facility in Orlando Central Park, south Orlando’s established ' +
-      'industrial district. A long single-storey warehouse with loading docks and a fenced yard is fronted by ' +
-      'a two-storey office with a glass entrance, on a site with generous surface parking.',
-    // No public size record found for this address; figures intentionally omitted.
+      'Located in Orlando, FL, the property is a single story industrial building totaling ' +
+      'approximately 215,000 square feet. The property is 100% net leased to AmerisourceBergen (NYSE: ' +
+      'ABC), one of the world’s largest pharmaceutical services companies providing drug distribution ' +
+      'and related services. The property benefits from easy access to the Florida Turnpike (Route 91) ' +
+      'and the Beachline Expressway (Route 528).',
     stats: [
       { label: 'Lease type', value: 'Net lease' },
       { label: 'Use', value: 'Distribution + office' },
@@ -892,9 +900,10 @@ export const properties = [
     uses: ['Net Lease', 'Retail'],
     headline: '',
     description:
-      'A free-standing single-tenant Walgreens in the Catalina Foothills of northeast Tucson, beneath the ' +
-      'Santa Catalina Mountains. A corner entrance tower, tile-roofed arcades on both frontages and a ' +
-      'surrounding parking field make this a classic net-leased pharmacy property.',
+      'An approximately 15,120 square foot building NNN leased to Walgreen Co. in the Sabino Canyon ' +
+      'area of Tucson, Arizona. The entire lot is approximately 2.0 acres. Prime AAA location at the ' +
+      'corner of East Snyder Road and North Sabino Canyon Road and only a 5 minute drive from the ' +
+      'Canyon Ranch Spa.',
     stats: [
       { label: 'Lease type', value: 'Net lease' },
       { label: 'Tenant', value: 'Walgreens' },
@@ -941,10 +950,12 @@ export const properties = [
     uses: ['Residential'],
     headline: '',
     description:
-      'The Link at 4th Ave is a garden-style apartment community on University Boulevard, steps from ' +
-      'Fourth Avenue’s shops and restaurants and a short walk to the University of Arizona. White stucco ' +
-      'buildings with open walkways surround a fenced pool courtyard with a shaded ramada, lounge deck and ' +
-      'lawn, with renovated apartments and on-site parking.',
+      'In the heart of the university area – just 3 ½ blocks from the University of Arizona campus in ' +
+      'Tucson. Ninety–six newly renovated units steps away from 4th avenue, where residents enjoy ' +
+      'shopping, restaurants and an exciting nightlife. Upgraded and modern furniture, BBQ and picnic ' +
+      'areas, volleyball and basketball courts. Cable–ready, 24–hour maintenance, well–lit parking, ' +
+      'swimming pool, laundry facilities, and central air conditioning. Apartments range from junior ' +
+      '1–bedroom, deluxe 1–bedroom and 2–bedroom.',
     stats: [
       { label: 'Property', value: 'The Link at 4th Ave' },
       { label: 'Type', value: 'Garden apartments' },
@@ -996,10 +1007,12 @@ export const properties = [
     uses: ['Retail'],
     headline: '',
     description:
-      'A grocery-anchored neighbourhood shopping center in northeast Tucson, beneath the Santa Catalina ' +
-      'Mountains. Fry’s Food & Drug anchors the center, with a pharmacy, bakery-deli and in-store services, ' +
-      'alongside an in-line strip, Burger King and Starbucks pads and a large surface parking field at Speedway ' +
-      'and Pantano; Potosino Mexican Food (No. 7865) faces the center across Speedway.',
+      'An approximately 86,500 square foot neighborhood shopping center located in Tucson, AZ, at the ' +
+      'Southwest Corner of Speedway Boulevard and Pantano Road. This Fry’s anchored shopping center, ' +
+      'located at a major intersection, completed a multi-million dollar renovation in 2007, making it ' +
+      'the dominant neighborhood center in a high growth residential area. It now features a brand new ' +
+      'Fry’s Marketplace (NYSE: KR) along with other notable retail tenants including Dollar Tree ' +
+      '(NASDAQ: DLTR), Starbucks (NADAQ: SBUX) and Cost Cutters (NYSE: RGS).',
     stats: [
       { label: 'Type', value: 'Grocery-anchored center' },
       { label: 'Anchor', value: 'Fry’s Food & Drug' },
@@ -1072,11 +1085,11 @@ export const properties = [
     uses: ['Industrial', 'Office'],
     headline: '',
     description:
-      'A single-story flex building in Shelton, Connecticut, combining about 39,500 SF of office with about ' +
-      '62,500 SF of industrial and warehouse space. A long glass-fronted office facade with a landscaped ' +
-      'drop-off drive leads to a block-and-metal industrial wing, with on-site parking throughout.',
-    // LoopNet / Crexi / ConnectCRE: ~102,000 SF, one story, built 1976, renovated 2002;
-    // office ~39,500 SF + industrial ~62,500 SF.
+      'Located in Shelton, CT, the approximately 100,000 square foot formerly single tenant building ' +
+      'was converted to a multi-tenant high-tech light assembly building featuring a dramatic glass ' +
+      'curtain wall as well as a new lobby. Located in the heart of the Shelton Business District with ' +
+      'easy access to Route 8, the building is used for office, lab and light assembly. Notable tenants ' +
+      'include Cara Therapeutics & Keno Graphic Services.',
     stats: [
       { label: 'Stories', value: '1' },
       { label: 'Built', value: '1976 · renovated 2002' },
@@ -1138,11 +1151,12 @@ export const properties = [
     uses: ['Office'],
     headline: '',
     description:
-      'El Dorado Square is a nine-building Spanish Colonial office campus in east Tucson. Two-story stucco ' +
-      'buildings with red clay-tile roofs, wrought-iron balconies and arched loggias are set around mature, ' +
-      'landscaped grounds, entered through brick-and-iron gates along a brick-paved drive.',
-    // CommercialSearch / CommercialCafe: built 1981, ~65,000–70,000 SF campus; nine buildings
-    // (Tucson.com / BizTucson).
+      'El Dorado Square built in 1981 consists of nine separate one and two-story buildings. The ' +
+      'property’s tranquil garden setting attracts medical and business professionals. El Dorado’s ' +
+      'Spanish Mediterranean design conveys a relaxed , professional well-designed office space. ' +
+      'Sparkling fountains, old-fashioned streetlights and brick walkways through the property are a ' +
+      'few of the exclusive features of this characteristic property. Amenities include ample covered ' +
+      'and open parking and on-site maintenance staff.',
     stats: [
       { label: 'Buildings', value: '9 · two-story' },
       { label: 'Built', value: '1981' },
@@ -1284,10 +1298,14 @@ export const properties = [
     // Sources: Pima County / LoopNet property record (apartment use, 1.16 AC),
     // Walk Score / Yardi Matrix / Apartments.com (Palm Shadows), satellite imagery.
     description:
-      'Palm Shadows is an apartment community on Speedway Boulevard, just west of the Speedway and ' +
-      'Campbell Avenue intersection and steps from the University of Arizona. Two-storey stucco buildings ' +
-      'with teal trim and open-air walkways wrap two courtyards, one with a fenced swimming pool, around ' +
-      'on-site parking on a lot of about 1.16 acres.',
+      'Set on approximately 2.6 acres of land in Tucson, AZ, at the corner of Speedway and Campbell. ' +
+      'AAA location. “Gateway” to University of Arizona. 152–unit apartment complex rented to U of A ' +
+      'students. Spread over 4 separate buildings, with 92 parking spaces. Amenities include free ' +
+      'high–speed internet, cable TV, controlled access gates, walk–in closets, professional on–site ' +
+      'management and 24–hour maintenance. Enjoy well–lit parking, entryways, swimming pool, shaded ' +
+      'armadas and available guest suites. 1–bedroom and 2–bedroom apartments available. This property ' +
+      'also has the potential to be a large scale multi–use development to cater to the University and ' +
+      'its community.',
     stats: [
       { label: 'Property', value: 'Palm Shadows' },
       { label: 'Buildings', value: '2 stories' },
@@ -1353,11 +1371,13 @@ export const properties = [
     // Daytona Beach Planning Board agenda (the corner is in the City of Daytona
     // Beach, zoned BR-2 / MFR-12); OpenStreetMap and satellite imagery.
     description:
-      'A wooded tract of raw land on the south-west corner of S Nova Road (SR 5A) and Big Tree Road, ' +
-      'at a signalised intersection. The land has long frontage on both roads, runs south to the ' +
-      'self-storage buildings along Space Drive and is covered by dense native woodland of oaks, pines ' +
-      'and sabal palms. The corner parcels are zoned Business Retail (BR-2), and electricity, water ' +
-      'and sewer are available.',
+      'An approximately 21-acre prime commercial and multi-family infill property located in the heart ' +
+      'of South Daytona at the lighted hard corner of Big Tree Road and Nova Road. Ideally situated ' +
+      'along a major north-south regional thoroughfare, the site is also just a short drive to ' +
+      'Interstate 4 and Interstate 95. Comprising three distinct parcels with flexible zoning (BR and ' +
+      'MFR-12), the land offers a rare large-scale development opportunity for mid-density multi-family ' +
+      'and retail projects. Utilities including electricity, water, and sewer are available, providing ' +
+      'a turnkey foundation for developers and investors targeting a high-visibility growth corridor.',
     stats: [
       { label: 'Property', value: 'Wooded land' },
       { label: 'Tract', value: '±26 acres' },
