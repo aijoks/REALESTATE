@@ -13,8 +13,10 @@
 export const company = {
   name: 'First Pioneer Properties',
   tagline: 'Manhattan commercial space, seen from every angle.',
-  phone: '(212) 555-0142', // SAMPLE
-  email: 'leasing@example.com', // SAMPLE
+  phone: '718-482-0700',
+  fax: '718-482-1380',
+  email: 'info@firstpioneerproperties.com',
+  address: ['34-09 Queens Boulevard', '3rd Floor', 'Long Island City, New York 11101'],
 };
 
 // Notable tenants shown in the scrolling logo band on the home page.

@@ -413,3 +413,25 @@ html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic
 .viewer-shell, .panel, .stat, .map-wrap, .gallery img, .gallery figure,
 form.contact input, form.contact textarea { border-radius: 0; }
 .map-switch, .map-switch button { border-radius: 0; }
+
+/* Contact Us page: serif-labelled form with square grey fields, details beside it. */
+.contact-grid { display: grid; grid-template-columns: minmax(0, 620px) 240px; gap: 56px; align-items: start; }
+.contact-full label { display: block; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-size: 19px; color: #3a3a3a; margin-bottom: 26px; }
+.contact-full input:not([type="checkbox"]), .contact-full textarea {
+  display: block; width: 100%; box-sizing: border-box; margin-top: 14px; border: 1px solid transparent; border-radius: 0;
+  background: #ebebea; padding: 9px 12px; font: 16px "Inter", "Helvetica Neue", Arial, sans-serif; color: var(--ink);
+}
+.contact-full input:focus, .contact-full textarea:focus { outline: none; border-color: #0b4a8f; background: #fff; }
+.contact-full textarea { resize: vertical; min-height: 180px; }
+.contact-full .robot { display: flex; align-items: center; gap: 10px; padding-left: 20px; margin-bottom: 18px; }
+.contact-full .robot input { width: 16px; height: 16px; accent-color: #0b4a8f; }
+.form-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.form-note { margin: 0; font-size: 14px; color: var(--muted); }
+.form-note.error { color: #b3261e; }
+.btn.send { background: #c4471c; border-color: #c4471c; color: #fff; border-radius: 0; text-transform: uppercase; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-size: 13px; letter-spacing: 0.06em; padding: 9px 22px; }
+.btn.send:hover { background: #a63a15; border-color: #a63a15; }
+.contact-info h3 { margin: 0 0 14px; font-size: 15px; color: #555; }
+.contact-info p { margin: 0 0 14px; font-size: 13px; line-height: 1.6; color: #666; }
+.contact-info a { color: inherit; }
+.contact-info a.mail { color: #c4471c; }
+@media (max-width: 820px) { .contact-grid { grid-template-columns: 1fr; gap: 32px; } }

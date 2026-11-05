@@ -1,5 +1,5 @@
 // Page-to-page slide in the direction of the menu: pages further right in the
-// menu (Home · Portfolio · Services · About Us) slide in from the right, pages
+// menu (Home · Portfolio · Services · About Us · Contact Us) slide in from the right, pages
 // to the left slide in from the left. The current page slides out the other
 // way. Property pages sit just after Portfolio.
 //
@@ -7,7 +7,7 @@
 // 18.2+) animate natively from the CSS in styles.css; this script picks the
 // direction. Other browsers get a script fallback with the same directions.
 (function () {
-  var ORDER = { '': 0, 'index.html': 0, 'portfolio.html': 1, 'property.html': 1.5, 'services.html': 2, 'about.html': 3 };
+  var ORDER = { '': 0, 'index.html': 0, 'portfolio.html': 1, 'property.html': 1.5, 'services.html': 2, 'about.html': 3, 'contact.html': 4 };
   function rank(href) {
     try {
       var p = new URL(href, location.href).pathname.split('/').pop();
