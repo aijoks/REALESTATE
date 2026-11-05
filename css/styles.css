@@ -315,7 +315,8 @@ html:active-view-transition-type(back)::view-transition-new(root) { animation-na
 @keyframes fp-in-left { from { transform: translateX(-100%); } }
 
 /* Script fallback for browsers without cross-document view transitions. */
-html.fp-leave, html.fp-enter, html.fp-enter-back { overflow-x: hidden; }
+html.fp-leave, html.fp-leave-back, html.fp-enter, html.fp-enter-back { overflow-x: hidden; }
+html.fp-leave-back body > :not(.site-header) { animation: fp-out-right 0.38s cubic-bezier(0.65, 0, 0.35, 1) both; }
 html.fp-leave body > :not(.site-header) { animation: fp-out-left 0.38s cubic-bezier(0.65, 0, 0.35, 1) both; }
 html.fp-enter body > :not(.site-header) { animation: fp-in-right 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
 html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic-bezier(0.65, 0, 0.35, 1) both; }
@@ -323,3 +324,6 @@ html.fp-enter-back body > :not(.site-header) { animation: fp-in-left 0.55s cubic
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }
+
+/* About Us page (placeholder copy until the full page is built). */
+.about-copy p { font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; color: var(--ink); max-width: 860px; font-size: clamp(18px, 1.6vw, 21px); line-height: 1.75; margin: 0; }
