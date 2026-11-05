@@ -59,7 +59,10 @@ export class BuildingViewer {
     this.scene = new THREE.Scene();
     this.scene.fog = new THREE.Fog('#cfdbe6', this.view.fog?.[0] ?? 260, this.view.fog?.[1] ?? 900);
 
-    this.camera = new THREE.PerspectiveCamera(45, 1, 0.3, 2000);
+    // Sky dome radius and far plane grow with the allowed zoom-out distance so
+    // the far side of the dome is never clipped (which showed as a black disc).
+    this.skyR = Math.max(1500, (this.view.maxDistance ?? 360) * 2 + 400);
+    this.camera = new THREE.PerspectiveCamera(45, 1, 0.3, this.skyR + (this.view.maxDistance ?? 360) + 200);
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.06;
@@ -151,7 +154,7 @@ export class BuildingViewer {
   }
 
   _setupSky() {
-    const dome = new THREE.Mesh(new THREE.SphereGeometry(1500, 32, 16), this._skyMaterial());
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(this.skyR, 32, 16), this._skyMaterial());
     dome.renderOrder = -1;
     this.scene.add(dome);
   }
