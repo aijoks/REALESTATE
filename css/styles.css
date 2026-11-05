@@ -4,7 +4,7 @@
   --line: #e4e8ee;
   --bg: #f7f8fa;
   --card: #ffffff;
-  --accent: #1f5fbf;
+  --accent: #0b4a8f; /* logo blue, same as the menu headings */
   --accent-ink: #ffffff;
   --radius: 14px;
   --shadow: 0 10px 30px rgba(20, 24, 31, 0.08);
@@ -38,6 +38,7 @@ nav a:hover { color: var(--ink); }
 }
 .btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { background: #072f5c; border-color: #072f5c; }
 .btn.small { padding: 7px 12px; font-size: 13px; }
 .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
