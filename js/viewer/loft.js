@@ -81,7 +81,7 @@ export function buildBuffLoft(params) {
   {
     const num = textTexture({ text: address, width: 256, height: 128, bg: 'rgba(0,0,0,0)', ink: '#3b3b3b', font: '600 92px "Helvetica Neue", Arial' });
     const plate = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.45), new THREE.MeshBasicMaterial({ map: num, transparent: true }));
-    plate.position.set(-W / 2 + 2.55 * s, 3.95, D / 2 + 0.01);
+    plate.position.set(-W / 2 + 2.55 * s, 3.95, D / 2 + 0.04);
     add(plate);
     const blade = textTexture({
       width: 128, height: 512, bg: '#9f1f1a',
@@ -291,7 +291,7 @@ export function buildBuffLoft(params) {
     add(bulk);
     const winMat = new THREE.MeshStandardMaterial({ color: '#2a3138', roughness: 0.2, metalness: 0.6 });
     const bw = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.1), winMat);
-    bw.position.set(-W / 2 + 4.72, towerTop + 2.1, -D / 2 + 3.6);
+    bw.position.set(-W / 2 + 4.75, towerTop + 2.1, -D / 2 + 3.6);
     bw.rotation.y = Math.PI / 2;
     add(bw);
     const tank = new THREE.Group();

@@ -11,11 +11,11 @@
 //   SE corner, 445 Park on the NE corner, towers lining the avenue
 //
 // e38-fifth — 10 E 38th St:
-//   east  (-x): building wrapped in black construction netting + pipe scaffold
+//   east  (-x): 14 E 38th, pre-war loft building (52 m)
 //   west  (+x): ornate limestone corner building with a deep dark cornice
 //   south (-z): plain brick party walls a few storeys above the roof terrace
 //   Fifth Avenue (+x, ~30 m west): one-way southbound, Empire State Building 4
-//   blocks south; green sidewalk shed along the frontage
+//   blocks south; no construction (shed/netting removed: work finished)
 // Neighbours fade out whenever they block the view of the subject building.
 import { SITE_EXTRAS } from './sites/index.js';
 import * as THREE from 'three';
@@ -50,6 +50,22 @@ const TILES = {
   redtenement: [8, 8],
   stucco: [8, 10],
   darkgrid: [8, 9.2],
+};
+
+// Roof colours for the generic neighbour blocks (tar / gravel / membrane).
+const ROOF_COLOR = {
+  glass: '#5f6469',
+  fluted: '#6b7074',
+  banded: '#85827c',
+  prewar: '#77736c',
+  whitegrid: '#8c8b87',
+  beaux: '#4a4b4c',
+  netting: '#595b5d',
+  tenement: '#5e5a56',
+  redtenement: '#5e5a56',
+  brickwall: '#6a6560',
+  stucco: '#8a877f',
+  darkgrid: '#55585b',
 };
 
 export function buildContext(scene, { W, D, site = {} }) {
@@ -357,9 +373,24 @@ export function buildContext(scene, { W, D, site = {} }) {
     const d = z1 - z0;
     const [tw, th] = TILES[kind];
     const mat = matFor(kind);
-    const mesh = new THREE.Mesh(boxUV(w, h, d, tw, th), mat);
+    // The box's top face (+y, group 2) is dropped from the facade mesh and
+    // replaced by a plain roof plane, so roofs seen from above don't show the
+    // window texture. The roof follows the facade's fade (opacity/depthWrite).
+    const geo = boxUV(w, h, d, tw, th);
+    const keepIdx = [];
+    for (const g of geo.groups) if (g.materialIndex !== 2) for (let i = g.start; i < g.start + g.count; i++) keepIdx.push(geo.index.getX(i));
+    geo.setIndex(keepIdx);
+    geo.clearGroups();
+    const mesh = new THREE.Mesh(geo, mat);
     mesh.position.set((x0 + x1) / 2, y0 + h / 2, (z0 + z1) / 2);
     mesh.castShadow = mesh.receiveShadow = true;
+    const roofMat = new THREE.MeshStandardMaterial({ color: ROOF_COLOR[kind] ?? '#7d7a74', roughness: 0.95, metalness: 0, transparent: true, opacity: 1 });
+    const roof = new THREE.Mesh(new THREE.PlaneGeometry(w, d), roofMat);
+    roof.rotation.x = -Math.PI / 2;
+    roof.position.y = h / 2;
+    roof.receiveShadow = true;
+    roof.onBeforeRender = () => { roofMat.opacity = mat.opacity; roofMat.depthWrite = mat.depthWrite; };
+    mesh.add(roof);
     scene.add(mesh);
     if (fade) { const box = new THREE.Box3().setFromObject(mesh); fadeables.push({ mesh, mats: [mat], box, boxes: [box], opacity: 1 }); }
     mats[kind] = mat;
@@ -706,19 +737,9 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
   const Z = (o) => front + o - 14.4;
   const netX = -23.2; // 14 E 38th: x -23.2…-7.8, 52.4 m
 
-  // East: 14 E 38th, wrapped in black netting over pipe scaffolding.
-  {
-    const net = block('netting', netX, eastX, Z(-10.5), front + 0.3, 52.4);
-    const pipeMat = new THREE.MeshStandardMaterial({ color: '#8d9296', roughness: 0.5, metalness: 0.6, transparent: true, opacity: 1 });
-    const pipes = [];
-    for (let x = netX + 0.5; x < eastX; x += 2.4) pipes.push([x, 26.2, front + 0.45, 0.06, 52.4, 0.06]);
-    for (let y = 2; y < 52; y += 2) pipes.push([(netX + eastX) / 2, y, front + 0.45, eastX - netX, 0.05, 0.05]);
-    const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), pipeMat, pipes.length);
-    const m = new THREE.Matrix4();
-    pipes.forEach(([x, y, z, sx, sy, sz], i) => im.setMatrixAt(i, m.compose(new THREE.Vector3(x, y, z), new THREE.Quaternion(), new THREE.Vector3(sx, sy, sz))));
-    scene.add(im);
-    group([net, im]);
-  }
+  // East: 14 E 38th (52.4 m), a pre-war loft building. Its facade work is
+  // finished: no more netting or pipe scaffold.
+  block('prewar', netX, eastX, Z(-10.5), front, 52.4);
 
   // West: the ornate limestone building (46.6 m, deep dark cornice) runs
   // 61 m along 38th St to the Fifth Avenue corner, 37 m deep, with a leg
@@ -731,8 +752,17 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
     const body = block('beaux', westX, x1, z0, front, h - 9, 9);
     const leg = block('beaux', 10.3, 30.1, zS, z0 - 0.05, h);
     const corniceMat = new THREE.MeshStandardMaterial({ color: '#26282a', roughness: 0.7, transparent: true, opacity: 1 });
-    const cornice = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX + 0.8, 2.4, front - z0 + 1.8), corniceMat);
-    cornice.position.set((westX + x1) / 2 + 0.4, h - 1.2, (z0 + front) / 2 + 0.9);
+    // The cornice is a projecting band along 38th St and Fifth Av only; its
+    // top sits 0.15 m below the roof so the two never share a plane
+    // (previously a full-depth slab coplanar with the roof z-fought).
+    const cH = 2.4;
+    const cTop = h - 0.15;
+    const cornice = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX + 0.7, cH, 2.6), corniceMat);
+    cornice.position.set((westX + x1) / 2 + 0.45, cTop - cH / 2, front + 0.5);
+    const corniceAv = new THREE.Mesh(new THREE.BoxGeometry(2.6, cH - 0.1, front - z0 - 0.2), corniceMat);
+    corniceAv.position.set(x1 + 0.5, cTop - 0.05 - (cH - 0.1) / 2, (z0 + front) / 2);
+    corniceAv.castShadow = true;
+    scene.add(corniceAv);
     cornice.castShadow = true;
     scene.add(cornice);
     const bracketMat = new THREE.MeshStandardMaterial({ color: '#1d1f21', roughness: 0.7, transparent: true, opacity: 1 });
@@ -743,7 +773,7 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
     const band = new THREE.Mesh(new THREE.BoxGeometry(x1 - westX, 1.2, 0.5), new THREE.MeshStandardMaterial({ color: '#cfc4ae', roughness: 0.8, transparent: true, opacity: 1 }));
     band.position.set((westX + x1) / 2, 9.6, front + 0.25);
     scene.add(band);
-    group([base, body, cornice, brackets, band]);
+    group([base, body, cornice, corniceAv, brackets, band]);
     group([leg]);
     // The 37th St / Fifth corner (44.5 m).
     block('prewar', 30.15, x1, zS, z0 - 0.05, 44.5, 0, { fade: false });
@@ -795,50 +825,6 @@ function neighbours38th({ scene, block, group, matFor, W, D, front, walk, road, 
 
   // Empire State Building: west side of Fifth between 33rd and 34th St.
   empireState(scene, PK.westLine + 64, streetZ(-5) + road / 2 + walk, streetZ(-4) - road / 2 - walk);
-
-  // Green sidewalk shed along the frontage (and the netted building next door).
-  {
-    const x0 = netX;
-    const x1 = W / 2 + 0.4;
-    const depth = 3.4;
-    const hgt = 3.7;
-    const green = new THREE.MeshStandardMaterial({ color: '#2f5848', roughness: 0.6, metalness: 0.3 });
-    const brace = new THREE.MeshStandardMaterial({ color: '#c2c6c9', roughness: 0.4, metalness: 0.6 });
-    const add = (geo, mat, x, y, z, q) => {
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set(x, y, z);
-      if (q) m.quaternion.copy(q);
-      m.castShadow = true;
-      scene.add(m);
-      return m;
-    };
-    for (let x = x0 + 0.2; x <= x1; x += 2.44) {
-      for (const z of [front + 0.25, front + depth]) add(new THREE.BoxGeometry(0.14, hgt, 0.14), green, x, hgt / 2, z);
-    }
-    for (let x = x0 + 0.2; x + 2.44 <= x1; x += 4.88) {
-      const len = Math.hypot(2.44, hgt - 0.6);
-      const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, Math.atan2(hgt - 0.6, 2.44)));
-      const q2 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, -Math.atan2(hgt - 0.6, 2.44)));
-      add(new THREE.BoxGeometry(len, 0.05, 0.05), brace, x + 1.22, hgt / 2, front + depth, q);
-      add(new THREE.BoxGeometry(len, 0.05, 0.05), brace, x + 1.22, hgt / 2, front + depth, q2);
-    }
-    add(new THREE.BoxGeometry(x1 - x0, 0.35, depth + 0.2), green, (x0 + x1) / 2, hgt + 0.17, front + depth / 2 + 0.1);
-    // Green railing on top of the deck.
-    add(new THREE.BoxGeometry(x1 - x0, 0.06, 0.06), green, (x0 + x1) / 2, hgt + 1.45, front + depth + 0.15);
-    for (let x = x0 + 0.2; x <= x1; x += 1.22) add(new THREE.BoxGeometry(0.06, 1.1, 0.06), green, x, hgt + 0.9, front + depth + 0.15);
-    const mesh = new THREE.MeshStandardMaterial({ color: '#2f5848', roughness: 0.8, transparent: true, opacity: 0.45, side: THREE.DoubleSide });
-    add(new THREE.PlaneGeometry(x1 - x0, 1.0), mesh, (x0 + x1) / 2, hgt + 0.85, front + depth + 0.15);
-    // Lights under the deck.
-    const lamp = new THREE.MeshBasicMaterial({ color: '#fff6dc' });
-    for (let x = x0 + 1.4; x < x1; x += 4.88) add(new THREE.BoxGeometry(0.3, 0.06, 0.3), lamp, x, hgt - 0.02, front + depth / 2);
-    // White signs hung on the railing.
-    const sign = (text, x, w) => {
-      const t = textTexture({ text, width: 768, height: 192, bg: '#f4f4f2', ink: '#24456e', font: '600 64px "Helvetica Neue", Arial' });
-      add(new THREE.PlaneGeometry(w, 0.75), new THREE.MeshStandardMaterial({ map: t, roughness: 0.6 }), x, hgt + 0.95, front + depth + 0.2);
-    };
-    sign('10 East 38th Street, NYC', 3.4, 2.8);
-    sign('SIDEWALK SHED', -1.3, 2.2);
-  }
 
   // Ornamental lampposts on 38th near Fifth.
   const post = new THREE.MeshStandardMaterial({ color: '#3d4a45', roughness: 0.5, metalness: 0.5 });
@@ -1122,12 +1108,15 @@ function empireState(scene, cx, z0, z1) {
   {
     const cz = (z0 + z1) / 2;
     const tex = facadeTexture('esb', 3);
+    const esbRoof = new THREE.MeshStandardMaterial({ color: '#9d9a93', roughness: 0.9 });
     const tier = (w, d, y0, y1) => {
       const g = new THREE.BoxGeometry(w, y1 - y0, d);
       const uv = g.attributes.uv;
       const dims = [[d, y1 - y0], [d, y1 - y0], [w, d], [w, d], [w, y1 - y0], [w, y1 - y0]];
       for (let f = 0; f < 6; f++) for (let k = 0; k < 4; k++) { const i = f * 4 + k; uv.setXY(i, uv.getX(i) * dims[f][0] / 10, uv.getY(i) * dims[f][1] / 14); }
-      const mesh = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.15 }));
+      // Setback roofs (+y face, group 2) get plain stone, not the window texture.
+      const wall = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.6, metalness: 0.15 });
+      const mesh = new THREE.Mesh(g, [wall, wall, esbRoof, wall, wall, wall]);
       mesh.position.set(cx, (y0 + y1) / 2, cz);
       mesh.castShadow = true;
       scene.add(mesh);
