@@ -440,3 +440,8 @@ form.contact input, form.contact textarea { border-radius: 0; }
 .showing-text { margin: 0 0 16px; color: var(--muted); }
 .showing-btn { display: block; text-align: center; margin-bottom: 10px; }
 .contact-full label[hidden] { display: none; }
+
+/* Services: no numbers; titles and text line up across each row. */
+.service-grid { gap: 0 72px; align-items: stretch; }
+.service { padding: 36px 0 48px; }
+.service h3 { margin: 0 0 18px; line-height: 1.15; }
