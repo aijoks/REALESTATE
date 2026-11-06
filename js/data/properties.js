@@ -1416,7 +1416,7 @@ export const properties = [
     tenants: [],
     availability: [],
     photos: [
-      { src: 'assets/properties/1802-s-nova/aerial-outline.jpg', caption: 'Aerial with the tract outlined' },
+      { src: 'assets/properties/1802-s-nova/site-map.jpg', caption: 'Site map: S Nova Rd and Big Tree Rd' },
       { src: 'assets/properties/1802-s-nova/street-view.jpg', caption: 'Approaching the Nova Rd / Big Tree Rd signal' },
     ],
     cover: 'assets/properties/1802-s-nova/street-view.jpg',
