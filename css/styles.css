@@ -415,7 +415,7 @@ form.contact input, form.contact textarea { border-radius: 0; }
 .map-switch, .map-switch button { border-radius: 0; }
 
 /* Contact Us page: serif-labelled form with square grey fields, details beside it. */
-.contact-grid { display: grid; grid-template-columns: minmax(0, 620px) 300px; gap: 56px; align-items: start; }
+.contact-grid { display: grid; grid-template-columns: minmax(0, 620px) minmax(0, 420px); gap: 56px; align-items: start; }
 .contact-full label { display: block; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-size: 19px; color: #3a3a3a; margin-bottom: 26px; }
 .contact-full input:not([type="checkbox"]), .contact-full textarea {
   display: block; width: 100%; box-sizing: border-box; margin-top: 14px; border: 1px solid transparent; border-radius: 0;
@@ -447,6 +447,6 @@ form.contact input, form.contact textarea { border-radius: 0; }
 .service h3 { margin: 0 0 18px; line-height: 1.15; }
 
 /* Contact Us: the bronze "Managed by" plaque, quiet and framed. */
-.managed-by { margin: 0 0 30px; padding: 10px; background: #fff; border: 1px solid var(--line); box-shadow: 0 18px 40px -24px rgba(20, 24, 31, 0.35); }
-.managed-by img { display: block; width: 100%; height: auto; filter: saturate(0.9); }
-@media (max-width: 820px) { .managed-by { max-width: 420px; } }
+.managed-by { margin: 34px 0 0; }
+.managed-by img { display: block; width: 100%; height: auto; box-shadow: 0 22px 44px -28px rgba(20, 24, 31, 0.45); }
+@media (max-width: 820px) { .managed-by { max-width: 520px; } }
