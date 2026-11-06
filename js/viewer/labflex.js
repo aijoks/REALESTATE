@@ -196,6 +196,20 @@ export function buildLabFlex(params) {
     add(m);
   }
 
+  // Dark single-ply roof membrane inside the parapets (as on the satellite).
+  {
+    const roofMat = new THREE.MeshStandardMaterial({ color: '#4d5156', roughness: 0.95 });
+    const slab = (x0, x1, z0, z1, y) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, 0.04, z1 - z0), roofMat);
+      m.position.set((x0 + x1) / 2, y, (z0 + z1) / 2);
+      m.receiveShadow = true;
+      add(m);
+    };
+    slab(N.x0 + 0.45, N.x1 - 0.2, N.z0 + 0.45, N.z1 - 0.45, HN + 0.37);
+    slab(Mb.x0 + 0.2, Mb.x1 - 0.45, Mb.z0 + 0.45, Mb.z1 - 3, H + 1.12);
+    slab(Mb.x0 + 0.2, Mb.x1 - 3, Mb.z1 - 3, Mb.z1 - 0.45, H + 1.12);
+    slab(S.x0 - 0.2, S.x1 - 0.45, S.z0 + 0.45, S.z1 - 0.45, H + 1.12);
+  }
   // Roof plant (many small rooftop units, as seen from above).
   for (let x = N.x0 + 6; x < N.x1 - 3; x += 9) for (let z = N.z0 + 6; z < N.z1 - 3; z += 11) if (r() < 0.6) box(new THREE.MeshStandardMaterial({ color: '#c3c6c8', roughness: 0.5, metalness: 0.4 }), 2.6, 1.2, 2.0, x + r() * 3, HN + 0.9, z + r() * 3);
   for (let x = Mb.x0 + 6; x < Mb.x1 - 3; x += 12) for (let z = Mb.z0 + 6; z < Mb.z1 - 4; z += 13) if (r() < 0.55) plant(x + r() * 3, z + r() * 3);

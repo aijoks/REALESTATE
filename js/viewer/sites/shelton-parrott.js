@@ -1,28 +1,101 @@
-// Real surroundings for site 'shelton-parrott' (1 Parrott Drive, Shelton CT),
-// traced from Google satellite imagery and OSM. Called by buildSuburban with
-// site.bare (no generic lots / trees / sheds).
+// Real surroundings for site 'shelton-parrott' (1 Parrott Drive, Shelton CT).
+// Called by buildSuburban with site.bare (no generic lots / trees / sheds).
 // ctx: { THREE, scene, add, flat, box, W, D, front, site, r, mats }
-// The building's long axis runs NNE-SSW (16 deg off north). Tracing was done
-// in pixels of two north-up images; P() / S() convert them to model metres
-// (model +x = along the building toward SSW, +z = toward WNW).
+//
+// Model frame: origin = centre of the building footprint, +x = along the
+// building toward SSW, +z = toward WNW (the glazed office front); the long
+// axis is 17.2 deg east of north, so real north is (-cos17.2, +sin17.2).
+// Every road centreline, parking lot, neighbouring footprint and tree spot
+// comes from shelton-parrott.data.js, generated from OpenStreetMap ways and
+// the satellite canopy, converted into this frame:
+//   - Parrott Drive leaves Bridgeport Ave (SR 714) opposite Fairchild Dr,
+//     curves north past the Fountain Square entrance and the site's south
+//     driveway, runs straight up the building's east side and ends in a
+//     turnaround with drives on to the hotel / office lots to the north.
+//   - The site's own drives: the south driveway into the big south lot, the
+//     long west lot along the office front with its drop-off loop at the CARA
+//     lobby, the north drive back out to Parrott Drive, and the east loading
+//     lot / driveway.
+//   - Progress Drive (west) does NOT connect to Parrott Drive.
 import { textTexture } from '../textures.js';
+import { roads, lots, bldgs, trees } from './shelton-parrott.data.js';
 
-const SN = Math.sin((16 * Math.PI) / 180);
-const CS = Math.cos((16 * Math.PI) / 180);
-// Zoom-19 image (0.2244 m/px).
-const P = (px, py) => [(-SN * px + CS * py) * 0.2244 - 76.35, (-CS * px - SN * py) * 0.2244 + 152];
-// Zoom-18 image (0.4488 m/px), registered to the zoom-19 one.
-const S = (X, Y) => P((X - 675.6) * 2 + 588, (Y - 697) * 2 + 626);
+const LOOP_ID = 793944528; // OSM ring of the drop-off loop (drawn as a ring)
+const PUBLIC = new Set(['secondary', 'tertiary', 'residential', 'unclassified']);
 
 export function site_shelton_parrott(ctx) {
   const { THREE, add, r, mats } = ctx;
   const { asphalt, white, yellow, grass, kerbMat } = mats;
   const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, ...o });
-  const lotMat = M('#4b4c4f', { roughness: 0.95 });
-  const sand = M('#c9b48f', { roughness: 1 });
+  const lotMat = M('#4a4b4e', { roughness: 0.95 });
+  const driveMat = M('#424346', { roughness: 0.95 });
 
-  // Flat polygon on the ground from model [x, z] points.
-  const poly = (pts, mat, y = 0.04) => {
+  // ---------------- geometry helpers ----------------
+  const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const segDist = (p, a, b) => {
+    const dx = b[0] - a[0]; const dz = b[1] - a[1]; const L = dx * dx + dz * dz;
+    const t = L ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dz) / L)) : 0;
+    return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dz);
+  };
+  const lineDist = (p, pts) => { let d = Infinity; for (let i = 0; i < pts.length - 1; i++) d = Math.min(d, segDist(p, pts[i], pts[i + 1])); return d; };
+  const inside = (pt, poly) => {
+    let c = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, zi] = poly[i]; const [xj, zj] = poly[j];
+      if ((zi > pt[1]) !== (zj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - zi)) / (zj - zi) + xi) c = !c;
+    }
+    return c;
+  };
+  // Centripetal Catmull-Rom resampling (~2 m steps) for smooth curves.
+  const smooth = (pts, step = 2) => {
+    if (pts.length < 3) return pts.slice();
+    const out = [];
+    const P = [[2 * pts[0][0] - pts[1][0], 2 * pts[0][1] - pts[1][1]], ...pts,
+      [2 * pts.at(-1)[0] - pts.at(-2)[0], 2 * pts.at(-1)[1] - pts.at(-2)[1]]];
+    for (let i = 1; i < P.length - 2; i++) {
+      const [p0, p1, p2, p3] = [P[i - 1], P[i], P[i + 1], P[i + 2]];
+      const t01 = Math.sqrt(dist(p0, p1)) || 1e-3; const t12 = Math.sqrt(dist(p1, p2)) || 1e-3; const t23 = Math.sqrt(dist(p2, p3)) || 1e-3;
+      const n = Math.max(1, Math.ceil(dist(p1, p2) / step));
+      for (let k = 0; k < n; k++) {
+        const u = k / n;
+        const v = [0, 1].map((c) => {
+          const m1 = (p2[c] - p1[c] + t12 * ((p1[c] - p0[c]) / t01 - (p2[c] - p0[c]) / (t01 + t12)));
+          const m2 = (p2[c] - p1[c] + t12 * ((p3[c] - p2[c]) / t23 - (p3[c] - p1[c]) / (t12 + t23)));
+          const a = 2 * p1[c] - 2 * p2[c] + m1 + m2; const b = -3 * p1[c] + 3 * p2[c] - 2 * m1 - m2;
+          return a * u * u * u + b * u * u + m1 * u + p1[c];
+        });
+        out.push(v);
+      }
+    }
+    out.push(pts.at(-1).slice());
+    return out;
+  };
+  // Unit left normal at each vertex (mitred, clamped).
+  const normals = (pts) => pts.map((p, i) => {
+    const a = pts[Math.max(0, i - 1)]; const b = pts[Math.min(pts.length - 1, i + 1)];
+    const dx = b[0] - a[0]; const dz = b[1] - a[1]; const L = Math.hypot(dx, dz) || 1;
+    return [-dz / L, dx / L];
+  });
+  // Flat ribbon along a polyline; w = width or per-vertex widths.
+  const ribbon = (pts, w, mat, y) => {
+    const ns = normals(pts);
+    const pos = []; const idx = [];
+    pts.forEach((p, i) => {
+      const h = (Array.isArray(w) ? w[i] : w) / 2;
+      pos.push(p[0] + ns[i][0] * h, y, p[1] + ns[i][1] * h, p[0] - ns[i][0] * h, y, p[1] - ns[i][1] * h);
+      if (i) { const k = (i - 1) * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+    });
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    // Make sure the faces point up.
+    if (g.attributes.normal.getY(0) < 0) { for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]]; g.setIndex(idx); g.computeVertexNormals(); }
+    const m = add(new THREE.Mesh(g, mat));
+    m.receiveShadow = true;
+    return m;
+  };
+  const poly = (pts, mat, y) => {
     const sh = new THREE.Shape();
     pts.forEach(([x, z], i) => (i ? sh.lineTo(x, -z) : sh.moveTo(x, -z)));
     const m = add(new THREE.Mesh(new THREE.ShapeGeometry(sh), mat));
@@ -31,189 +104,219 @@ export function site_shelton_parrott(ctx) {
     m.receiveShadow = true;
     return m;
   };
-  // A road along a polyline (model points), with round joints and a centre line.
-  const road = (pts, w, mat = asphalt, y = 0.05, centre = true) => {
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [x0, z0] = pts[i];
-      const [x1, z1] = pts[i + 1];
-      const len = Math.hypot(x1 - x0, z1 - z0);
-      const m = add(new THREE.Mesh(new THREE.PlaneGeometry(len, w), mat));
-      m.rotation.set(-Math.PI / 2, 0, Math.atan2(-(z1 - z0), x1 - x0));
-      m.position.set((x0 + x1) / 2, y, (z0 + z1) / 2);
-      m.receiveShadow = true;
-      if (centre) {
-        for (const o of [-0.12, 0.12]) {
-          const l = add(new THREE.Mesh(new THREE.PlaneGeometry(len, 0.1), yellow));
-          l.rotation.copy(m.rotation);
-          const nx = -(z1 - z0) / len;
-          const nz = (x1 - x0) / len;
-          l.position.set((x0 + x1) / 2 + nx * o, y + 0.01, (z0 + z1) / 2 + nz * o);
-        }
-      }
-      const j = add(new THREE.Mesh(new THREE.CircleGeometry(w / 2, 16), mat));
-      j.rotation.x = -Math.PI / 2;
-      j.position.set(x1, y - 0.002, z1);
-    }
-  };
-  const box = (pts, h, color) => {
-    // Extruded neighbour footprint (model points).
-    const sh = new THREE.Shape();
-    pts.forEach(([x, z], i) => (i ? sh.lineTo(x, -z) : sh.moveTo(x, -z)));
-    const geo = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: false });
-    geo.rotateX(-Math.PI / 2);
-    const m = add(new THREE.Mesh(geo, M(color)));
-    m.castShadow = m.receiveShadow = true;
+  const disc = (x, z, rad, mat, y) => {
+    const m = add(new THREE.Mesh(new THREE.CircleGeometry(rad, 40), mat));
+    m.rotation.x = -Math.PI / 2;
+    m.position.set(x, y, z);
+    m.receiveShadow = true;
     return m;
   };
-  // Sign plate on a wall between two model points a -> b (outside on the right in plan).
-  const sign = (a, b, t, y, text, sub, w, bg = '#ffffff', ink = '#1f2a3a') => {
-    const [x0, z0] = a;
-    const [x1, z1] = b;
-    const len = Math.hypot(x1 - x0, z1 - z0);
-    const tex = textTexture({ text, sub, width: 1024, height: 220, bg, ink, font: '800 92px Arial', subFont: '600 42px Arial' });
-    const m = add(new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.215), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })));
-    const nx = -(z1 - z0) / len;
-    const nz = (x1 - x0) / len;
-    m.position.set(x0 + (x1 - x0) * t + nx * 0.12, y, z0 + (z1 - z0) * t + nz * 0.12);
-    m.rotation.y = Math.atan2(nx, nz);
+  // Dashed / solid paint line offset `off` from a centreline.
+  const paint = (pts, off, mat, y, dash = 0, gap = 0, lw = 0.12) => {
+    const ns = normals(pts);
+    const line = pts.map((p, i) => [p[0] + ns[i][0] * off, p[1] + ns[i][1] * off]);
+    if (!dash) { ribbon(line, lw, mat, y); return; }
+    let run = []; let s = 0;
+    for (let i = 0; i < line.length; i++) {
+      if (i) s += dist(line[i], line[i - 1]);
+      const on = s % (dash + gap) < dash;
+      if (on) run.push(line[i]);
+      if ((!on || i === line.length - 1) && run.length > 1) { ribbon(run, lw, mat, y); run = []; } else if (!on) run = [];
+    }
   };
-  const Pm = (arr) => arr.map(([a, b]) => P(a, b));
-  const Sm = (arr) => arr.map(([a, b]) => S(a, b));
-
-  // ---------------- ground cover ----------------
-  // Construction site (sand) east of Parrott Drive.
-  poly(Sm([[880, 60], [1024, 60], [1024, 1024], [880, 1024], [860, 820], [880, 500]]), sand, 0.02);
 
   // ---------------- roads ----------------
-  // Parrott Drive: from Bridgeport Ave (south-east) north past the building to a cul-de-sac.
-  const parrott = [...Pm([[1280, 1255], [1100, 1170], [960, 1090], [850, 1010], [800, 950], [793, 850], [805, 700], [825, 560], [848, 400], [870, 200], [885, 0]]), ...Sm([[842, 300], [855, 240], [878, 205]])];
-  road(parrott, 9);
-  {
-    const [cx, cz] = S(884, 192);
-    const c = add(new THREE.Mesh(new THREE.CircleGeometry(15, 32), asphalt));
-    c.rotation.x = -Math.PI / 2;
-    c.position.set(cx, 0.049, cz);
-  }
-  // Progress Drive (west) and the street along the north.
-  road(Sm([[300, -40], [312, 200], [310, 330], [285, 450], [240, 520], [170, 560], [-60, 600]]), 9);
-  road(Sm([[300, 30], [580, 30], [640, 40], [880, 192]]), 8);
-  // Service drive from Parrott Drive to the south lots.
-  road(Pm([[800, 1000], [700, 1065], [560, 1075]]), 7, asphalt, 0.048, false);
+  const ring = roads.find((rd) => rd.id === LOOP_ID);
+  const net = roads.filter((rd) => rd.id !== LOOP_ID).map((rd) => {
+    const curvy = PUBLIC.has(rd.k) || rd.k === 'driveway' || rd.k === 'service';
+    const pts = curvy ? smooth(rd.p) : rd.p;
+    let w = rd.w;
+    // Parrott Drive widens to turn lanes at Bridgeport Ave.
+    if (rd.n === 'Parrott Drive') w = pts.map(([x, z]) => 10 + 4 * Math.max(0, Math.min(1, (x - 100) / 25)) * (z < -70 ? 1 : 0));
+    return { ...rd, pts, wv: w, pub: PUBLIC.has(rd.k) };
+  });
+  const halfAt = (rd, i) => (Array.isArray(rd.wv) ? rd.wv[i] : rd.wv) / 2;
+  const Y = { secondary: 0.07, tertiary: 0.066, residential: 0.064, unclassified: 0.064, service: 0.058, driveway: 0.056, 'drive-through': 0.054, parking_aisle: 0.05 };
+  for (const rd of net) ribbon(rd.pts, rd.wv, rd.pub ? asphalt : driveMat, Y[rd.k] ?? 0.056);
 
-  // ---------------- parking / drives on the site ----------------
-  poly(Pm([[330, 905], [560, 1050], [560, 1095], [400, 1280], [250, 1280], [250, 980]]), lotMat); // south lot
-  poly(Pm([[300, 900], [330, 905], [250, 980], [230, 940]]), lotMat);
-  poly(Pm([[415, 100], [480, 100], [470, 150], [415, 430], [380, 520], [350, 500], [385, 420]]), lotMat); // west drive
-  poly(Pm([[700, 380], [835, 380], [815, 525], [700, 525]]), lotMat); // east lot (north block)
-  poly(Pm([[430, 0], [885, 0], [872, 120], [760, 188], [510, 108], [430, 108]]), lotMat); // north apron
-  poly(Pm([[640, 470], [700, 470], [700, 525], [640, 525]]), lotMat);
-  // Stripes in the south lot and east lot.
-  {
-    const stripe = (a, b) => road([a, b], 0.12, white, 0.07, false);
-    for (let k = 0; k < 14; k++) {
-      const [x, z] = P(330 + k * 13, 930 + k * 8);
-      stripe([x, z], [x + 5.4 * Math.cos(0.9), z + 5.4 * Math.sin(0.9)]);
-    }
-    for (let k = 0; k < 9; k++) {
-      const a = P(712 + k * 12, 392);
-      stripe(a, [a[0] + 5.2, a[1] + 0.6]);
+  // Junction flares: where a road ends on another road, widen its mouth so
+  // the corners read as kerb returns instead of square cuts.
+  for (const rd of net) {
+    for (const end of [0, 1]) {
+      const pts = end ? [...rd.pts].reverse() : rd.pts;
+      const E = pts[0];
+      const host = net.find((o) => o !== rd && (o.pub || !rd.pub) && lineDist(E, o.pts) < 0.6
+        && !(o.k === rd.k && o.n === rd.n && Math.min(dist(E, o.pts[0]), dist(E, o.pts.at(-1))) < 0.6));
+      if (!host) continue;
+      let hi = 0; let hd = Infinity;
+      host.pts.forEach((p, i) => { const d = dist(p, E); if (d < hd) { hd = d; hi = i; } });
+      const hw = halfAt(host, hi);
+      const fr = rd.pub && host.pub ? 7 : rd.k === 'parking_aisle' ? 2 : 3.5;
+      let k = 1; while (k < pts.length - 1 && dist(pts[k], E) < hw + fr + 1) k++;
+      const dx = pts[k][0] - E[0]; const dz = pts[k][1] - E[1]; const L = Math.hypot(dx, dz);
+      if (L < hw + 1) continue;
+      const d = [dx / L, dz / L]; const n = [-d[1], d[0]];
+      const bw = (Array.isArray(rd.wv) ? rd.wv[end ? rd.wv.length - 1 : 0] : rd.wv) / 2;
+      const at = (along, off) => [E[0] + d[0] * along + n[0] * off, E[1] + d[1] * along + n[1] * off];
+      // Concave quarter-circle returns of radius fr on both sides.
+      const side = (s) => {
+        const out = [];
+        for (let t = 0; t <= 8; t++) {
+          const th = Math.PI + (t / 8) * (Math.PI / 2);
+          out.push(at(hw + fr + fr * Math.cos(th), s * (bw + fr + fr * Math.sin(th))));
+        }
+        return out;
+      };
+      const shape = [at(hw - 0.4, bw + fr), ...side(1), ...side(-1).reverse(), at(hw - 0.4, -(bw + fr))];
+      poly(shape, rd.pub ? asphalt : driveMat, (Y[rd.k] ?? 0.056) - 0.003);
     }
   }
-  // Circular drop-off drive with its grass island, in front of the CARA lobby.
+
+  // Parrott Drive turnaround at its north end, and the drop-off loop.
+  const parrott = net.find((rd) => rd.n === 'Parrott Drive');
   {
-    const [cx, cz] = P(398, 812);
-    const ring = add(new THREE.Mesh(new THREE.CircleGeometry(12, 40), asphalt));
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(cx, 0.052, cz);
-    const isl = add(new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.2, 0.25, 40), grass));
+    const end = parrott.p.reduce((a, b) => (b[0] < a[0] ? b : a));
+    disc(end[0] - 4, end[1] + 3, 15, asphalt, 0.063);
+  }
+  if (ring) {
+    const cx = ring.p.reduce((s, p) => s + p[0], 0) / ring.p.length;
+    const cz = ring.p.reduce((s, p) => s + p[1], 0) / ring.p.length;
+    disc(cx, cz, 11.2, driveMat, 0.057);
+    const isl = add(new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.25, 40), grass));
     isl.position.set(cx, 0.13, cz);
-    const k = add(new THREE.Mesh(new THREE.TorusGeometry(5.2, 0.2, 6, 40), kerbMat));
+    const k = add(new THREE.Mesh(new THREE.TorusGeometry(5, 0.18, 6, 40), kerbMat));
     k.rotation.x = -Math.PI / 2;
-    k.position.set(cx, 0.16, cz);
-    // Drive from the loop down to the south lot and toward the lobby.
-    road([[cx + 8, cz - 4], [P(380, 905)[0], P(380, 905)[1]]], 7, asphalt, 0.051, false);
-    road([[cx, cz], [P(455, 760)[0], P(455, 760)[1]]], 6, asphalt, 0.051, false);
+    k.position.set(cx, 0.17, cz);
+  }
+
+  // ---------------- parking lots ----------------
+  for (const l of lots) poly(l, lotMat, 0.04);
+  // Paved apron in front of the industrial wing entrance (photographed).
+  poly([[-10.6, 24.5], [8, 24.5], [8, 37], [-10.6, 37]], lotMat, 0.041);
+
+  // ---------------- kerbs on the public roads ----------------
+  {
+    const spots = [];
+    for (const rd of net) {
+      if (!rd.pub) continue;
+      const ns = normals(rd.pts);
+      for (let i = 0; i < rd.pts.length - 1; i++) {
+        const a = rd.pts[i]; const b = rd.pts[i + 1]; const L = dist(a, b);
+        for (let t = 0; t < L; t += 1.2) {
+          const u = t / L;
+          const p = [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+          const n = ns[i]; const h = halfAt(rd, i) + 0.15;
+          for (const s of [1, -1]) {
+            const q = [p[0] + n[0] * h * s, p[1] + n[1] * h * s];
+            if (net.some((o) => o !== rd && lineDist(q, o.pts) < (Array.isArray(o.wv) ? 7 : o.wv / 2) + (o.pub && rd.pub ? 7.5 : 4))) continue;
+            spots.push([q[0], q[1], Math.atan2(-(b[1] - a[1]), b[0] - a[0])]);
+          }
+        }
+      }
+    }
+    const km = new THREE.InstancedMesh(new THREE.BoxGeometry(1.25, 0.14, 0.28), kerbMat, spots.length);
+    const m4 = new THREE.Matrix4(); const q = new THREE.Quaternion(); const e = new THREE.Euler(); const one = new THREE.Vector3(1, 1, 1);
+    spots.forEach(([x, z, ry], i) => km.setMatrixAt(i, m4.compose(new THREE.Vector3(x, 0.07, z), q.setFromEuler(e.set(0, ry, 0)), one)));
+    km.receiveShadow = true;
+    add(km);
+  }
+
+  // ---------------- markings ----------------
+  // Bridgeport Ave (SR 714): double yellow centre, dashed lane lines, edge lines.
+  for (const rd of net.filter((o) => o.k === 'secondary')) {
+    const y = Y.secondary + 0.006;
+    for (const o of [-0.14, 0.14]) paint(rd.pts, o, yellow, y);
+    for (const o of [-4.3, 4.3]) paint(rd.pts, o, white, y, 3, 9);
+    for (const o of [-7.9, 7.9]) paint(rd.pts, o, white, y);
+  }
+  // Parking stalls along the aisles that run through striped lots.
+  const carSpots = [];
+  {
+    const stripes = [];
+    const blocked = (p, self) => net.some((o) => o !== self && lineDist(p, o.pts) < (Array.isArray(o.wv) ? 7 : o.wv / 2) + 0.4)
+      || bldgs.some((b) => inside(p, b.p));
+    for (const rd of net.filter((o) => o.k === 'parking_aisle')) {
+      for (let i = 0; i < rd.p.length - 1; i++) {
+        const a = rd.p[i]; const b = rd.p[i + 1]; const L = dist(a, b);
+        if (L < 8) continue;
+        const d = [(b[0] - a[0]) / L, (b[1] - a[1]) / L]; const n = [-d[1], d[0]];
+        for (let t = 3; t < L - 2.5; t += 2.75) {
+          for (const s of [1, -1]) {
+            const p0 = [a[0] + d[0] * t + n[0] * s * 3.4, a[1] + d[1] * t + n[1] * s * 3.4];
+            const p1 = [p0[0] + n[0] * s * 5.2, p0[1] + n[1] * s * 5.2];
+            const mid = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+            if (!lots.some((l) => inside(p0, l) && inside(p1, l))) continue;
+            if (blocked(p1, rd) || blocked(mid, rd)) continue;
+            stripes.push([mid[0], mid[1], Math.atan2(-n[1], n[0])]);
+            const c = [mid[0] + d[0] * 1.37, mid[1] + d[1] * 1.37];
+            if (t + 2.75 < L - 2.5 && !blocked(c, rd) && lots.some((l) => inside(c, l))) carSpots.push([c[0], c[1], Math.atan2(-n[1], n[0])]);
+          }
+        }
+      }
+    }
+    const sm = new THREE.InstancedMesh(new THREE.PlaneGeometry(5.2, 0.12), white, stripes.length);
+    const m4 = new THREE.Matrix4(); const q = new THREE.Quaternion(); const e = new THREE.Euler(); const one = new THREE.Vector3(1, 1, 1);
+    stripes.forEach(([x, z, ry], i) => sm.setMatrixAt(i, m4.compose(new THREE.Vector3(x, 0.056, z), q.setFromEuler(e.set(-Math.PI / 2, ry, 0, 'YXZ')), one)));
+    add(sm);
   }
 
   // ---------------- parked cars ----------------
-  const carCols = ['#e8e8e6', '#8e9aa6', '#7a1d22', '#c9c3b5', '#2c3440', '#b8bcc2', '#3c5a78'];
-  const car = ([x, z], ry) => {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.8, 1.85), M(carCols[Math.floor(r() * carCols.length)], { roughness: 0.3, metalness: 0.5 }));
-    body.position.y = 0.65;
-    const cab = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.6, 1.7), M('#22272d', { roughness: 0.2, metalness: 0.6 }));
-    cab.position.set(-0.2, 1.3, 0);
-    g.add(body, cab);
-    g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
-    g.position.set(x, 0, z);
-    g.rotation.y = ry;
-    add(g);
-  };
-  for (let k = 0; k < 14; k++) if (r() < 0.4) car(P(335 + k * 13, 948 + k * 8), -0.9 + Math.PI / 2);
-  for (let k = 0; k < 9; k++) if (r() < 0.55) car(P(718 + k * 12, 410), Math.PI / 2 - 0.28);
-  for (const p of [[735, 440], [742, 493], [520, 2], [600, 2], [660, 2]]) car(P(...p), 0.3);
+  // Tour camera spots (x, z): keep cars and tree trunks clear of them.
+  const cams = [[100, 38], [74, 26], [32, 44], [8, 38], [-104, 10]];
+  {
+    const carCols = ['#e8e8e6', '#8e9aa6', '#7a1d22', '#c9c3b5', '#2c3440', '#b8bcc2', '#3c5a78', '#1d1f22'];
+    const near = carSpots.filter(([x, z]) => Math.hypot(x, z) < 260 && !cams.some((c) => dist(c, [x, z]) < 12) && r() < (Math.hypot(x, z) < 120 ? 0.42 : 0.3));
+    const bodies = new THREE.InstancedMesh(new THREE.BoxGeometry(4.6, 0.8, 1.85), M('#ffffff', { roughness: 0.3, metalness: 0.5 }), near.length);
+    const cabs = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 0.6, 1.7), M('#22272d', { roughness: 0.2, metalness: 0.6 }), near.length);
+    const m4 = new THREE.Matrix4(); const q = new THREE.Quaternion(); const e = new THREE.Euler(); const one = new THREE.Vector3(1, 1, 1); const col = new THREE.Color();
+    near.forEach(([x, z, ry], i) => {
+      q.setFromEuler(e.set(0, ry, 0));
+      bodies.setMatrixAt(i, m4.compose(new THREE.Vector3(x, 0.65, z), q, one));
+      bodies.setColorAt(i, col.set(carCols[Math.floor(r() * carCols.length)]));
+      const o = new THREE.Vector3(-0.2, 0, 0).applyQuaternion(q);
+      cabs.setMatrixAt(i, m4.compose(new THREE.Vector3(x + o.x, 1.3, z + o.z), q, one));
+    });
+    bodies.castShadow = cabs.castShadow = true;
+    add(bodies);
+    add(cabs);
+  }
 
   // ---------------- neighbouring buildings ----------------
-  const b50 = Sm([[630, 268], [778, 285], [770, 365], [625, 350]]);
-  box(b50, 8, '#d7d9db');
-  sign(b50[3], b50[2], 0.5, 5.6, '50 PARROTT DRIVE', null, 8);
-  const b60 = Sm([[655, 100], [805, 140], [795, 220], [650, 190]]);
-  box(b60, 8, '#dcdcda');
-  sign(b60[3], b60[2], 0.5, 5.6, '60 PARROTT DRIVE', null, 8);
-  const b14 = Sm([[372, 52], [555, 52], [555, 222], [372, 222]]);
-  box(b14, 9, '#c9cdd2');
-  sign(b14[3], b14[2], 0.5, 6.2, '14 PROGRESS DRIVE', 'Office · light industrial', 9);
-  const b10 = Sm([[408, 402], [470, 408], [420, 565], [345, 550], [340, 490], [360, 470]]);
-  box(b10, 7, '#d3d5d6');
-  sign(b10[4], b10[3], 0.5, 4.6, 'GRIFFIN HOSPITAL', 'Occupational Medicine Center · 10 Progress Dr', 10, '#ffffff', '#00467f');
-  box(Sm([[145, 690], [250, 600], [315, 690], [210, 765]]), 11, '#c8b89c');
-  box(Sm([[125, 165], [190, 170], [190, 262], [125, 240]]), 6, '#dcdcdc');
-  box(Sm([[115, 10], [230, 10], [230, 100], [115, 100]]), 7, '#e6e6e4');
-  box(Sm([[965, 455], [1015, 478], [900, 780], [860, 778], [852, 668], [870, 640]]), 9, '#c7ccd2');
-  box(Sm([[870, 890], [945, 828], [975, 850], [900, 955]]), 7, '#b9c3cc');
-  // Big parking lots of the Progress Drive office park (west).
-  poly(Sm([[0, 170], [200, 170], [200, 330], [130, 520], [0, 540]]), lotMat, 0.035);
-  poly(Sm([[150, 760], [440, 770], [440, 900], [150, 900]]), lotMat, 0.035);
-
-  // ---------------- woods (instanced) ----------------
-  const inside = (pt, poly2) => {
-    let c = false;
-    for (let i = 0, j = poly2.length - 1; i < poly2.length; j = i++) {
-      const [xi, zi] = poly2[i];
-      const [xj, zj] = poly2[j];
-      if ((zi > pt[1]) !== (zj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - zi)) / (zj - zi) + xi) c = !c;
-    }
-    return c;
-  };
-  // Keep the lawn strip in front of the building and the drives clear.
-  const keepClear = [
-    [[-90, 34], [-12, 34], [-12, 44], [-90, 50]],
-    [[-12, 21], [62, 21], [62, 40], [-12, 40]],
-    [[48, -2], [106, -2], [106, 52], [48, 52]],
-  ];
-  const woods = [
-    Sm([[330, 560], [480, 560], [560, 640], [600, 1000], [430, 1000], [330, 920]]),
-    Sm([[560, 300], [610, 300], [600, 640], [560, 640]]),
-    Sm([[690, 520], [785, 520], [780, 900], [700, 920]]),
-    Sm([[800, 250], [870, 250], [860, 850], [795, 850]]),
-    Sm([[560, 930], [760, 930], [760, 1024], [560, 1024]]),
-    Sm([[70, 140], [300, 140], [300, 560], [200, 560], [200, 330], [70, 330]]),
-    Sm([[0, 560], [140, 560], [140, 900], [0, 900]]),
-    Sm([[350, 230], [620, 230], [620, 300], [350, 300]]),
-  ];
-  const spots = [];
-  for (const w of woods) {
-    let x0 = Infinity; let x1 = -Infinity; let z0 = Infinity; let z1 = -Infinity;
-    for (const [x, z] of w) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
-    for (let x = x0; x < x1; x += 6.5) {
-      for (let z = z0; z < z1; z += 6.5) {
-        const p = [x + (r() - 0.5) * 5, z + (r() - 0.5) * 5];
-        if (!inside(p, w) || keepClear.some((k) => inside(p, k))) continue;
-        if (p[0] > -86 && p[0] < 86 && p[1] > -38 && p[1] < 38) continue; // the building itself
-        spots.push(p);
+  const wallMat = M('#d9d7d2');
+  const roofMats = new Map();
+  for (const b of bldgs) {
+    const sh = new THREE.Shape();
+    b.p.forEach(([x, z], i) => (i ? sh.lineTo(x, -z) : sh.moveTo(x, -z)));
+    const geo = new THREE.ExtrudeGeometry(sh, { depth: b.h, bevelEnabled: false });
+    geo.rotateX(-Math.PI / 2);
+    if (!roofMats.has(b.c)) roofMats.set(b.c, M(b.c));
+    const m = add(new THREE.Mesh(geo, [roofMats.get(b.c), wallMat]));
+    m.castShadow = m.receiveShadow = true;
+    if (b.n && b.h > 5) {
+      // Name sign on the longest wall that faces a road.
+      let best = null;
+      for (let i = 0; i < b.p.length; i++) {
+        const a = b.p[i]; const c = b.p[(i + 1) % b.p.length]; const L = dist(a, c);
+        if (L < 12) continue;
+        const mid = [(a[0] + c[0]) / 2, (a[1] + c[1]) / 2];
+        const out = [(c[1] - a[1]) / L, -(c[0] - a[0]) / L];
+        const probe = [mid[0] + out[0] * 3, mid[1] + out[1] * 3];
+        const side = inside(probe, b.p) ? -1 : 1;
+        const dRoad = Math.min(...net.filter((o) => o.pub || o.k === 'service').map((o) => lineDist([mid[0] + out[0] * side * 3, mid[1] + out[1] * side * 3], o.pts)));
+        if (!best || dRoad < best.d) best = { a, c, L, mid, out: [out[0] * side, out[1] * side], d: dRoad };
+      }
+      if (best) {
+        const w = Math.min(10, best.L * 0.5);
+        const tex = textTexture({ text: b.n.toUpperCase(), width: 1024, height: 200, bg: '#ffffff', ink: '#23324a', font: '800 104px Arial' });
+        const s = add(new THREE.Mesh(new THREE.PlaneGeometry(w, w * 0.195), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.5 })));
+        s.position.set(best.mid[0] + best.out[0] * 0.12, b.h - 1.4, best.mid[1] + best.out[1] * 0.12);
+        s.rotation.y = Math.atan2(best.out[0], best.out[1]);
       }
     }
   }
+
+  // ---------------- trees (canopy sampled from the satellite) ----------------
+  const spots = trees.filter((p) => !cams.some((c) => dist(c, p) < 9));
   {
     const n = spots.length;
     const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), M('#ffffff', { roughness: 1 }), n * 2);
@@ -223,10 +326,10 @@ export function site_shelton_parrott(ctx) {
     const col = new THREE.Color();
     const greens = ['#3d6b2b', '#4a7a33', '#335c24', '#56813a', '#2f4f26'];
     spots.forEach(([x, z], i) => {
-      const h = 8 + r() * 8;
+      const h = 9 + r() * 8;
       trunks.setMatrixAt(i, m4.compose(new THREE.Vector3(x, h * 0.3, z), q, new THREE.Vector3(1, h * 0.6, 1)));
       for (let k = 0; k < 2; k++) {
-        const s = 2.6 + r() * 2.2;
+        const s = 2.7 + r() * 2.0;
         crowns.setMatrixAt(i * 2 + k, m4.compose(new THREE.Vector3(x + (r() - 0.5) * 2, h * (0.62 + k * 0.22), z + (r() - 0.5) * 2), q, new THREE.Vector3(s, s * 0.9, s)));
         crowns.setColorAt(i * 2 + k, col.set(greens[Math.floor(r() * greens.length)]));
       }
@@ -235,9 +338,9 @@ export function site_shelton_parrott(ctx) {
     add(crowns);
     add(trunks);
   }
-  // Evergreens and lawn trees in front of the office (as photographed).
+  // The tall evergreen between the office wing and the CARA lobby (photo).
   const ever = M('#2f4b2a', { roughness: 1 });
-  for (const [x, z, h] of [[57, 28, 12], [116, 26, 10], [-14, 48, 9], [20, 52, 8]]) {
+  for (const [x, z, h] of [[57, 28, 12]]) {
     const c = add(new THREE.Mesh(new THREE.ConeGeometry(h * 0.32, h, 10), ever));
     c.position.set(x, h / 2 + 0.8, z);
     c.castShadow = true;

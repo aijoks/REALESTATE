@@ -1139,17 +1139,19 @@ export const properties = [
         ],
       },
       site: { id: 'shelton-parrott', facing: 'west', suburban: true, noFence: true, bare: true },
+      view: { fog: [480, 1500], maxDistance: 420 },
       tour: {
-        avenue: { label: 'CARA entrance & loop drive', pos: [93, 1.8, 43], target: [50, 3.5, 11], fov: 64 },
-        labels: { roof: 'Aerial over Parrott Drive' },
+        avenue: { label: 'CARA entrance & loop drive', pos: [100, 1.8, 38], target: [50, 3.5, 10], fov: 64 },
         radius: 110,
-        omit: ['street', 'base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'crown'],
+        omit: ['street', 'base', 'front', 'front-west', 'west', 'rear-west', 'back', 'east', 'roof', 'crown'],
         extra: [
           { id: 'lobby', label: 'CARA lobby', pos: [74, 2.4, 26], target: [74, 3.8, 0], fov: 55 },
           { id: 'office', label: 'Office wing', pos: [32, 2.4, 44], target: [30, 3.4, 23], fov: 60 },
           { id: 'wing', label: 'Industrial wing entrance', pos: [8, 2.2, 38], target: [-6, 3, 23], fov: 55 },
-          { id: 'north', label: 'North end & truck doors', pos: [-122, 9, 6], target: [-70, 3, 4], fov: 55 },
+          { id: 'north', label: 'North end & truck doors', pos: [-104, 6, 10], target: [-78, 3, -2], fov: 58 },
           { id: 'aerial-sw', label: 'Aerial from the south-west', pos: [170, 80, 120], target: [0, 0, 0], fov: 50 },
+          { id: 'aerial-ne', label: 'Aerial over Parrott Drive', pos: [-190, 95, -150], target: [10, 0, -20], fov: 50 },
+          { id: 'plan', label: 'Site plan from above', pos: [45, 340, -14], target: [0, 0, 0], fov: 50 },
         ],
       },
       hotspots: [
