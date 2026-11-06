@@ -20,7 +20,36 @@ fill('[data-description]', p.description);
 document.querySelector('[data-stats]').innerHTML = p.stats
   .map((s) => `<div class="stat"><small>${s.label}</small><b>${s.value}</b></div>`).join('');
 document.querySelector('[data-gallery]').innerHTML = p.photos
-  .map((ph) => `<figure><img src="${ph.src}" alt="${ph.caption}" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /><figcaption>${ph.caption}</figcaption></figure>`).join('');
+  .map((ph, i) => `<figure><button type="button" class="ph" data-i="${i}" aria-label="View larger: ${ph.caption}"><img src="${ph.src}" alt="${ph.caption}" loading="lazy" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /></button><figcaption>${ph.caption}</figcaption></figure>`).join('');
+
+// Photo viewer: click a photo to see it larger; arrows / Esc / click outside.
+{
+  const lb = document.getElementById('lightbox');
+  const img = lb.querySelector('img');
+  const cap = lb.querySelector('figcaption');
+  let at = 0;
+  const show = (i) => {
+    at = (i + p.photos.length) % p.photos.length;
+    img.src = p.photos[at].src; img.alt = p.photos[at].caption; cap.textContent = p.photos[at].caption;
+    lb.querySelectorAll('.lb-nav').forEach((b) => (b.hidden = p.photos.length < 2));
+  };
+  const open = (i) => { show(i); lb.hidden = false; document.body.classList.add('lb-open'); lb.querySelector('.lb-close').focus(); };
+  const close = () => { lb.hidden = true; document.body.classList.remove('lb-open'); };
+  document.querySelector('[data-gallery]').addEventListener('click', (e) => {
+    const b = e.target.closest('.ph'); if (b) open(Number(b.dataset.i));
+  });
+  lb.querySelector('.lb-close').addEventListener('click', close);
+  lb.querySelector('.lb-prev').addEventListener('click', () => show(at - 1));
+  lb.querySelector('.lb-next').addEventListener('click', () => show(at + 1));
+  lb.addEventListener('click', (e) => { if (e.target === lb) close(); });
+  window.addEventListener('keydown', (e) => {
+    if (lb.hidden) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowRight') show(at + 1);
+    if (e.key === 'ArrowLeft') show(at - 1);
+    e.stopImmediatePropagation();
+  }, true);
+}
 
 // ---------- Location map (Leaflet, loaded on demand) ----------
 import('./map.js').then((m) => m.initMap(p)).catch(() => { document.getElementById('location').hidden = true; });

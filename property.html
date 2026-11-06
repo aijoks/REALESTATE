@@ -68,9 +68,13 @@
           <p data-description></p>
           <div class="statgrid" data-stats></div>
         </div>
+        <div class="panel" id="contact">
+          <h3>Request a showing</h3>
+          <a class="btn primary showing-btn" data-showing href="contact.html">Request a showing</a>
+          <div class="contact-note">Or call <span data-phone></span></div>
+        </div>
         <div class="panel" id="availability">
           <h3>Availability</h3>
-          <p class="avail-text">For current availability, floor plans and asking rents, view our live listings.</p>
           <a class="btn primary avail-link" href="https://firstpioneerrealty.net/listings/" target="_blank" rel="noopener">View current listings <span aria-hidden="true">↗</span></a>
         </div>
         <div class="panel" id="location">
@@ -94,18 +98,12 @@
             </div>
           </div>
         </div>
-        <div class="panel">
-          <h3>Photos</h3>
-          <div class="gallery" data-gallery></div>
-        </div>
       </div>
       <aside>
         <div class="sticky">
-          <div class="panel" id="contact">
-            <h3>Request a showing</h3>
-            <p class="showing-text">Tell us a little about your requirements and we’ll arrange a visit.</p>
-            <a class="btn primary showing-btn" data-showing href="contact.html">Request a showing</a>
-            <div class="contact-note">Or call <span data-phone></span></div>
+          <div class="panel photos-panel">
+            <h3>Photos</h3>
+            <div class="gallery" data-gallery></div>
           </div>
         </div>
       </aside>
@@ -113,6 +111,12 @@
   </div>
 
 
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="lb-close" type="button" aria-label="Close">×</button>
+    <button class="lb-nav lb-prev" type="button" aria-label="Previous photo">‹</button>
+    <figure><img alt="" /><figcaption></figcaption></figure>
+    <button class="lb-nav lb-next" type="button" aria-label="Next photo">›</button>
+  </div>
   <script type="module" src="js/property.js"></script>
 </body>
 </html>
