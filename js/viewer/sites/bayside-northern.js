@@ -343,7 +343,9 @@ export function site_bayside_northern(ctx) {
     })();
     extrude(s.p, s.h, tealM, M('#3c3f42'));
     // White coping on the north and east parapets (satellite), grey roof edge.
-    box(M('#e9e7e1'), 31.6, 0.25, 0.4, -45.3, s.h + 0.12, 12.1, 0.02, false);
+    // (The teal west wall stops 0.4 m short of the CVS east wall so the two
+    // never share a plane, which made them flicker.)
+    box(M('#e9e7e1'), 29.4, 0.25, 0.4, -46.2, s.h + 0.12, 12.2, 0.02, false);
     box(M('#e9e7e1'), 0.4, 0.25, 26.3, -62.2, s.h + 0.12, -4.4, 0.076, false);
     // A few shopfronts and a door on the Bell Blvd face.
     for (const z of [-12, -4, 4]) {
@@ -730,7 +732,7 @@ const BAYSIDE_BLDGS = [
   ['', 5.0, [57.5,-75.8,57.9,-70.0,51.4,-69.6,51.0,-75.4]],
   ['', 4.8, [74.6,10.8,75.0,25.2,70.2,25.4,69.7,11.0]],
   ['', 3.3, [95.4,-7.7,95.8,-2.8,92.5,-2.5,92.1,-7.4]],
-  ['teal', 5.4, [-29.4,11.9,-60.9,12.5,-61.2,8.7,-63.2,-17.5,-31.0,-18.2]],
+  ['teal', 5.4, [-31.45,11.94,-60.9,12.5,-61.2,8.7,-63.2,-17.5,-31.45,-18.2]],
   ['', 4.1, [110.3,-54.4,110.5,-48.6,104.6,-48.4,104.4,-54.1]],
   ['', 3.3, [25.9,-147.7,25.9,-141.8,21.9,-141.7,21.8,-147.6]],
   ['', 3.3, [69.5,11.4,69.7,16.4,63.1,16.7,62.9,11.8]],
