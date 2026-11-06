@@ -115,11 +115,6 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'ArrowLeft') { viewer.prev(); syncState(); }
 });
 
-// Contact form (no backend yet) — opens a pre-filled email.
-document.getElementById('contact-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const f = new FormData(e.target);
-  const body = `Name: ${f.get('name')}\nEmail: ${f.get('email')}\nCompany: ${f.get('company')}\n\n${f.get('message')}`;
-  location.href = `mailto:${company.email}?subject=${encodeURIComponent('Showing request — ' + p.address)}&body=${encodeURIComponent(body)}`;
-  document.getElementById('contact-note').textContent = 'Opening your email client…';
-});
+// "Request a showing" opens the Contact Us page with this property filled in.
+document.querySelectorAll('[data-showing]').forEach((a) => { a.href = `contact.html?property=${encodeURIComponent(p.id)}`; });
+

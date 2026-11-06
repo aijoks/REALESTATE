@@ -435,3 +435,8 @@ form.contact input, form.contact textarea { border-radius: 0; }
 .contact-info a { color: inherit; }
 .contact-info a.mail { color: #c4471c; }
 @media (max-width: 820px) { .contact-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.contact-full .interest input { background: #f3f5f8; border-color: #c9d3df; color: #0b4a8f; font-weight: 600; }
+.showing-text { margin: 0 0 16px; color: var(--muted); }
+.showing-btn { display: block; text-align: center; margin-bottom: 10px; }
+.contact-full label[hidden] { display: none; }
