@@ -458,3 +458,11 @@ form.contact input, form.contact textarea { border-radius: 0; }
 }
 .filters .btn:hover { color: #072f5c; border-color: #0b4a8f; }
 .filters .btn.active { background: #0b4a8f; border-color: #0b4a8f; color: #fff; }
+
+/* Property page buttons: same type and blue as the top menu and portfolio filters. */
+.prop-head .cta .btn, .avail-link, .showing-btn, .map-actions .btn {
+  font-family: inherit; font-weight: 500; text-transform: uppercase; letter-spacing: 0.01em;
+  font-size: 13px; border-radius: 0;
+}
+.prop-head .cta .btn:not(.primary), .map-actions .btn:not(.primary) { color: #0b4a8f; background: #fff; border-color: #d5dde8; }
+.prop-head .cta .btn:not(.primary):hover, .map-actions .btn:not(.primary):hover { color: #072f5c; border-color: #0b4a8f; }
