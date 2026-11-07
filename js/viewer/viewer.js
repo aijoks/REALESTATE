@@ -298,6 +298,10 @@ export class BuildingViewer {
       .map((c) => ({
         ...c,
         label: tour.labels?.[c.id] ?? c.label,
+        // Per-property camera override for a default stop (sets the orbit
+        // pivot, so dragging turns around the property, not around a point
+        // next to the camera).
+        ...(tour.set?.[c.id] ? { pos: vec(tour.set[c.id].pos), target: vec(tour.set[c.id].target), fov: tour.set[c.id].fov ?? c.fov } : {}),
         // Per-stop sight-lines: only neighbours blocking these points fade.
         ...(tour.fades?.[c.id] ? { fade: 'street', targets: tour.fades[c.id].map(vec) } : {}),
       }));

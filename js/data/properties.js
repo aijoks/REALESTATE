@@ -998,7 +998,13 @@ export const properties = [
       procedural: { generator: 'garden', floors: 3, width: 90, depth: 120 },
       site: { id: 'tucson-university', facing: 'south', suburban: true, desert: true, noSheds: true },
       tour: {
-        avenue: { label: 'Pool courtyard', pos: [2, 3.2, 6], target: [-16, 1.8, 2], fov: 62 },
+        // Orbit pivots sit on the complex (not on the street edge or next to
+        // the camera) so dragging turns around the buildings like every other tour.
+        avenue: { label: 'Pool courtyard', pos: [26, 24, 42], target: [-16, 2, 2], fov: 50 },
+        set: {
+          street: { pos: [-6, 40, 112], target: [-6, 3, 4], fov: 50 },
+          crown: { pos: [22, 9, 96], target: [9, 3, 58], fov: 48 },
+        },
         labels: { street: 'University Blvd', west: 'Parking & east side', 'rear-west': 'Northeast corner', back: 'North side', crown: 'Entrance on University' },
         extra: [{ id: 'fourth', label: '4th Ave side', pos: [-60, 4.5, 48], target: [-38, 4, 12], fov: 55 }],
         streetDist: 14,
