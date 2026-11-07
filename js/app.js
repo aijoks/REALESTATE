@@ -45,7 +45,12 @@ if (document.body.classList.contains('home') && matchMedia('(max-width: 600px)')
     const visible = window.visualViewport ? visualViewport.height : innerHeight;
     const bar = Math.max(0, Math.round(probe.offsetHeight - visible));
     document.documentElement.style.setProperty('--bar-js', `${bar}px`);
+    // Once the page is scrolled (Safari's bar shrinks), seat the belt on the
+    // very bottom edge; on first load it keeps its original position.
+    if (first === null) first = bar;
+    document.documentElement.classList.toggle('bar-small', scrollY > 2 || bar < first - 20);
   };
+  let first = null;
   setBar();
   addEventListener('resize', setBar);
   addEventListener('scroll', setBar, { passive: true });

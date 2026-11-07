@@ -516,6 +516,8 @@ body.lb-open { overflow: hidden; }
   }
   .hero:has(.serif-title)::before { top: calc(50% - var(--bar) / 2); }
   .hero:has(.serif-title) .tenant-band { bottom: var(--bar); }
+  .hero:has(.serif-title) .tenant-band { transition: transform 0.25s ease; }
+  html.bar-small .hero:has(.serif-title) .tenant-band { transform: translateY(18px); }
   html:has(body.home) { background: #2a2724; }
   body.home .site-header { background: #fff; }
   .tenant-set img { filter: none; opacity: 0.95; }
