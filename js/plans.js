@@ -91,7 +91,20 @@ export function initPlans(p, viewer) {
     tabs.hidden = list.length < 2;
     const keep = list.includes(planIdx) ? planIdx : list[0];
     showPlan(keep);
-    if (focus3d && viewer?.model) viewer.focusFloor(f);
+    if (focus3d) show3d();
+  }
+
+  // The plan to lay into the 3D model for the current floor: the one on screen
+  // if it is a full-floor plan, else the floor's full-floor/typical plan.
+  const plan3dFor = (f, i) => {
+    if (plans[i]?.model3d && plans[i].floors.includes(f)) return plans[i];
+    return (byFloor.get(f) ?? []).map((k) => plans[k]).find((pl) => pl.model3d) ?? null;
+  };
+  function show3d() {
+    if (!viewer?.model) return;
+    const pl = plan3dFor(floor, planIdx);
+    if (pl) viewer.showPlan(floor, pl);
+    else { viewer.clearPlan(); viewer.focusFloor(floor); }
   }
 
   stack.addEventListener('click', (e) => {
@@ -100,14 +113,37 @@ export function initPlans(p, viewer) {
   });
   tabs.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-i]');
-    if (b) showPlan(Number(b.dataset.i));
+    if (b) { showPlan(Number(b.dataset.i)); if (viewer?.plan) show3d(); }
   });
   to3d.addEventListener('click', () => {
     const tour = document.getElementById('tour');
     const y = tour.getBoundingClientRect().top + scrollY - (document.querySelector('.site-header')?.offsetHeight || 0) - 14;
     scrollTo({ top: y, behavior: 'smooth' });
-    if (viewer?.model) viewer.focusFloor(floor);
+    show3d();
   });
+
+  // In-viewer control while a floor is cut open: step between floors that have
+  // a full-floor plan, or go back to the whole building.
+  const floors3d = [...byFloor.keys()].filter((f) => plan3dFor(f)).sort((a, b) => a - b);
+  const pill = document.getElementById('plan-pill');
+  if (pill && viewer) {
+    const lab = pill.querySelector('[data-pill-label]');
+    const up = pill.querySelector('[data-pill-up]');
+    const down = pill.querySelector('[data-pill-down]');
+    viewer.onPlan = (n, pl) => {
+      pill.hidden = n == null;
+      document.getElementById('hint')?.classList.toggle('hidden-for-plan', n != null);
+      if (n == null) return;
+      lab.textContent = `${ord(n)} plan`;
+      up.disabled = !floors3d.some((f) => f > n);
+      down.disabled = !floors3d.some((f) => f < n);
+      if (floor !== n) showFloor(n, { focus3d: false });
+    };
+    up.addEventListener('click', () => { const f = floors3d.find((x) => x > viewer.plan?.n); if (f) showFloor(f); });
+    down.addEventListener('click', () => { const f = [...floors3d].reverse().find((x) => x < viewer.plan?.n); if (f) showFloor(f); });
+    pill.querySelector('[data-pill-close]').addEventListener('click', () => viewer.clearPlan());
+  }
+  to3d.textContent = floors3d.length ? 'See it in 3D' : 'View on 3D model';
 
   // Click to zoom; while zoomed the plan follows the pointer. Esc / click resets.
   function unzoom() { stage.classList.remove('zoomed'); img.style.transformOrigin = ''; }

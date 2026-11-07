@@ -961,3 +961,16 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
 .hero-diamond + .wrap .finder, .finder { margin-top: -66px; }
 @media (max-width: 600px) { .finder { margin-top: -66px; } }
 .hero-diamond { margin-bottom: 0; }
+
+/* Floor-plan cut-away control inside the 3D viewer */
+.plan-pill { position: absolute; top: 12px; left: 12px; z-index: 5; display: flex; align-items: center; gap: 2px; padding: 4px; background: rgba(255,255,255,0.96); box-shadow: 0 8px 24px rgba(0,0,0,0.25); font: 600 12px/1 var(--sans); color: var(--ink); }
+.plan-pill[hidden] { display: none; }
+.plan-pill span { padding: 0 10px; white-space: nowrap; }
+.plan-pill button { height: 30px; border: 0; background: none; cursor: pointer; font: inherit; color: var(--ink); }
+.plan-pill .pp-step { width: 30px; font-size: 18px; }
+.plan-pill .pp-step:disabled { color: #c3c8cf; cursor: default; }
+.plan-pill .pp-step:not(:disabled):hover { background: #eef3f9; }
+.plan-pill .pp-close { margin-left: 4px; padding: 0 12px; background: var(--ink); color: #fff; letter-spacing: 0.06em; }
+.plan-pill .pp-close:hover { background: var(--navy); }
+@media (max-width: 760px) { .plan-pill { top: 8px; left: 8px; font-size: 11px; } .plan-pill .pp-close { padding: 0 9px; } }
+.hint.hidden-for-plan { opacity: 0 !important; }

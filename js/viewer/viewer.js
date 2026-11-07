@@ -27,6 +27,7 @@ const GENERATORS = { prewarBrick: buildPrewarBrick, buffLoft: buildBuffLoft, cla
 import { hotspotTexture } from './textures.js';
 import { buildContext, updateFades } from './context.js';
 import { mergeStatic } from './optimize.js';
+import { buildPlanFloor } from './floorplan3d.js';
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -51,6 +52,8 @@ export class BuildingViewer {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05;
+    // Floor-plan cut-aways clip the building (and only the building) above a storey.
+    this.renderer.localClippingEnabled = true;
     container.appendChild(this.renderer.domElement);
 
     // Large sites (e.g. raw land) may widen the fog, zoom range and shadow
@@ -91,6 +94,16 @@ export class BuildingViewer {
       root.updateMatrixWorld(true);
       this.context = buildContext(root, { W: this.model.width, D: this.model.depth, site });
       this.subjectBox = new THREE.Box3().setFromObject(this.model.group);
+      // Give the building its own copies of its materials, so a floor-plan
+      // cut-away can clip it without clipping neighbours that share a material.
+      this.buildingMats = new Set();
+      {
+        const copies = new Map();
+        const own = (mm) => { if (!copies.has(mm)) { const c = mm.clone(); copies.set(mm, c); this.buildingMats.add(c); } return copies.get(mm); };
+        this.model.group.traverse((o) => { if (o.material) o.material = Array.isArray(o.material) ? o.material.map(own) : own(o.material); });
+        this._fp = { uFPOn: { value: 0 }, uFPCut: { value: 0 }, uFPFloor: { value: 0 }, uFPHalf: { value: new THREE.Vector2() } };
+        for (const mm of this.buildingMats) addCutaway(mm, this._fp);
+      }
       // Bake static scenery into a few meshes (hundreds fewer draw calls).
       mergeStatic(this.model.group, { into: this.scene });
       mergeStatic(root, { into: this.scene });
@@ -328,6 +341,7 @@ export class BuildingViewer {
   // ---------- public API ----------
   play() {
     if (!this.chapters) return;
+    this.clearPlan();
     this.tour.playing = true;
     this.tour.from = { pos: this.camera.position.clone(), target: this.controls.target.clone(), fov: this._fov ?? this.camera.fov };
     this.tour.t = 0;
@@ -342,6 +356,7 @@ export class BuildingViewer {
   }
   goToChapter(i, instant = false) {
     if (!this.chapters) return;
+    this.clearPlan();
     this.tour.index = ((i % this.chapters.length) + this.chapters.length) % this.chapters.length;
     const ch = this.chapters[this.tour.index];
     this._chapterFade(ch);
@@ -401,6 +416,69 @@ export class BuildingViewer {
     if (this.highlight) this.highlight.visible = false;
   }
 
+  // Cut the building open just above storey n and lay its published plan in
+  // it (drawing on the floor, walls and columns raised from the drawing).
+  async showPlan(n, plan) {
+    if (!this.model || !plan?.model3d) return this.focusFloor(n);
+    const token = (this._planToken = (this._planToken ?? 0) + 1);
+    const [y0, y1] = this.model.floorRange(n);
+    const { width: W, depth: D } = this.model;
+    const key = `${plan.src}|${n}`;
+    if (this.plan?.key !== key) {
+      const g = await buildPlanFloor({ src: plan.src, model3d: plan.model3d, W, D, maxAniso: this.renderer.capabilities.getMaxAnisotropy() });
+      if (token !== this._planToken) { g.userData.dispose(); return; }
+      this._removePlan();
+      g.position.y = y0 + 0.02;
+      this.scene.add(g);
+      this.plan = { key, group: g, n };
+    }
+    if (this.highlight) this.highlight.visible = false;
+    const cut = y0 + Math.min(this.plan.group.userData.wallH + 0.35, (y1 - y0) * 0.6);
+    this._clip(cut, y0 + 0.03);
+    this.hotspots.forEach((h) => (h.visible = false));
+    this._hotspotsOff = true;
+    this.fadeOpts = {};
+    this._dirty = true;
+    // Look down into the cut from the street-side corner.
+    const r = Math.max(W, D);
+    this.flyTo(new THREE.Vector3(W * 0.45, y0 + r * 0.82, D * 0.5 + r * 0.48), new THREE.Vector3(0, y0, -D * 0.06), 2.0, 36);
+    this.onPlan?.(n, plan);
+  }
+  clearPlan() {
+    if (!this.plan && !this._clipped) return;
+    this._planToken = (this._planToken ?? 0) + 1;
+    this._removePlan();
+    this._clip(null);
+    this._hotspotsOff = false;
+    this._dirty = true;
+    this.onPlan?.(null);
+  }
+  _removePlan() {
+    if (!this.plan) return;
+    this.scene.remove(this.plan.group);
+    this.plan.group.userData.dispose();
+    this.plan = null;
+  }
+  // Cut-away: hide the building above `cut`, and everything inside the facade
+  // (inset ~0.6 m) above `floor`, leaving the outer walls around the plan.
+  _clip(cut, floor) {
+    const on = cut != null;
+    const u = this._fp;
+    if (!u) return;
+    u.uFPOn.value = on ? 1 : 0;
+    if (on) {
+      u.uFPCut.value = cut;
+      u.uFPFloor.value = floor;
+      u.uFPHalf.value.set(this.model.width / 2 - 0.6, this.model.depth / 2 - 0.6);
+    }
+    if (on !== !!this._clipped) {
+      for (const mm of this.buildingMats ?? []) {
+        if (on) { mm.userData.side0 ??= mm.side; mm.side = THREE.DoubleSide; } else mm.side = mm.userData.side0 ?? mm.side;
+      }
+      this._clipped = on;
+    }
+  }
+
   resize() {
     const w = this.container.clientWidth;
     const h = this.container.clientHeight;
@@ -455,7 +533,7 @@ export class BuildingViewer {
       s.scale.set(pulse, pulse, 1);
       const o = THREE.MathUtils.clamp((s.position.distanceTo(this.camera.position) - 8) / 10, 0, 1);
       s.material.opacity = o;
-      s.visible = o > 0.02;
+      s.visible = o > 0.02 && !this._hotspotsOff;
     }
     this.renderer.render(this.scene, this.camera);
     this._adaptQuality(dt);
@@ -545,4 +623,28 @@ function positionOnBox(u, v, face, W, D, H) {
     case 'left': return new THREE.Vector3(-W / 2 - 0.9, y, (u - 0.5) * D);
     default: return new THREE.Vector3((u - 0.5) * W, y, 0);
   }
+}
+
+// Inject the floor-plan cut-away into a built-in material (uniforms are shared,
+// so turning it on/off or moving it needs no shader recompile).
+function addCutaway(mat, u) {
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => {
+    prev?.call(mat, sh, r);
+    if (!sh.vertexShader.includes('#include <project_vertex>') || !sh.fragmentShader.includes('void main() {')) return;
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = 'varying vec3 vFPWorld;\n' + sh.vertexShader.replace('#include <project_vertex>', `#include <project_vertex>
+      vec4 fpw = vec4(transformed, 1.0);
+      #ifdef USE_INSTANCING
+        fpw = instanceMatrix * fpw;
+      #endif
+      vFPWorld = (modelMatrix * fpw).xyz;`);
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', `uniform float uFPOn; uniform float uFPCut; uniform float uFPFloor; uniform vec2 uFPHalf; varying vec3 vFPWorld;
+      void main() {
+        if (uFPOn > 0.5) {
+          if (vFPWorld.y > uFPCut) discard;
+          if (vFPWorld.y > uFPFloor && abs(vFPWorld.x) < uFPHalf.x && abs(vFPWorld.z) < uFPHalf.y) discard;
+        }`);
+  };
+  mat.customProgramCacheKey = () => 'fp-cutaway';
 }

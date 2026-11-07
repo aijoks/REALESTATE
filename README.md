@@ -59,6 +59,7 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/viewer/sites/tucson-speedway-1815.js` | Speedway & Campbell surroundings for 1815 E Speedway (twin complex, Babcock, Taco Bell, Aloft, Chipotle strip...) |
 | `js/viewer/sites/bayside-northern.js` | Northern Blvd & Bell Blvd surroundings for 213-04 Northern Blvd (parking lot, Northern/Bell/45th Rd, 212-14 Northern, teal 45-18 Bell, White Castle, Capital One, ~280 OSM footprints with NYC heights, satellite-sampled trees) |
 | `js/viewer/sites/nova-bigtree.js` | S Nova Rd & Big Tree Rd surroundings for 1802 S Nova Rd (divided Nova Rd with median canal, mast-arm signals, Big Tree / Old Big Tree Rd, Space Dr storage rows, Circle K, Downey Ave houses, mobile-home parks, ponds, satellite-sampled trees); data in `nova-bigtree-data.js` (OSM + Volusia County GIS) |
+| `js/viewer/floorplan3d.js` | Turns a full-floor plan into a 3D cut-away: building hidden above the storey, the drawing laid on the floor, walls and columns raised from the drawing (alignment per plan via `model3d` in `floorplans.js`) |
 | `js/viewer/textures.js` | Canvas-generated brick/stone/signage textures (no image downloads) |
 | `vendor/three/` | Three.js r170 (MIT) + the addons we use |
 | `assets/properties/<id>/` | Listing photos |
