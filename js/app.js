@@ -34,6 +34,24 @@ const hdr = document.querySelector('.site-header');
 const setHdr = () => hdr && document.documentElement.style.setProperty('--hdr', `${hdr.offsetHeight}px`);
 setHdr(); addEventListener('resize', setHdr);
 
+// Phones: how much of the full screen height Safari's bars cover right now.
+// The home hero keeps its headline and logo belt above that, and drops them
+// to the very bottom when the bars shrink while scrolling.
+if (document.body.classList.contains('home') && matchMedia('(max-width: 600px)').matches) {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  const setBar = () => {
+    const visible = window.visualViewport ? visualViewport.height : innerHeight;
+    const bar = Math.max(0, Math.round(probe.offsetHeight - visible));
+    document.documentElement.style.setProperty('--bar-js', `${bar}px`);
+  };
+  setBar();
+  addEventListener('resize', setBar);
+  addEventListener('scroll', setBar, { passive: true });
+  window.visualViewport?.addEventListener('resize', setBar);
+}
+
 const grid = document.querySelector('[data-grid]');
 
 // Portfolio tile: full-bleed photo with the street address along the bottom.

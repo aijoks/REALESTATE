@@ -511,7 +511,7 @@ body.lb-open { overflow: hidden; }
      kept in the visible part above the bar; when the bar shrinks they
      follow it down. No second backdrop image. */
   .hero:has(.serif-title) {
-    --bar: calc(100lvh - 100dvh);
+    --bar: var(--bar-js, calc(100lvh - 100dvh));
     min-height: calc(100lvh - var(--hdr, 86px)); padding-bottom: var(--bar); box-sizing: border-box;
   }
   .hero:has(.serif-title)::before { top: calc(50% - var(--bar) / 2); }
