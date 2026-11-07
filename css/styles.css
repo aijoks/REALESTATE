@@ -604,16 +604,15 @@ body.lb-open { overflow: hidden; }
   .property-page .photos-panel { padding-top: 0; }
 }
 
-/* Services titles: each word carries a drawn letter (crane T, rising-bars I,
-   chart A, building N). Vector art in the text colour, so it stays as crisp
-   as the type at any size. */
-.service h3.svc-title { position: relative; font-size: clamp(30px, 3.2vw, 44px); letter-spacing: 0.04em; line-height: 1; margin: 0 0 22px; padding-top: 0.42em; white-space: nowrap; }
-.svc-title .glyph { position: relative; display: inline-block; vertical-align: baseline; height: 0.69em; }
-.svc-title .glyph svg { position: absolute; right: 0; bottom: 0; width: 100%; height: 100%; overflow: visible; }
-/* The crane's jib reaches back over the word; only its mast takes up space. */
-.g-crane { width: 0.5em; margin-left: 0.03em; }
-.svc-title .g-crane svg { width: 1.38em; height: 0.95em; }
-.g-bars { width: 0.3em; margin: 0 0.04em; }
-.g-a { width: 0.62em; margin: 0 0.02em; }
-.g-house { width: 0.62em; margin: 0 0.03em; }
-@media (max-width: 600px) { .service h3.svc-title { font-size: 34px; } }
+/* Services titles: plain serif capitals with one hairline accent in logo
+   blue that hints at the service: a crane jib off the T (Development), the
+   I rising into an arrow (Acquisitions), a baseline rule that turns upward
+   (Finance) and a roofline over AGE (Management). */
+.service h3.svc-title { position: relative; font-size: clamp(30px, 3.2vw, 44px); letter-spacing: 0.06em; line-height: 1; margin: 0 0 24px; padding-top: 0.42em; white-space: nowrap; }
+.svc-title .acc { position: relative; display: inline-block; }
+.svc-title .acc svg { position: absolute; overflow: visible; color: #0b4a8f; stroke-width: 1.4px; pointer-events: none; }
+.acc-crane svg { right: 0; bottom: 0.86em; width: 1.75em; height: 0.42em; }
+.acc-arrow svg { left: 50%; bottom: 0.86em; width: 0.28em; height: 0.34em; transform: translateX(-50%); }
+.acc-trend svg { left: 0; right: -0.55em; bottom: -0.2em; height: 0.92em; width: calc(100% + 0.55em); }
+.acc-roof svg { left: -0.08em; width: calc(100% + 0.16em); bottom: 0.9em; height: 0.28em; }
+@media (max-width: 600px) { .service h3.svc-title { font-size: 32px; } .svc-title .acc svg { stroke-width: 1.2px; } }
