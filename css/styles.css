@@ -539,3 +539,67 @@ body.lb-open { overflow: hidden; }
   .prop-head .cta { width: 100%; }
   .prop-head .cta .btn { flex: 1; justify-content: center; padding: 10px 6px; font-size: 12px; }
 }
+
+/* =====================================================================
+   Property pages: editorial presentation in the site's own type.
+   Same structure; no cards or grey tiles. Sections are separated by fine
+   rules, headings use the serif capitals of the home and Services pages,
+   labels use the menu's small capitals in logo blue.
+   ===================================================================== */
+.property-page { background: #fff; }
+.property-page .site-header { background: #fff; }
+.property-page .panel { background: none; border: 0; border-top: 1px solid #d9dee6; border-radius: 0; padding: 30px 0 34px; margin: 0; }
+.property-page .detail > div > .panel:first-child { border-top: 0; padding-top: 6px; }
+.property-page .panel h3 {
+  font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-weight: 400;
+  text-transform: uppercase; letter-spacing: 0.03em; font-size: 22px; color: var(--ink); margin: 0 0 18px;
+}
+.property-page .panel h3:empty { display: none; }
+.property-page [data-description] {
+  font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-size: 20px; line-height: 1.7;
+  color: #23262b; margin: 0 0 30px; max-width: 62ch;
+}
+/* Key facts: a ruled row of label + serif value, no grey boxes. */
+.property-page .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; border-top: 1px solid #d9dee6; }
+.property-page .stat { background: none; border-radius: 0; padding: 16px 18px 4px 0; }
+.property-page .stat + .stat { border-left: 1px solid #e6e9ee; padding-left: 18px; }
+.property-page .stat small {
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif; font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em; color: #0b4a8f; margin-bottom: 6px;
+}
+.property-page .stat b {
+  display: block; font-family: "Times New Roman", Times, "Liberation Serif", Georgia, serif; font-weight: 400;
+  font-size: 22px; line-height: 1.2; color: var(--ink);
+}
+/* Calls to action. */
+.property-page .showing-btn { display: inline-flex; width: auto; padding: 12px 26px; margin-bottom: 14px; }
+.property-page .contact-note { font-family: "Times New Roman", Times, Georgia, serif; font-style: italic; font-size: 16px; color: #4a5260; }
+.property-page .avail-link { padding: 12px 22px; gap: 10px; }
+.property-page .avail-link .ext { flex: none; }
+/* Map: plain text switch, square frame, address in serif. */
+.property-page .map-switch { background: none; padding: 0; gap: 16px; }
+.property-page .map-switch button {
+  padding: 2px 0; border-radius: 0; box-shadow: none; background: none;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif; font-size: 12px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.06em; color: #7a8494; border-bottom: 1px solid transparent;
+}
+.property-page .map-switch button.active { color: #0b4a8f; border-bottom-color: #0b4a8f; }
+.property-page .map-head h3 { margin: 0; }
+.property-page .map-wrap { border: 0; }
+/* Photos: a quiet grid with hairline gaps. */
+.property-page .photos-panel { border-top: 0; padding-top: 6px; }
+.property-page .photos-panel .gallery { gap: 6px; }
+.property-page .gallery .ph img { transition: opacity 0.3s, transform 0.6s; }
+.property-page .gallery .ph:hover img { opacity: 0.88; }
+@media (max-width: 600px) {
+  .property-page .panel { padding: 24px 0 26px; }
+  .property-page .panel h3 { font-size: 20px; }
+  .property-page [data-description] { font-size: 18px; }
+  .property-page .statgrid { grid-template-columns: 1fr 1fr; }
+  .property-page .stat { padding: 14px 12px 14px 0; border-bottom: 1px solid #eceff3; }
+  .property-page .stat + .stat { border-left: 0; padding-left: 0; }
+  .property-page .stat:nth-child(even) { border-left: 1px solid #e6e9ee; padding-left: 14px; }
+  .property-page .stat b { font-size: 20px; }
+  .property-page .showing-btn { display: flex; width: 100%; justify-content: center; }
+  .property-page .photos-panel { padding-top: 0; }
+}
