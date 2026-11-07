@@ -603,3 +603,19 @@ body.lb-open { overflow: hidden; }
   .property-page .showing-btn { display: flex; width: 100%; justify-content: center; }
   .property-page .photos-panel { padding-top: 0; }
 }
+
+/* Services titles: each word carries a drawn letter (crane T, rising-bars I,
+   chart A, building N). Vector art in the text colour, so it stays as crisp
+   as the type at any size. */
+.service h3.svc-title { position: relative; font-size: clamp(30px, 3.2vw, 44px); letter-spacing: 0.04em; line-height: 1; margin: 0 0 22px; padding-top: 0.8em; white-space: nowrap; }
+.svc-title .glyph { position: relative; display: inline-block; vertical-align: baseline; height: 0.66em; }
+.svc-title .glyph svg { position: absolute; right: 0; bottom: 0; overflow: visible; color: inherit; }
+.g-crane { width: 0.62em; }
+.g-crane svg { width: 7.2em; height: 1.42em; }
+.g-bars { width: 0.46em; margin: 0 0.04em 0 0.02em; }
+.g-bars svg { width: 1.9em; height: 1.08em; right: -0.02em; }
+.g-a { width: 0.84em; margin-right: -0.02em; }
+.g-a svg { width: 0.84em; height: 0.92em; }
+.g-house { width: 0.8em; margin: 0 0.02em; }
+.g-house svg { width: 0.8em; height: 0.94em; }
+@media (max-width: 600px) { .service h3.svc-title { font-size: 34px; } }
