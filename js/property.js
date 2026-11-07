@@ -24,7 +24,9 @@ fill('[data-description]', p.description);
 {
   const cover = p.photos.find((x) => x.src === p.cover) ?? p.photos[0];
   const img = document.querySelector('[data-hero-img]');
-  img.src = cover.src;
+  // Enhanced 2560 px banner version of the cover (assets/properties/<id>/hero.jpg).
+  img.src = `assets/properties/${p.id}/hero.jpg`;
+  img.onerror = () => { img.onerror = null; img.src = cover.src; };
   img.alt = cover.caption || p.address;
   if (cover.focus) img.style.objectPosition = cover.focus;
 }

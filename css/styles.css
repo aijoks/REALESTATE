@@ -121,11 +121,12 @@ button { cursor: pointer; }
 }
 .hero > img.hero-bg { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
 .hero::before {
+  /* No colour wash: the photo shows true to life. A soft neutral shade sits
+     only behind the text block so white type stays readable. */
   content: ""; position: absolute; inset: 0; z-index: -1;
-  background:
-    linear-gradient(90deg, rgba(6, 34, 68, 0.96) 0%, rgba(9, 52, 102, 0.88) 30%, rgba(10, 58, 112, 0.42) 56%, rgba(10, 58, 112, 0.05) 76%),
-    linear-gradient(0deg, rgba(6, 30, 60, 0.35), transparent 40%);
+  background: radial-gradient(ellipse 62% 78% at 18% 52%, rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0.18) 55%, transparent 80%);
 }
+.hero h1, .hero .lede, .hero .eyebrow, .hero .loc { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 18px rgba(0, 0, 0, 0.35); }
 .hero .wrap { position: relative; }
 .hero-copy { max-width: 640px; padding: 56px 0 112px; }
 .hero h1 {
@@ -192,7 +193,7 @@ button { cursor: pointer; }
 
 /* ---------- home: navy fact bar + tenant belt ---------- */
 .facts { background: var(--navy); color: #fff; }
-.facts-row { display: grid; grid-template-columns: repeat(4, 1fr); padding: 22px 0 20px; }
+.facts-row { display: grid; grid-template-columns: repeat(2, 1fr); max-width: 900px; margin: 0 auto; padding: 22px 0 20px; }
 .fact { text-align: center; padding: 2px 16px; }
 .fact + .fact { border-left: 1px solid rgba(255, 255, 255, 0.28); }
 .fact b { display: block; font: 400 clamp(32px, 3vw, 42px)/1 var(--serif); letter-spacing: 0.01em; }
@@ -613,7 +614,6 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
   .brand img { height: 46px; }
   .finder { grid-template-columns: minmax(0, 1.4fr) repeat(2, minmax(0, 1fr)) auto; }
   .hero-copy, .hero.short .hero-copy { max-width: 540px; }
-  .hero::before { background: linear-gradient(90deg, rgba(6, 34, 68, 0.96) 0%, rgba(9, 52, 102, 0.9) 45%, rgba(10, 58, 112, 0.5) 72%, rgba(10, 58, 112, 0.15) 100%); }
   .finder-title { display: none; }
   .featured { grid-template-columns: minmax(0, 1fr); }
   .featured-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-items: end; }
