@@ -858,10 +858,10 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
 
 /* Portfolio hero: a compact band with one diamond on the left holding
    "Explore" and the short description. */
-.hero.hero-explore { min-height: 330px; }
+.hero.hero-explore { min-height: 420px; }
 .hero.hero-explore .hero-copy {
   --d: 370px; position: relative; isolation: isolate; width: 228px; max-width: none;
-  margin-left: 70px; padding: 36px 0 70px; text-align: center;
+  margin-left: 70px; padding: 60px 0 96px; text-align: center;
 }
 .hero.hero-explore .hero-copy::before { display: block; width: calc(var(--d) * 0.7071); left: 50%; top: calc(50% - 17px); }
 .hero-explore h1 { font-size: 36px; letter-spacing: 0.05em; }
