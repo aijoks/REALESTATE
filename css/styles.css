@@ -508,8 +508,15 @@ body.lb-open { overflow: hidden; }
   /* 5. Home: hero fits the visible screen so the tenant logo belt shows. */
   /* The photo runs down to the bottom of the screen (behind Safari's
      toolbar); the headline and the tenant belt stay in the visible part. */
-  .hero:has(.serif-title) { min-height: calc(100lvh - var(--hdr, 86px)); padding-bottom: calc(100lvh - 100svh); box-sizing: border-box; }
-  .hero:has(.serif-title) .tenant-band { bottom: calc(100lvh - 100svh); }
+  /* The hero fills exactly the visible screen under the header, so the
+     diamond, headline and button are centred and the tenant belt sits on
+     the bottom edge. Behind Safari's translucent bottom bar the same photo
+     continues (fixed backdrop), so no white strip shows there. */
+  .hero:has(.serif-title) { min-height: calc(100svh - var(--hdr, 86px)); }
+  body.home { background: transparent; }
+  body.home .site-header { background: #fff; }
+  body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; background: #2a2724 url(../assets/hero-street.jpg) center bottom / cover no-repeat; }
+  .tenant-set img { filter: none; opacity: 0.95; }
   /* iOS Safari can skip painting a masked, animated strip until the page is
      touched; on phones the belt is drawn without the edge mask. */
   .tenant-viewport { -webkit-mask-image: none; mask-image: none; }

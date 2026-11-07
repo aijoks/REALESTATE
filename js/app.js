@@ -8,7 +8,11 @@ document.querySelectorAll('[data-email]').forEach((el) => (el.textContent = comp
 // can slide by exactly one set and loop seamlessly.
 const track = document.querySelector('[data-tenant-track]');
 if (track) {
-  const set = notableTenants.map((t) => `<img src="${t.logo}" alt="${t.name}" title="${t.name}"${t.size ? ` style="--s:${t.size}"` : ''} />`).join('');
+  // Phones get pre-whitened logos (no CSS filter), which iOS Safari paints
+  // reliably inside the moving strip.
+  const phone = matchMedia('(max-width: 600px)').matches;
+  const src = (t) => (phone ? t.logo.replace('assets/tenants/', 'assets/tenants/white/') : t.logo);
+  const set = notableTenants.map((t) => `<img src="${src(t)}" alt="${t.name}" title="${t.name}"${t.size ? ` style="--s:${t.size}"` : ''} />`).join('');
   track.innerHTML = `<div class="tenant-set">${set}</div><div class="tenant-set" aria-hidden="true">${set}</div>`;
 }
 
