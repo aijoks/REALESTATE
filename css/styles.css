@@ -511,10 +511,10 @@ body.lb-open { overflow: hidden; }
 .service p { font-size: clamp(17px, 1.4vw, 19px); line-height: 1.75; margin: 0; }
 .service h3.svc-title { position: relative; font-size: clamp(30px, 3.2vw, 44px); letter-spacing: 0.06em; line-height: 1; margin: 0 0 24px; padding-top: 0.42em; white-space: nowrap; }
 .svc-title .acc { position: relative; display: inline-block; }
-.svc-title .acc svg { position: absolute; overflow: visible; color: var(--orange); stroke-width: 1.4px; pointer-events: none; }
+.svc-title .acc svg { position: absolute; overflow: visible; color: var(--blue); stroke-width: 1.4px; pointer-events: none; }
 .acc-crane svg { right: 0; bottom: 0.86em; width: 1.75em; height: 0.42em; }
 .acc-arrow svg { left: 50%; bottom: 0.86em; width: 0.28em; height: 0.34em; transform: translateX(-50%); }
-.acc-trend::after { content: ""; position: absolute; left: 0; right: 0.04em; bottom: -0.2em; border-bottom: 1.4px solid var(--orange); }
+.acc-trend::after { content: ""; position: absolute; left: 0; right: 0.04em; bottom: -0.2em; border-bottom: 1.4px solid var(--blue); }
 .acc-trend svg { right: -0.62em; bottom: -0.2em; width: 0.66em; height: 0.66em; }
 .acc-roof svg { left: -0.08em; width: calc(100% + 0.16em); bottom: 0.9em; height: 0.28em; }
 
