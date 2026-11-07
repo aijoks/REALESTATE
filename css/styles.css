@@ -512,7 +512,7 @@ body.lb-open { overflow: hidden; }
      diamond, headline and button are centred and the tenant belt sits on
      the bottom edge. Behind Safari's translucent bottom bar the same photo
      continues (fixed backdrop), so no white strip shows there. */
-  .hero:has(.serif-title) { min-height: calc(100svh - var(--hdr, 86px)); }
+  .hero:has(.serif-title) { min-height: calc(100svh - var(--hdr, 86px)); min-height: calc(100dvh - var(--hdr, 86px)); }
   body.home { background: transparent; }
   body.home .site-header { background: #fff; }
   body.home::before { content: ""; position: fixed; inset: 0; z-index: -1; background: #2a2724 url(../assets/hero-street.jpg) center bottom / cover no-repeat; }
