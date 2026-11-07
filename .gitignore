@@ -1,0 +1,3 @@
+# temporary files from the banner upscaler
+assets/**/*.in.png
+assets/**/*.sr.png
