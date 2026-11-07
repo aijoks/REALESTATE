@@ -153,7 +153,6 @@ function initPortfolio() {
     const what = state.use === 'all' ? 'All asset types' : state.use;
     const where = marketName() ? `in ${marketName()}` : 'in all markets';
     document.querySelector('[data-results-note]').textContent = `${what} ${where}${sold.length ? ` · ${sold.length} sold` : ''}`;
-    document.querySelector('[data-pin-count]').textContent = `${list.filter((p) => p.coords).length} of ${properties.length} properties`;
 
     const q = new URLSearchParams();
     if (state.use !== 'all') q.set('use', state.use);
