@@ -5,20 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>First Pioneer Properties — Services</title>
   <meta name="description" content="Development, acquisitions, finance and management services from First Pioneer Properties." />
-  <link rel="stylesheet" href="css/styles.css?v=20261107p" />
+  <link rel="stylesheet" href="css/styles.css?v=20261108a" />
   <script src="js/transitions.js"></script>
+  <script src="js/nav.js?v=20261108a" defer></script>
 </head>
 <body>
   <header class="site-header">
     <div class="wrap">
-      <a class="brand" href="index.html"><img src="assets/first-pioneer-logo.svg" alt="First Pioneer Properties, Inc." width="139" height="48" /></a>
-      <nav class="main-nav">
-        <a href="index.html">Home</a><span class="sep" aria-hidden="true"></span>
-        <a href="portfolio.html">Portfolio</a><span class="sep" aria-hidden="true"></span>
-        <a href="services.html">Services</a><span class="sep" aria-hidden="true"></span>
+      <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="main-nav"><i><span></span><span></span><span></span></i></button>
+      <a class="brand" href="index.html"><img src="assets/first-pioneer-logo.svg" alt="First Pioneer Properties, Inc." width="151" height="52" /></a>
+      <nav class="main-nav" id="main-nav" aria-label="Main">
+        <a href="index.html">Home</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="services.html" aria-current="page">Services</a>
         <a href="about.html">About Us</a>
+        <span class="nav-sep" aria-hidden="true"></span>
         <a class="nav-cta" href="contact.html">Contact Us</a>
+        <p class="nav-extra"><a href="tel:+17184820700">718-482-0700</a><br /><a href="mailto:info@firstpioneerproperties.com">info@firstpioneerproperties.com</a></p>
       </nav>
+      <a class="nav-call" href="tel:+17184820700" aria-label="Call 718-482-0700"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3.5h3.3l1.6 4.6-2.2 1.5a12.5 12.5 0 0 0 6.5 6.5l1.5-2.2 4.6 1.6v3.3a1.8 1.8 0 0 1-1.9 1.8A16.5 16.5 0 0 1 3.4 5.4a1.8 1.8 0 0 1 1.8-1.9z"/></svg></a>
     </div>
   </header>
 
@@ -26,19 +31,19 @@
     <div class="wrap">
       <h2 class="serif-heading">Services</h2>
       <div class="service-grid">
-        <article class="service">
+        <article class="service" id="development">
           <h3 class="svc-title" aria-label="Development"><span aria-hidden="true">Developmen</span><span class="acc acc-crane" aria-hidden="true">T<svg viewBox="0 0 100 40" preserveAspectRatio="none"><path d="M83 40V0M4 8h94M20 8v16" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"/><path d="M17 24h6v5h-6z" fill="currentColor"/></svg></span></h3>
           <p>First Pioneer seeks to develop each of its assets into its highest and best use. Our development experience includes both ground up construction and building rehabilitation and upgrades. For more information about our development capabilities, please contact us.</p>
         </article>
-        <article class="service">
+        <article class="service" id="acquisitions">
           <h3 class="svc-title" aria-label="Acquisitions"><span aria-hidden="true">Acquisit</span><span class="acc acc-arrow" aria-hidden="true">I<svg viewBox="0 0 20 40" preserveAspectRatio="none"><path d="M10 40V4M3 13l7-9 7 9" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"/></svg></span><span aria-hidden="true">ons</span></h3>
           <p>First Pioneer is in the market to acquire commercial, residential, mixed use and single tenant net leased properties in New York, New Jersey, Connecticut, Florida, Arizona, California and Texas.</p>
         </article>
-        <article class="service">
+        <article class="service" id="finance">
           <h3 class="svc-title" aria-label="Finance"><span class="acc acc-trend" aria-hidden="true">Finance<svg viewBox="0 0 40 40" preserveAspectRatio="none"><path d="M0 40 34 6M24 6h10v10" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"/></svg></span></h3>
           <p>In addition to real estate management, First Pioneer also arranges the financing for the real estate portfolio. First Pioneer has close relationships with many banking institutions including JP Morgan Chase, Bank of America Merrill Lynch, Citibank, HSBC, Valley National Bank, Signature Bank, Capital One and M&amp;T Bank. First Pioneer also offers a lending arm as part of their real estate business. Our offerings include real estate mortgages and mezzanine financing to individuals and entities.</p>
         </article>
-        <article class="service">
+        <article class="service" id="management">
           <h3 class="svc-title" aria-label="Management"><span aria-hidden="true">Man</span><span class="acc acc-roof" aria-hidden="true">age<svg viewBox="0 0 100 30" preserveAspectRatio="none"><path d="M0 30 50 2l50 28M74 17V8h7v13" fill="none" stroke="currentColor" vector-effect="non-scaling-stroke"/></svg></span><span aria-hidden="true">ment</span></h3>
           <p>First Pioneer seeks to provide forward thinking and efficient management of the family’s assets.</p>
         </article>
@@ -46,6 +51,22 @@
     </div>
   </section>
 
-  <script type="module" src="js/app.js?v=20261107p"></script>
+  <footer class="site-footer">
+    <div class="wrap">
+      <a href="index.html"><img src="assets/first-pioneer-logo.svg" alt="First Pioneer Properties, Inc." width="128" height="44" loading="lazy" /></a>
+      <p class="footer-addr">34-09 Queens Boulevard, 3rd Floor, Long Island City, New York 11101<br /><a href="tel:+17184820700">718-482-0700</a> &nbsp;·&nbsp; <a href="mailto:info@firstpioneerproperties.com">info@firstpioneerproperties.com</a></p>
+      <nav class="footer-nav" aria-label="Footer">
+        <a href="index.html">Home</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="services.html">Services</a>
+        <a href="about.html">About Us</a>
+        <a href="contact.html">Contact Us</a>
+        <a class="ext" href="https://firstpioneerrealty.net/listings/" target="_blank" rel="noopener">Current listings</a>
+      </nav>
+      <p class="footer-copy">&copy; First Pioneer Properties, Inc.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js?v=20261108a"></script>
 </body>
 </html>

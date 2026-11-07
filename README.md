@@ -24,9 +24,11 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 
 | Path | Purpose |
 | --- | --- |
-| `index.html` / `js/app.js` | Home page: hero + tenant logo strip |
-| `portfolio.html` / `js/app.js` | Portfolio grid with use filters |
-| `property.html` / `js/property.js` | Property page: 3D viewer HUD, availability table, photos, contact |
+| `index.html` / `js/app.js` | Home page: hero, find-a-property bar, featured properties, fact bar + tenant logo belt, approach/services, markets, contact band |
+| `portfolio.html` / `js/app.js` | Portfolio: filter bar (asset type + market, `?use=` / `?market=`), Leaflet map of all properties, card grid incl. sold tiles |
+| `js/catalog.js` | Shared card / market helpers derived from the catalogue |
+| `js/nav.js` | Phone hamburger menu |
+| `property.html` / `js/property.js` | Property page: hero band, 3D viewer HUD, property overview card, photos, location map |
 | `js/data/properties.js` | **The catalogue.** Add a property object here to list a new building |
 | `js/viewer/viewer.js` | Three.js scene, guided 360° tour, hotspots, floor highlight |
 | `js/viewer/kit.js` | Shared building kit: brick materials, walls with openings, recessed windows |

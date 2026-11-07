@@ -11,16 +11,68 @@ document.title = `${p.address} — ${company.name}`;
 const fill = (sel, v) => document.querySelectorAll(sel).forEach((el) => (el.textContent = v));
 fill('[data-company]', company.name);
 fill('[data-phone]', company.phone);
+fill('[data-email]', company.email);
 fill('[data-address]', p.address);
 fill('[data-city]', p.city);
+fill('[data-neighborhood]', p.neighborhood || p.city);
+fill('[data-uses]', p.uses.join(' · '));
 fill('[data-headline]', p.headline);
 document.querySelectorAll('[data-headline]').forEach((el) => (el.hidden = !p.headline));
 fill('[data-description]', p.description);
 
-document.querySelector('[data-stats]').innerHTML = p.stats
-  .map((s) => `<div class="stat"><small>${s.label}</small><b>${s.value}</b></div>`).join('');
-document.querySelector('[data-gallery]').innerHTML = p.photos
+// Hero band: the property's cover photo.
+{
+  const cover = p.photos.find((x) => x.src === p.cover) ?? p.photos[0];
+  const img = document.querySelector('[data-hero-img]');
+  img.src = cover.src;
+  img.alt = cover.caption || p.address;
+  if (cover.focus) img.style.objectPosition = cover.focus;
+}
+
+// Property overview: the property's own facts, each with a small line icon.
+const ICONS = {
+  building: '<path d="M5 21V4h10v17M15 9h4v12M3 21h18M8 7.5h1.5M11 7.5h1.5M8 11h1.5M11 11h1.5M8 14.5h1.5M11 14.5h1.5"/>',
+  calendar: '<rect x="3.5" y="5" width="17" height="15.5" rx="1"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  area: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  layers: '<path d="m12 4 9 4.5-9 4.5-9-4.5z"/><path d="m3 12.5 9 4.5 9-4.5M3 16.5l9 4.5 9-4.5"/>',
+  pen: '<path d="M4 20l4.5-1 10-10-3.5-3.5-10 10z"/><path d="M13.5 7.5 17 11"/>',
+  people: '<circle cx="9" cy="8" r="3"/><path d="M3.5 19c.5-3.3 2.6-5 5.5-5s5 1.7 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.8 14.2c2.4 0 4.2 1.5 4.7 4.3"/>',
+  tag: '<path d="M3.5 12.5V4h8.5l8.5 8.5-8 8z"/><circle cx="8" cy="8.5" r="1.4"/>',
+  pin: '<path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/>',
+  height: '<path d="M12 3v18M8 7l4-4 4 4M8 17l4 4 4-4"/>',
+};
+const iconFor = (label) => {
+  const l = label.toLowerCase();
+  if (/stor|floor|building$|buildings/.test(l)) return 'building';
+  if (/built|renovat/.test(l)) return 'calendar';
+  if (/typical/.test(l)) return 'layers';
+  if (/size|lot|tract|frontage|acre/.test(l)) return 'area';
+  if (/architect|style/.test(l)) return 'pen';
+  if (/tenant|anchor|apartment/.test(l)) return 'people';
+  if (/height/.test(l)) return 'height';
+  if (/market|location|submarket/.test(l)) return 'pin';
+  return 'tag';
+};
+const row = (icon, label, value) => `<div><dt><svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[icon]}</svg><span>${label}</span></dt><dd>${value}</dd></div>`;
+document.querySelector('[data-stats]').innerHTML =
+  row('tag', 'Asset type', p.uses.join(' / '))
+  + p.stats.map((s) => row(iconFor(s.label), s.label, s.value)).join('')
+  + (p.neighborhood ? row('pin', 'Location', p.neighborhood) : '');
+
+const galleryEl = document.querySelector('[data-gallery]');
+galleryEl.classList.add(`n${Math.min(p.photos.length, 6)}`);
+galleryEl.innerHTML = p.photos
   .map((ph, i) => `<figure><button type="button" class="ph" data-i="${i}" aria-label="View larger: ${ph.caption}"><img src="${ph.src}" alt="${ph.caption}" loading="lazy" ${ph.focus ? `style="object-position:${ph.focus}"` : ''} /></button></figure>`).join('');
+
+// On-page tabs (3D tour · Photos · Location) scroll to their section.
+document.querySelectorAll('.view-tabs a').forEach((a) => a.addEventListener('click', (e) => {
+  const t = document.querySelector(a.getAttribute('href'));
+  if (!t) return;
+  e.preventDefault();
+  document.querySelectorAll('.view-tabs a').forEach((x) => x.classList.toggle('on', x === a));
+  const y = t.getBoundingClientRect().top + scrollY - (document.querySelector('.site-header')?.offsetHeight || 0) - 14;
+  scrollTo({ top: y, behavior: 'smooth' });
+}));
 
 // Photo viewer: click a photo to see it larger; arrows / Esc / click outside.
 {
