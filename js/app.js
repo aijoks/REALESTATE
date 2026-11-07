@@ -14,6 +14,19 @@ if (track) {
   const src = (t) => (phone ? t.logo.replace('assets/tenants/', 'assets/tenants/white/') : t.logo);
   const set = notableTenants.map((t) => `<img src="${src(t)}" alt="${t.name}" title="${t.name}"${t.size ? ` style="--s:${t.size}"` : ''} />`).join('');
   track.innerHTML = `<div class="tenant-set">${set}</div><div class="tenant-set" aria-hidden="true">${set}</div>`;
+  // On a first visit iOS Safari can start the sliding strip before the logo
+  // files arrive and then never repaint it. On phones the strip only starts
+  // once every logo has loaded and decoded (it is shown again on a return
+  // visit because the files are cached by then).
+  if (phone) {
+    const imgs = [...track.querySelectorAll('img')];
+    const loaded = (img) => (img.complete && img.naturalWidth ? Promise.resolve()
+      : new Promise((ok) => { img.addEventListener('load', ok, { once: true }); img.addEventListener('error', ok, { once: true }); }));
+    const ready = (img) => loaded(img).then(() => (img.decode ? img.decode() : null)).catch(() => {});
+    const start = () => requestAnimationFrame(() => track.classList.add('go'));
+    Promise.all(imgs.map(ready)).then(start);
+    setTimeout(start, 4000); // never leave the belt empty if a logo fails
+  }
 }
 
 // Header height for phone layouts that size the hero to the screen.

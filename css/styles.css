@@ -519,6 +519,7 @@ body.lb-open { overflow: hidden; }
   html:has(body.home) { background: #2a2724; }
   body.home .site-header { background: #fff; }
   .tenant-set img { filter: none; opacity: 0.95; }
+  .tenant-track:not(.go) { animation: none; visibility: hidden; }
   /* iOS Safari can skip painting a masked, animated strip until the page is
      touched; on phones the belt is drawn without the edge mask. */
   .tenant-viewport { -webkit-mask-image: none; mask-image: none; }
