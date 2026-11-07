@@ -105,7 +105,7 @@ nav a:hover { color: var(--ink); }
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-.tenant-track { flex: none; display: flex; width: max-content; will-change: transform; backface-visibility: hidden; animation: tenant-scroll 56s linear infinite; }
+.tenant-track { flex: none; display: flex; width: max-content; animation: tenant-scroll 56s linear infinite; }
 .tenant-set { flex: none; display: flex; align-items: center; gap: 44px; padding-right: 44px; }
 .tenant-set img {
   flex: none; height: calc(25px * var(--s, 1)); width: auto; max-width: 99px; object-fit: contain;
@@ -113,7 +113,7 @@ nav a:hover { color: var(--ink); }
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5)); opacity: 0.92;
 }
 /* Left-to-right: start shifted one set left and slide back to 0. */
-@keyframes tenant-scroll { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes tenant-scroll { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
 @media (prefers-reduced-motion: reduce) { .tenant-track { animation-duration: 180s; } }
 @media (max-width: 600px) {
   .tenant-band { height: 52px; }
@@ -506,7 +506,13 @@ body.lb-open { overflow: hidden; }
   .main-nav .nav-cta { margin-left: 0; padding: 4px 7px; }
 
   /* 5. Home: hero fits the visible screen so the tenant logo belt shows. */
-  .hero:has(.serif-title) { min-height: calc(100svh - 96px); }
+  /* The photo runs down to the bottom of the screen (behind Safari's
+     toolbar); the headline and the tenant belt stay in the visible part. */
+  .hero:has(.serif-title) { min-height: calc(100lvh - var(--hdr, 86px)); padding-bottom: calc(100lvh - 100svh); box-sizing: border-box; }
+  .hero:has(.serif-title) .tenant-band { bottom: calc(100lvh - 100svh); }
+  /* iOS Safari can skip painting a masked, animated strip until the page is
+     touched; on phones the belt is drawn without the edge mask. */
+  .tenant-viewport { -webkit-mask-image: none; mask-image: none; }
 
   /* 2. Portfolio: heading above a tidy 4 x 2 grid of small filter buttons. */
   .section.page-top { padding-top: 28px; }

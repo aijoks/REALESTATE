@@ -12,6 +12,11 @@ if (track) {
   track.innerHTML = `<div class="tenant-set">${set}</div><div class="tenant-set" aria-hidden="true">${set}</div>`;
 }
 
+// Header height for phone layouts that size the hero to the screen.
+const hdr = document.querySelector('.site-header');
+const setHdr = () => hdr && document.documentElement.style.setProperty('--hdr', `${hdr.offsetHeight}px`);
+setHdr(); addEventListener('resize', setHdr);
+
 const grid = document.querySelector('[data-grid]');
 
 // Portfolio tile: full-bleed photo with the street address along the bottom.
