@@ -867,30 +867,10 @@ function neighbours23rd({ scene, block, group, W, D, front, walk, road, acrossZ,
   }
   group([loftA, loftB, loftC]);
 
-  // Behind the lofts: the 81.9 m brick building with the shark mural on its
-  // south wall, facing 23rd St above the lofts.
+  // Behind the lofts: the 81.9 m brick building, its south wall facing 23rd St
+  // above the lofts (plain brick; no mural).
   const muralBldg = block('brickwall', 11, PK.eastLine, Math.max(zS, Z(56.8)), Z(24.9), 81.9);
-  {
-    const c = document.createElement('canvas');
-    c.width = 512; c.height = 512;
-    const ctx = c.getContext('2d');
-    const g = ctx.createLinearGradient(0, 0, 0, 512);
-    g.addColorStop(0, '#eef3f6'); g.addColorStop(1, '#b9d2e4');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, 512, 512);
-    ctx.fillStyle = '#5c7f99';
-    ctx.beginPath(); ctx.ellipse(300, 250, 170, 120, -0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#a9343a';
-    ctx.beginPath(); ctx.ellipse(320, 290, 90, 50, -0.3, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.moveTo(240 + i * 20, 255 + i * 4); ctx.lineTo(250 + i * 20, 280 + i * 4); ctx.lineTo(260 + i * 20, 258 + i * 4); ctx.fill(); }
-    ctx.font = '900 96px Impact, Arial Black, Arial'; ctx.textAlign = 'center'; ctx.fillText('SHARK', 256, 480);
-    const tex = unmirror(new THREE.CanvasTexture(c));
-    tex.colorSpace = THREE.SRGBColorSpace;
-    const mural = new THREE.Mesh(new THREE.PlaneGeometry(26, 30), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, transparent: true, opacity: 1 }));
-    mural.position.set(26, 41, Z(24.9) + 0.1);
-    scene.add(mural);
-    group([muralBldg, mural]);
-  }
+  group([muralBldg]);
 
   // East: 119 E 23rd, the 70.5 m red-brick residential tower built against
   // our east wall on a stone retail podium, with street trees in front; then
