@@ -830,11 +830,11 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
 
 /* Home hero: the translucent dark diamond from the original home page, kept
    on the left, with the headline and copy centred inside it. */
-.hero-diamond { min-height: 700px; }
+.hero-diamond { min-height: 740px; }
 .hero-diamond::before { display: none; }
 .hero-diamond .hero-copy {
-  --d: 680px; position: relative; isolation: isolate; width: 410px; max-width: none;
-  margin-left: 30px; padding: 40px 0 110px; text-align: center;
+  --d: 760px; position: relative; isolation: isolate; width: 410px; max-width: none;
+  margin-left: 70px; padding: 40px 0 110px; text-align: center;
 }
 .hero-diamond .hero-copy::before {
   content: ""; position: absolute; z-index: -1; left: 50%; top: 50%;
@@ -850,7 +850,7 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
 .hero-diamond .cta .btn { padding: 12px 18px; }
 @media (max-width: 1100px) { .hero-diamond .hero-copy { margin-left: 0; } }
 @media (max-width: 600px) {
-  .hero-diamond .hero-copy { --d: 560px; width: min(320px, 86vw); margin: 0 auto; padding: 72px 0 84px; }
+  .hero-diamond .hero-copy { --d: 620px; width: min(320px, 86vw); margin: 0 auto; padding: 72px 0 84px; }
   .hero-diamond h1 { font-size: 30px; }
   .hero-diamond .lede { font-size: 14.5px; max-width: 280px; }
   .hero-diamond .cta .btn { padding: 11px 14px; font-size: 11px; }
