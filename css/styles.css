@@ -613,6 +613,7 @@ body.lb-open { overflow: hidden; }
 .svc-title .acc svg { position: absolute; overflow: visible; color: #0b4a8f; stroke-width: 1.4px; pointer-events: none; }
 .acc-crane svg { right: 0; bottom: 0.86em; width: 1.75em; height: 0.42em; }
 .acc-arrow svg { left: 50%; bottom: 0.86em; width: 0.28em; height: 0.34em; transform: translateX(-50%); }
-.acc-trend svg { left: 0; right: -0.55em; bottom: -0.2em; height: 0.92em; width: calc(100% + 0.55em); }
+.acc-trend::after { content: ""; position: absolute; left: 0; right: 0.04em; bottom: -0.2em; border-bottom: 1.4px solid #0b4a8f; }
+.acc-trend svg { right: -0.62em; bottom: -0.2em; width: 0.66em; height: 0.66em; }
 .acc-roof svg { left: -0.08em; width: calc(100% + 0.16em); bottom: 0.9em; height: 0.28em; }
 @media (max-width: 600px) { .service h3.svc-title { font-size: 32px; } .svc-title .acc svg { stroke-width: 1.2px; } }
