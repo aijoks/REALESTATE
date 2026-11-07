@@ -873,3 +873,11 @@ html.fp-enter-back body > :not(.site-header):not(.mobile-bar) { animation: fp-in
   .hero-explore h1 { font-size: 32px; }
   .hero.hero-explore .lede { font-size: 14px; margin: 0; }
 }
+
+/* Home: the Find a Property bar sits higher, overlapping the photo just
+   below the diamond, with a smaller gap above. */
+.hero-diamond { min-height: 590px; }
+.hero-diamond .hero-copy { padding: 0 0 70px; }
+.hero-diamond + .wrap .finder, .finder { margin-top: -66px; }
+@media (max-width: 600px) { .finder { margin-top: -66px; } }
+.hero-diamond { margin-bottom: 0; }
