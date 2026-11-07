@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Property — First Pioneer Properties</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-  <link rel="stylesheet" href="css/styles.css?v=20261108j" />
+  <link rel="stylesheet" href="css/styles.css?v=20261108k" />
   <script src="js/transitions.js"></script>
-  <script src="js/nav.js?v=20261108j" defer></script>
+  <script src="js/nav.js?v=20261108k" defer></script>
   <script type="importmap">
     {
       "imports": {
@@ -63,6 +63,7 @@
         <div>
           <nav class="view-tabs" aria-label="On this page">
             <a class="on" href="#tour"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>3D Tour</a>
+            <a href="#plans"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M3.5 10h7v10.5M10.5 14H20.5M14 3.5v6.5"/></svg>Floor plans</a>
             <a href="#photos"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="1"/><circle cx="9" cy="9.5" r="1.6"/><path d="m4 18 5.5-5.5 4 4 2.5-2.5 4.5 4.5"/></svg>Photos</a>
             <a href="#location"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg>Location</a>
           </nav>
@@ -104,6 +105,38 @@
           </div>
         </aside>
       </div>
+
+      <section class="plans" id="plans" aria-labelledby="plans-title">
+        <div class="section-head">
+          <div><span class="eyebrow">Floor by floor</span><h2 class="h2" id="plans-title">Floor plans</h2></div>
+          <p class="plans-count" data-plans-count></p>
+        </div>
+        <div class="card plans-card" data-plans>
+          <div class="plan-stack-wrap">
+            <span class="stack-cap">Select a floor</span>
+            <ol class="plan-stack" data-plan-stack aria-label="Floors"></ol>
+          </div>
+          <div class="plan-view">
+            <div class="plan-tabs" data-plan-tabs role="tablist" aria-label="Plans on this floor" hidden></div>
+            <figure class="plan-stage" data-plan-stage tabindex="0" aria-label="Floor plan. Click to zoom.">
+              <img alt="" decoding="async" />
+              <span class="plan-zoom-hint" aria-hidden="true">Click to zoom</span>
+            </figure>
+            <div class="plan-meta">
+              <div>
+                <span class="plan-kind" data-plan-kind></span>
+                <b class="plan-title" data-plan-title></b>
+                <p class="plan-note" data-plan-note></p>
+              </div>
+              <div class="plan-actions">
+                <button type="button" class="btn btn-orange btn-sm" data-plan-3d>View on 3D model</button>
+                <a class="btn btn-outline btn-sm" data-plan-full target="_blank" rel="noopener">Full size</a>
+              </div>
+            </div>
+            <p class="plan-src">Source: <a data-plan-src target="_blank" rel="noopener"></a></p>
+          </div>
+        </div>
+      </section>
 
       <div class="prop-lower">
         <section id="photos" class="photos-panel" aria-labelledby="photos-title">
@@ -175,6 +208,6 @@
     <figure><img alt="" /></figure>
     <button class="lb-nav lb-next" type="button" aria-label="Next photo">›</button>
   </div>
-  <script type="module" src="js/property.js?v=20261108j"></script>
+  <script type="module" src="js/property.js?v=20261108k"></script>
 </body>
 </html>

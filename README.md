@@ -30,6 +30,8 @@ output directory empty, and deploy. `vercel.json` only adds cache headers.
 | `js/nav.js` | Phone hamburger menu |
 | `property.html` / `js/property.js` | Property page: hero band, 3D viewer HUD, property overview card, photos, location map |
 | `js/data/properties.js` | **The catalogue.** Add a property object here to list a new building |
+| `js/data/floorplans.js` / `js/plans.js` | Published floor plans per floor (with source links) and the Floor plans panel: floor stack beside a zoomable plan; picking a floor highlights it on the 3D model |
+| `assets/properties/<id>/plans/` | Floor plan images, cleaned from the published PDFs/brochures (title blocks cropped, re-inked, WebP) |
 | `js/viewer/viewer.js` | Three.js scene, guided 360° tour, hotspots, floor highlight |
 | `js/viewer/kit.js` | Shared building kit: brick materials, walls with openings, recessed windows |
 | `js/viewer/building.js` | `prewarBrick` generator (120 E 56th St) |

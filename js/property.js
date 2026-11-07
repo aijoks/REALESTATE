@@ -1,5 +1,6 @@
 import { company, getProperty, properties } from './data/properties.js';
 import { BuildingViewer } from './viewer/viewer.js';
+import { initPlans } from './plans.js?v=20261108k';
 
 // Property id from #hash (preferred) or ?id= (older links).
 const id = decodeURIComponent(location.hash.slice(1)) || new URLSearchParams(location.search).get('id') || properties[0].id;
@@ -196,6 +197,9 @@ window.addEventListener('keydown', (e) => {
   if (e.code === 'ArrowRight') { viewer.next(); syncState(); }
   if (e.code === 'ArrowLeft') { viewer.prev(); syncState(); }
 });
+
+// ---------- Floor plans (published plans per floor, linked to the 3D floor highlight) ----------
+initPlans(p, viewer);
 
 // "Request a showing" opens the Contact Us page with this property filled in.
 document.querySelectorAll('[data-showing]').forEach((a) => { a.href = `contact.html?property=${encodeURIComponent(p.id)}`; });
