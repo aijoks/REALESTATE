@@ -55,7 +55,6 @@ nav a:hover { color: var(--ink); }
   .main-nav { gap: 8px; } .main-nav a { font-size: 11px; }
   .main-nav .sep { display: none; } .main-nav .nav-cta { margin-left: 4px; padding: 5px 8px; }
 }
-@media (max-width: 480px) { .main-nav a:not(.nav-cta):not([href="portfolio.html"]) { display: none; } }
 
 /* ---------- hero ---------- */
 .hero {
@@ -491,3 +490,34 @@ form.contact input, form.contact textarea { border-radius: 0; }
 body.lb-open { overflow: hidden; }
 @keyframes lb-in { from { opacity: 0; } }
 @media (max-width: 700px) { .lightbox { padding: 56px 12px; } .lb-nav { width: 36px; height: 52px; } }
+
+/* =====================================================================
+   PHONE ONLY (screens up to 600 px wide). Laptop, desktop and iPad
+   layouts are untouched: everything below applies only on phones.
+   ===================================================================== */
+@media (max-width: 600px) {
+  /* 1. Header: logo on top, the full menu on one evenly spaced row. */
+  .site-header .wrap { width: calc(100% - 24px); height: auto; flex-direction: column; align-items: stretch; gap: 8px; padding: 9px 0 10px; }
+  .site-header .brand { align-self: center; }
+  .brand img { height: 34px; }
+  .main-nav { justify-content: space-between; gap: 0; }
+  .main-nav .sep { display: none; }
+  .main-nav a { font-size: 11px; letter-spacing: 0.02em; white-space: nowrap; }
+  .main-nav .nav-cta { margin-left: 0; padding: 4px 7px; }
+
+  /* 5. Home: hero fits the visible screen so the tenant logo belt shows. */
+  .hero:has(.serif-title) { min-height: calc(100svh - 96px); }
+
+  /* 2. Portfolio: heading above a tidy 4 x 2 grid of small filter buttons. */
+  .section.page-top { padding-top: 28px; }
+  #listings .section-head { flex-direction: column; align-items: stretch; gap: 16px; }
+  .filters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .filters .btn { justify-content: center; padding: 8px 2px; font-size: 10px; letter-spacing: 0; white-space: nowrap; }
+
+  /* 4. Property pages: photos first, above the description. */
+  .detail aside { order: -1; }
+  .detail .sticky { position: static; }
+  .detail { gap: 0; padding-top: 22px; }
+  .prop-head .cta { width: 100%; }
+  .prop-head .cta .btn { flex: 1; justify-content: center; padding: 10px 6px; font-size: 12px; }
+}

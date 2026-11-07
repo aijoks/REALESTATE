@@ -114,8 +114,45 @@ export class BuildingViewer {
       e.stopImmediatePropagation();
       this.onScrollHint?.();
     }, { capture: true, passive: true });
-    this.controls.touches = { ONE: null, TWO: THREE.TOUCH.DOLLY_ROTATE };
+    // Touch: one finger scrolls the page; two fingers orbit (move together)
+    // and zoom (pinch). Handled here with touch events rather than by
+    // OrbitControls, because iOS cancels pointer events as soon as the first
+    // finger starts a page scroll, which froze the model mid-gesture.
+    this.controls.touches = { ONE: null, TWO: null };
     this.renderer.domElement.style.touchAction = 'pan-y';
+    {
+      const el = this.renderer.domElement;
+      let last = null; // { x, y, d } midpoint and finger spacing
+      const read = (t) => ({
+        x: (t[0].clientX + t[1].clientX) / 2,
+        y: (t[0].clientY + t[1].clientY) / 2,
+        d: Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY),
+      });
+      el.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 2) { last = null; return; }
+        if (e.cancelable) e.preventDefault();
+        this.pause();
+        last = read(e.touches);
+      }, { passive: false });
+      el.addEventListener('touchmove', (e) => {
+        if (e.touches.length !== 2 || !last) return;
+        if (e.cancelable) e.preventDefault();
+        const now = read(e.touches);
+        const c = this.controls, h = el.clientHeight || 1, k = 2 * Math.PI * c.rotateSpeed / h;
+        c._rotateLeft(k * (now.x - last.x));
+        c._rotateUp(k * (now.y - last.y));
+        if (last.d > 0 && now.d > 0) {
+          const s = Math.min(1.25, Math.max(0.8, last.d / now.d));
+          if (s > 1) c._dollyOut(1 / s); else if (s < 1) c._dollyIn(s);
+        }
+        c.update();
+        this._dirty = true;
+        last = now;
+      }, { passive: false });
+      const end = (e) => { if (e.touches.length < 2) last = null; };
+      el.addEventListener('touchend', end);
+      el.addEventListener('touchcancel', end);
+    }
     this.controls.addEventListener('change', () => { this._dirty = true; });
     // Only render while the viewer is on screen and the tab is visible.
     this._onScreen = true;
