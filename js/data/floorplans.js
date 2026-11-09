@@ -21,6 +21,7 @@ const SRC = {
   columbia120e56: { name: 'Columbia University, Avery Library — NY Real Estate Brochure Collection (Julien J. Studley, Inc.)', url: 'https://dlc.library.columbia.edu/nyre/cul:p2ngf1vjx8' },
   loopnetQB: { name: 'LoopNet listing — First Pioneer Realty', url: 'https://www.loopnet.com/Listing/34-09-34-11-Queens-Blvd-Long-Island-City-NY/6606809/' },
   monaLisa: { name: 'Mona Lisa Plaza leasing brochure — Paul Ash Commercial Real Estate', url: 'https://images.loopnet.ca/d2/VeUrlIlFVapMSx138i5-XQ7OIym1DvJ71b1T2pyMUQg/Mona%20Lisa%20Plaza%20Brochure.pdf' },
+  owner115: { name: 'First Pioneer Properties — 115 E 23rd Street floor plans', url: 'https://firstpioneerrealty.net/listings/' },
   link4th: { name: 'The Link at 4th Ave — published unit plans (Zumper)', url: 'https://www.zumper.com/apartment-buildings/p4817/the-link-at-4th-ave-west-university-tucson-az' },
 };
 
@@ -43,6 +44,10 @@ export const floorPlans = {
     { floors: [8], label: '8th floor', kind: 'Full floor', src: P('10-e-38th', 'floor-08'), model3d: { rot: 1, box: [0.038, 0.024, 0.919, 0.974] },  note: 'Full floor of ≈5,250 SF, built out with offices along the 38th Street windows, internal rooms and open work area.', source: SRC.loopnet10e38 },
     { floors: [10], label: '10th floor', kind: 'Full floor', src: P('10-e-38th', 'floor-10'), model3d: { rot: 1, box: [0.038, 0.026, 0.912, 0.974] },  note: 'Full floor of ≈5,250 SF in open-loft condition, with restrooms at the core.', source: SRC.loopnet10e38 },
     { floors: [11], label: '11th floor', kind: 'Full floor', src: P('10-e-38th', 'floor-11'), model3d: { rot: 1, box: [0.038, 0.025, 0.919, 0.974] },  note: 'Full floor of ≈5,250 SF with perimeter offices and an open centre.', source: SRC.loopnet10e38 },
+  ],
+  '115-e-23rd': [
+    { floors: [4], label: '4th floor', kind: 'Full floor', src: P('115-e-23rd', 'floor-04'), model3d: { rot: 1, box: [0.02, 0.037, 0.938, 0.909] }, note: '4th floor: private offices 401–420 for 1–8 desks, conference room, conference & podcast room, phone booths, lounge and kitchen; two passenger elevators and a freight elevator.', source: SRC.owner115 },
+    { floors: [5], label: '5th floor', kind: 'Full floor', src: P('115-e-23rd', 'floor-05'), model3d: { rot: 1, box: [0.024, 0.023, 0.936, 0.918] }, note: '5th floor: enterprise suite, offices 501–510 for 1–11 desks, conference room, lounge & event space, kitchen and phone booths.', source: SRC.owner115 },
   ],
   '34-09-queens-blvd': [
     { floors: [1], label: 'Corner store', kind: 'Suite', src: P('34-09-queens-blvd', 'floor-01-corner-store'), note: 'Ground-floor corner retail, 8,556 SF: 55 ft on Queens Blvd, 111 ft on 34th St, private loading dock.', source: SRC.loopnetQB },
