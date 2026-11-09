@@ -13,7 +13,8 @@
 //   source : where it was published
 //   model3d: (full-floor plans only) how the drawing sits on the 3D model —
 //            see js/viewer/floorplan3d.js. Plans with it are laid into the
-//            building as a cut-away floor when that storey is picked.
+//            building as a cut-away floor when that storey is picked, and
+//            furnished from js/data/furnishings.js (keyed by src).
 
 const SRC = {
   loopnet10e38: { name: 'LoopNet listing — architect’s plans by Tuller Feld McNealus (Mar 2023)', url: 'https://www.loopnet.com/Listing/10-E-38th-St-New-York-NY/35969074/' },

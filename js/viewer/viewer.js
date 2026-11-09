@@ -439,9 +439,14 @@ export class BuildingViewer {
     this._hotspotsOff = true;
     this.fadeOpts = {};
     this._dirty = true;
-    // Look down into the cut from the street-side corner.
+    // Look down into the cut from the street-side corner — steep enough to
+    // see into the rooms over the raised walls, framed on the floor's centre.
     const r = Math.max(W, D);
-    this.flyTo(new THREE.Vector3(W * 0.45, y0 + r * 0.82, D * 0.5 + r * 0.48), new THREE.Vector3(0, y0, -D * 0.06), 2.0, 36);
+    const k = this.plan.group.userData.furnished ? 1 : 0;
+    const target = new THREE.Vector3(0, y0, D * (-0.06 + 0.11 * k));
+    const pos = new THREE.Vector3(W * (0.45 - 0.1 * k), y0 + r * (0.82 + 0.16 * k), D * 0.5 + r * (0.48 - 0.14 * k));
+    pos.sub(target).multiplyScalar(1 + 0.1 * k).add(target);
+    this.flyTo(pos, target, 2.0, 36);
     this.onPlan?.(n, plan);
   }
   clearPlan() {
