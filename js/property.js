@@ -1,6 +1,6 @@
 import { company, getProperty, properties } from './data/properties.js';
 import { BuildingViewer } from './viewer/viewer.js';
-import { initPlans } from './plans.js?v=20261108m';
+import { initPlans } from './plans.js?v=20261110a';
 
 // Property id from #hash (preferred) or ?id= (older links).
 const id = decodeURIComponent(location.hash.slice(1)) || new URLSearchParams(location.search).get('id') || properties[0].id;

@@ -27,8 +27,7 @@ export function initPlans(p, viewer) {
     count.textContent = '';
     card.innerHTML = `<div class="plans-empty">
       <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M3.5 10h7v10.5M10.5 14H20.5M14 3.5v6.5"/></svg>
-      <div><b>No floor plans have been published for this property.</b>
-      <p>Our leasing team can share current plans on request.</p></div>
+      <div><b>No floor plans have been published for this property.</b></div>
       <a class="btn btn-outline btn-sm" href="contact.html?property=${encodeURIComponent(p.id)}&topic=plans">Request floor plans</a>
     </div>`;
     return;
