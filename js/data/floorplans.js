@@ -23,6 +23,7 @@ const SRC = {
   loopnetQB: { name: 'LoopNet listing — First Pioneer Realty', url: 'https://www.loopnet.com/Listing/34-09-34-11-Queens-Blvd-Long-Island-City-NY/6606809/' },
   monaLisa: { name: 'Mona Lisa Plaza leasing brochure — Paul Ash Commercial Real Estate', url: 'https://images.loopnet.ca/d2/VeUrlIlFVapMSx138i5-XQ7OIym1DvJ71b1T2pyMUQg/Mona%20Lisa%20Plaza%20Brochure.pdf' },
   owner115: { name: 'First Pioneer Properties — 115 E 23rd Street floor plans', url: 'https://firstpioneerrealty.net/listings/' },
+  metro12e44: { name: 'Metro Manhattan Office Space — 12 East 44th Street, entire 7th floor', url: 'https://www.metro-manhattan.com/listing/12-east-44th-street-entire-7th-floor/' },
   link4th: { name: 'The Link at 4th Ave — published unit plans (Zumper)', url: 'https://www.zumper.com/apartment-buildings/p4817/the-link-at-4th-ave-west-university-tucson-az' },
 };
 
@@ -50,6 +51,9 @@ export const floorPlans = {
     { floors: [4], label: '4th floor', kind: 'Full floor', src: P('115-e-23rd', 'floor-04'), model3d: { rot: 1, box: [0.02, 0.037, 0.938, 0.909] }, note: '4th floor: private offices 401–420 for 1–8 desks, conference room, conference & podcast room, phone booths, lounge and kitchen; two passenger elevators and a freight elevator.', source: SRC.owner115 },
     { floors: [5], label: '5th floor', kind: 'Full floor', src: P('115-e-23rd', 'floor-05'), model3d: { rot: 1, box: [0.024, 0.023, 0.936, 0.918] }, note: '5th floor: enterprise suite, offices 501–510 for 1–11 desks, conference room, lounge & event space, kitchen and phone booths.', source: SRC.owner115 },
   ],
+  '12-e-44th': [
+    { floors: [7], label: '7th floor', kind: 'Full floor', src: P('12-e-44th', 'floor-07'), model3d: { rot: 3, box: [0.0138, 0.062, 0.938, 0.9413] }, note: 'Entire 7th floor, ≈2,710 SF: elevator opens into reception, large conference room on East 44th Street, two conference rooms, open bullpen, wet pantry and two private restrooms; oversized windows on three sides.', source: SRC.metro12e44 },
+  ],
   '34-09-queens-blvd': [
     { floors: [1], label: 'Corner store', kind: 'Suite', src: P('34-09-queens-blvd', 'floor-01-corner-store'), note: 'Ground-floor corner retail, 8,556 SF: 55 ft on Queens Blvd, 111 ft on 34th St, private loading dock.', source: SRC.loopnetQB },
     { floors: [4], label: 'Suite 402', kind: 'Suite', src: P('34-09-queens-blvd', 'floor-04-suite-402'), note: '4th floor with the new 4,800 SF division (Suite 402) shaded; freight elevator and shared WC on 34th Street.', source: SRC.loopnetQB },
@@ -58,6 +62,13 @@ export const floorPlans = {
     { floors: [1], label: 'Ground floor', kind: 'Site plan', src: P('7225-n-mona-lisa', 'floor-01-site-plan'), note: 'Ground-floor site plan: Bayada HealthCare suites and Suite 101 (2,170 SF) off the lobby, parking all round.', source: SRC.monaLisa },
     { floors: [1], label: 'Suite 101', kind: 'Suite', src: P('7225-n-mona-lisa', 'floor-01-suite-101'), note: 'Suite 101 (2,170 SF), directly off the ground-floor lobby, with windows on three sides.', source: SRC.monaLisa },
     { floors: [2], label: '2nd floor', kind: 'Full floor', src: P('7225-n-mona-lisa', 'floor-02-plate'), note: 'Second-floor plate with tenant suites (Spencer Construction, Gentle Dental, Tetra Tech, Morgan Cohen & Bach, Frost Insurance).', source: SRC.monaLisa },
+  ],
+  // No drawing of the restaurant has been published: this one is an
+  // illustrative layout drawn for the site from YOON's own gallery photos
+  // (bar, stair, banquette dining room, private rooms) on the building's
+  // surveyed 10.1 × 27.3 m footprint — the note says so.
+  '8-w-36th': [
+    { floors: [1], label: 'Ground floor · YOON', kind: 'Full floor', src: P('8-w-36th', 'floor-01-yoon'), model3d: { box: [0.0826, 0.0328, 0.9174, 0.9279] }, note: 'YOON Haeundae Galbi, Korean barbecue (about 70 seats on this floor): host stand and stair to the second-floor dining room, reclaimed-wood bar, butcher-block grill tables between leather banquettes, two private rooms, restrooms and kitchen at the rear; building lobby (No. 8) and elevator on the west side. Illustrative layout drawn from the restaurant’s photos, not a measured plan.', source: { name: 'YOON Haeundae Galbi — gallery (layout illustrative)', url: 'https://www.yoon-nyc.com/gallery' } },
   ],
   '415-e-university': [
     { floors: [1, 2, 3], label: 'Jr 1 bed · 440 SF', kind: 'Unit', src: P('415-e-university', 'unit-jr-1-bedroom-440sf'), note: 'Junior one-bedroom, one bath, 440 SF.', source: SRC.link4th },

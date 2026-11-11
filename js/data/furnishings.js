@@ -25,6 +25,77 @@ const F = (id, file) => `assets/properties/${id}/plans/${file}.webp`;
 const box = (x, y, hw = 34, hh = 16) => [x - hw, y - hh, x + hw, y + hh];
 
 export const furnishings = {
+  // ------------------------------------------------------------------ 12 E 44th St, 7th floor
+  // Entire floor (Metro Manhattan listing). East 44th Street is the right edge
+  // of the drawing; the core (stair, restrooms, shaft, elevator) runs along the
+  // west party wall at the top. Elevator opens into reception.
+  [F('12-e-44th', 'floor-07')]: {
+    grid: [3130, 920],
+    base: 'oak',
+    rooms: [
+      // large conference room on 44th Street, two conference rooms
+      ['carpet', 2388, 100, 2936, 838], ['carpetBlue', 1035, 545, 1442, 826], ['carpetBlue', 1450, 548, 1906, 828],
+      // reception
+      ['stone', 1945, 270, 2378, 832],
+      // pantry, restrooms
+      ['tile', 588, 100, 932, 372], ['tile', 1488, 108, 1742, 366], ['tile', 1742, 262, 1944, 366], ['tile', 1852, 128, 1944, 262],
+      // shaft, elevator, stair
+      ['shaft', 1708, 104, 1832, 250], ['shaft', 1966, 104, 2192, 236], ['stair', 1028, 100, 1452, 370],
+    ],
+    erase: [
+      // labels
+      [640, 190, 835, 245], [238, 455, 452, 560], [1572, 222, 1630, 268], [1855, 238, 1910, 285], [2272, 182, 2342, 234],
+      [2535, 350, 2670, 450], [1152, 662, 1292, 714], [1552, 676, 1692, 726], [2008, 652, 2282, 706],
+      // elevator cab (box + label), shaft X, stair treads and UP/DN
+      [1996, 106, 2186, 234], [1712, 106, 1830, 246], [1030, 104, 1354, 368], [1360, 138, 1402, 174], [1360, 252, 1402, 292],
+      // restroom fixtures (toilets, the two sinks either side of the partition)
+      [1500, 108, 1562, 186], [1866, 130, 1922, 216], [1702, 284, 1737, 342], [1749, 284, 1786, 342],
+      // the drawn wall line across the large conference room's door
+      [2366, 422, 2394, 516],
+    ],
+    items: [
+      // --- open bullpen: two benches across the floor, lounge by the rear windows
+      { t: 'desks', x: 300, y: 600, r: 90, n: 3, w: 1.25, d: 0.7, double: true },
+      { t: 'desks', x: 650, y: 600, r: 90, n: 3, w: 1.25, d: 0.7, double: true },
+      { t: 'rug', x: 300, y: 240, r: 90, w: 2.2, d: 2.8, color: 'Grey' },
+      { t: 'sofa', x: 132, y: 240, r: 270, seats: 3, w: 2.2, fab: 'navy' },
+      { t: 'coffeeTable', x: 245, y: 240, r: 90, w: 1.1, d: 0.55 },
+      { t: 'armchair', x: 390, y: 172, r: 70, fab: 'cognac' }, { t: 'armchair', x: 390, y: 308, r: 110, fab: 'cognac' },
+      { t: 'plant', x: 535, y: 135, size: 'tall' }, { t: 'plant', x: 120, y: 405, size: 'small' },
+      { t: 'plant', x: 900, y: 785, size: 'bush' },
+
+      // --- pantry: counter along the party wall, small café table
+      { t: 'kitchen', x: 760, y: 132, r: 0, w: 3.0, d: 0.62, sink: -0.5, fridge: 'right' },
+      { t: 'cafeTable', x: 712, y: 275, r: 0.4, chairs: 2, a0: 0 },
+
+      // --- stair, elevator
+      { t: 'stair', x: 1192, y: 236, r: 90, w: 2.5, d: 3.1, flights: 2 },
+      { t: 'elevator', x: 2133, y: 277, r: 0, w: 0.85 },
+
+      // --- restrooms
+      { t: 'toilet', x: 1528, y: 137, r: 0 }, { t: 'toilet', x: 1893, y: 157, r: 0 },
+      { t: 'vanity', x: 1721, y: 315, r: 0, w: 0.32 }, { t: 'vanity', x: 1766, y: 315, r: 0, w: 0.32 },
+
+      // --- conference rooms
+      { t: 'confTable', x: 1238, y: 690, r: 0, w: 2.2, d: 1.0, seats: 6, ends: 0 },
+      { t: 'tv', x: 1054, y: 690, r: 270, w: 1.2, console: false },
+      { t: 'confTable', x: 1680, y: 695, r: 0, w: 2.6, d: 1.05, seats: 8, ends: 0 },
+      { t: 'tv', x: 1886, y: 695, r: 90, w: 1.3, console: false },
+
+      // --- reception facing the elevator, waiting chairs along the conference wall
+      { t: 'reception', x: 2165, y: 645, r: 180, R: 1.05, span: 1.7, deep: 0.55 },
+      { t: 'armchair', x: 1962, y: 638, r: 270, fab: 'sand' }, { t: 'armchair', x: 1962, y: 770, r: 270, fab: 'sand' },
+      { t: 'sideTable', x: 1950, y: 704 },
+      { t: 'plant', x: 2340, y: 800, size: 'tall' }, { t: 'plant', x: 2340, y: 302, size: 'small' },
+
+      // --- large conference room on East 44th Street
+      { t: 'confTable', x: 2634, y: 470, r: 90, w: 3.6, d: 1.2, seats: 12, ends: 2 },
+      { t: 'tv', x: 2634, y: 122, r: 0, w: 1.6 },
+      { t: 'credenza', x: 2634, y: 811, r: 180, w: 1.8, d: 0.45 },
+      { t: 'plant', x: 2840, y: 150, size: 'tall' }, { t: 'plant', x: 2840, y: 785, size: 'tall' },
+    ],
+  },
+
   // ------------------------------------------------------------------ 115 E 23rd St, 4th floor
   // Coworking floor: offices 401–420 (desk counts from the drawing's legend:
   // dark 1–2, green 2–3, magenta 3–4, blue 4–5, gold 6–8).
@@ -111,7 +182,7 @@ export const furnishings = {
       { t: 'reception', x: 672, y: 398, r: 180, R: 1.28, span: 2.3, deep: 0.55 },
       { t: 'plant', x: 525, y: 300, size: 'tall' },
       // --- elevators, stairs
-      { t: 'elevator', x: 570, y: 243, r: 0, w: 1.15 }, { t: 'elevator', x: 733, y: 243, r: 0, w: 1.15 },
+      { t: 'elevator', x: 570, y: 245, r: 0, w: 1.15 }, { t: 'elevator', x: 733, y: 245, r: 0, w: 1.15 },
       { t: 'elevator', x: 603, y: 1008, r: 180, w: 1.3 },
       { t: 'stair', x: 990, y: 163, r: 90, w: 2.0, d: 3.1, flights: 2 },
       { t: 'stair', x: 1697, y: 163, r: 90, w: 2.0, d: 4.2, flights: 2 },
@@ -592,6 +663,118 @@ export const furnishings = {
       { t: 'coffeeTable', x: 733, y: 1560, r: 0, round: true, w: 1.0, d: 0.6 },
       { t: 'armchair', x: 625, y: 1505, r: 300, fab: 'cognac' }, { t: 'armchair', x: 841, y: 1505, r: 60, fab: 'cognac' },
       { t: 'plant', x: 500, y: 1660, size: 'tall' }, { t: 'plant', x: 965, y: 1660, size: 'tall' },
+    ],
+  },
+  // ------------------------------------------------------------------ 8 W 36th St, ground floor (YOON)
+  // YOON Haeundae Galbi, Korean barbecue. Illustrative layout (see
+  // floorplans.js) furnished from the restaurant's gallery photos: grey stone
+  // floor with white-marble chevron runners, reclaimed-wood bar on dark marble,
+  // stair behind a seigaiha-tiled pier, butcher-block grill tables between
+  // leather banquettes on walnut panelling with stacked-stone strips, private
+  // rooms in mauve felt with linen pendants. Generated by a script (grid = px).
+  [F('8-w-36th', 'floor-01-yoon')]: {
+    wallH: 1.6,
+    base: 'slate',
+    grid: [968, 2440],
+    rooms: [
+      ['slateLight', 104.0, 1256.0, 628.0, 2004.0],
+      ['slateLight', 104.0, 2004.0, 444.0, 2240.0],
+      ['tile', 104.0, 2048.0, 440.0, 2240.0],
+      ['tile', 153.6, 656.0, 276.0, 1232.0],
+      ['tile', 692.0, 656.0, 814.4, 1232.0],
+      ['stone', 640.0, 1576.0, 864.0, 2240.0],
+      ['stair', 528.0, 1496.0, 628.0, 2024.0],
+      ['stair', 640.0, 1256.0, 724.0, 1564.0],
+      ['shaft', 736.0, 1416.0, 864.0, 1564.0],
+      ['concrete', 736.0, 1256.0, 864.0, 1404.0],
+      ['tile', 104.0, 376.0, 280.0, 632.0],
+      ['terrace', 104.0, 104.0, 864.0, 364.0],
+      ['terrace', 292.0, 376.0, 368.0, 632.0],
+    ],
+    erase: [
+      [256.5, 2085.5, 319.5, 2106.0],
+      [314.5, 1661.5, 357.5, 1682.0],
+      [565.1, 1507.0, 590.6, 1524.5],
+      [669.1, 1267.0, 694.6, 1284.5],
+      [720.5, 1885.5, 783.5, 1906.0],
+      [731.0, 1927.0, 773.0, 1944.5],
+      [778.5, 1455.0, 821.5, 1472.5],
+      [309.0, 949.5, 378.5, 970.0],
+      [681.5, 534.0, 750.5, 553.0],
+      [688.5, 562.0, 743.5, 581.0],
+      [448.0, 535.0, 488.0, 552.5],
+      [133.0, 471.0, 163.0, 488.5],
+      [226.6, 471.0, 256.6, 488.5],
+      [407.0, 325.5, 488.5, 346.0],
+    ],
+    items: [
+      {t: 'hostStand', x: 284.0, y: 2156.0, r: 0},
+      {t: 'bench', x: 360.0, y: 2214.4, r: 180, w: 1.5},
+      {t: 'plant', x: 460.0, y: 2204.0, r: 0, size: 'tall'},
+      {t: 'plant', x: 140.0, y: 2072.0, r: 0, size: 'bush'},
+      {t: 'backBar', x: 128.0, y: 1632.0, r: 270, w: 7.2},
+      {t: 'barCounter', x: 228.0, y: 1632.0, r: 270, w: 6.6, stools: 8},
+      {t: 'grillTable', x: 460.0, y: 1848.0, r: 0, w: 0.75, d: 0.75, seats: {front: 1, back: 1, left: 0, right: 0}},
+      {t: 'grillTable', x: 460.0, y: 1672.0, r: 0, w: 0.75, d: 0.75, seats: {front: 1, back: 1, left: 0, right: 0}},
+      {t: 'grillTable', x: 460.0, y: 1496.0, r: 0, w: 0.75, d: 0.75, seats: {front: 1, back: 1, left: 0, right: 0}},
+      {t: 'stair', x: 578.0, y: 1760.0, r: 0, w: 1.2, d: 6.6, steps: 24, top: 1.9},
+      {t: 'stairGlass', x: 529.6, y: 1760.0, r: 270, w: 6.6, top: 1.9},
+      {t: 'stair', x: 681.6, y: 1410.0, r: 0, w: 1.0, d: 3.85, steps: 13, top: 1.9},
+      {t: 'lattice', x: 520.0, y: 1268.0, r: 0, w: 2.6},
+      {t: 'elevator', x: 800.0, y: 1578.4, r: 0, w: 0.9, h: 1.55},
+      {t: 'plant', x: 832.0, y: 2192.0, r: 0, size: 'tall'},
+      {t: 'banquette', x: 839.2, y: 944.0, r: 90, w: 7.2},
+      {t: 'grillTable', x: 777.6, y: 1160.0, r: 90, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 777.6, y: 1016.0, r: 90, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 777.6, y: 872.0, r: 90, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 777.6, y: 728.0, r: 90, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'banquette', x: 128.8, y: 944.0, r: 270, w: 7.2},
+      {t: 'grillTable', x: 190.4, y: 1160.0, r: 270, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 190.4, y: 1016.0, r: 270, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 190.4, y: 872.0, r: 270, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 190.4, y: 728.0, r: 270, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'grillTable', x: 484.0, y: 1144.0, r: 0, w: 0.8, d: 1.25, seats: {front: 0, back: 0, left: 2, right: 2}},
+      {t: 'grillTable', x: 484.0, y: 960.0, r: 0, w: 0.8, d: 1.25, seats: {front: 0, back: 0, left: 2, right: 2}},
+      {t: 'grillTable', x: 484.0, y: 776.0, r: 0, w: 0.8, d: 1.25, seats: {front: 0, back: 0, left: 2, right: 2}},
+      {t: 'toilet', x: 148.0, y: 408.0, r: 0},
+      {t: 'toilet', x: 241.6, y: 408.0, r: 0},
+      {t: 'vanity', x: 124.8, y: 588.0, r: 270, w: 0.9, sinks: 1},
+      {t: 'banquette', x: 468.0, y: 400.8, r: 0, w: 2.1},
+      {t: 'grillTable', x: 468.0, y: 460.0, r: 0, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'pendant', x: 468.0, y: 460.0, r: 0},
+      {t: 'banquette', x: 716.0, y: 400.8, r: 0, w: 3.6},
+      {t: 'grillTable', x: 644.0, y: 460.0, r: 0, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'pendant', x: 644.0, y: 460.0, r: 0},
+      {t: 'grillTable', x: 788.0, y: 460.0, r: 0, w: 1.25, d: 0.8, seats: {front: 2, back: 0, left: 0, right: 0}},
+      {t: 'pendant', x: 788.0, y: 460.0, r: 0},
+      {t: 'cookLine', x: 632.0, y: 137.6, r: 0, w: 5.4},
+      {t: 'prepTable', x: 560.0, y: 276.0, r: 0, w: 2.4, d: 0.75},
+      {t: 'reachIn', x: 832.0, y: 300.0, r: 90, w: 1.4},
+      {t: 'dishSink', x: 134.4, y: 232.0, r: 270, w: 2.4},
+      {t: 'prepTable', x: 256.0, y: 136.0, r: 0, w: 1.6, d: 0.7},
+      {t: 'wallPanel', x: 105.3, y: 2104.0, r: 270, w: 3.4, style: 'marble', h: 1.9},
+      {t: 'wallPanel', x: 105.3, y: 1632.0, r: 270, w: 7.6, style: 'marble', h: 1.9},
+      {t: 'wallPanel', x: 482.0, y: 2045.3, r: 0, w: 0.95, style: 'seigaiha'},
+      {t: 'wallPanel', x: 442.7, y: 2024.0, r: 270, w: 0.5, style: 'seigaiha'},
+      {t: 'wallPanel', x: 521.3, y: 2024.0, r: 90, w: 0.5, style: 'seigaiha'},
+      {t: 'wallPanel', x: 626.7, y: 1696.0, r: 90, w: 6.2, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 626.7, y: 1336.0, r: 90, w: 1.95, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 862.7, y: 944.0, r: 90, w: 7.5, style: 'walnut', strip: 1.8, off: 0.15, h: 1.9},
+      {t: 'wallPanel', x: 105.3, y: 944.0, r: 270, w: 7.5, style: 'walnut', strip: 1.8, off: 0.15, h: 1.9},
+      {t: 'wallPanel', x: 746.0, y: 1242.7, r: 180, w: 2.95, style: 'stack'},
+      {t: 'wallPanel', x: 132.0, y: 645.3, r: 0, w: 0.7, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 262.0, y: 645.3, r: 0, w: 0.75, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 388.0, y: 645.3, r: 0, w: 0.5, style: 'stack'},
+      {t: 'wallPanel', x: 544.0, y: 645.3, r: 0, w: 1.6, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 788.0, y: 645.3, r: 0, w: 1.9, style: 'walnut', strip: 0},
+      {t: 'wallPanel', x: 569.3, y: 504.0, r: 270, w: 3.2, style: 'mauve'},
+      {t: 'wallPanel', x: 862.7, y: 504.0, r: 90, w: 3.2, style: 'mauve', h: 1.9},
+      {t: 'wallPanel', x: 716.0, y: 377.3, r: 0, w: 3.7, style: 'strips'},
+      {t: 'wallPanel', x: 788.0, y: 630.7, r: 180, w: 1.9, style: 'mauve'},
+      {t: 'wallPanel', x: 588.0, y: 630.7, r: 180, w: 0.5, style: 'mauve'},
+      {t: 'wallPanel', x: 381.3, y: 504.0, r: 270, w: 3.2, style: 'walnut', strip: 0.0, stripAt: [-1.3]},
+      {t: 'wallPanel', x: 554.7, y: 504.0, r: 90, w: 3.2, style: 'mauve'},
+      {t: 'wallPanel', x: 468.0, y: 377.3, r: 0, w: 2.2, style: 'chevron'},
     ],
   },
 };

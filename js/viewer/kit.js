@@ -199,7 +199,7 @@ export function createKit(g, r, { glass = 'dark' } = {}) {
       }
       const depth = o.roomDepth ?? 2.4;
       const over = o.over ?? 0.45;
-      I.room.add(P(0, 0.1, zf - depth / 2 - 0.02, w + over * 2, h + 0.9, depth), room);
+      I.room.add(P(0, 0.1, zf - depth / 2 - 0.02, w + over * 2, h + 0.9, depth), o.roomColor ?? room);
       if (o.blinds !== false && (o.room === undefined || o.room === 'warm') && r() < 0.45) {
         const frac = 0.12 + r() * 0.55;
         const bc = ['#bdb6a8', '#a9a192', '#cfcabe', '#9d927f'][Math.floor(r() * 4)];

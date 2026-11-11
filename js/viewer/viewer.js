@@ -634,6 +634,10 @@ function positionOnBox(u, v, face, W, D, H) {
 // so turning it on/off or moving it needs no shader recompile).
 function addCutaway(mat, u) {
   const prev = mat.onBeforeCompile;
+  // The fake interiors behind the windows (kit.js: back-faced, vertex-coloured
+  // boxes ~2.4 m deep) would otherwise survive in the facade band of the cut
+  // storey as dark slabs in front of the windows: drop all of it above the floor.
+  const room = mat.isMeshBasicMaterial && mat.side === THREE.BackSide && mat.vertexColors;
   mat.onBeforeCompile = (sh, r) => {
     prev?.call(mat, sh, r);
     if (!sh.vertexShader.includes('#include <project_vertex>') || !sh.fragmentShader.includes('void main() {')) return;
@@ -648,8 +652,8 @@ function addCutaway(mat, u) {
       void main() {
         if (uFPOn > 0.5) {
           if (vFPWorld.y > uFPCut) discard;
-          if (vFPWorld.y > uFPFloor && abs(vFPWorld.x) < uFPHalf.x && abs(vFPWorld.z) < uFPHalf.y) discard;
+          if (vFPWorld.y > uFPFloor && ${room ? 'true' : '(abs(vFPWorld.x) < uFPHalf.x && abs(vFPWorld.z) < uFPHalf.y)'}) discard;
         }`);
   };
-  mat.customProgramCacheKey = () => 'fp-cutaway';
+  mat.customProgramCacheKey = () => (room ? 'fp-cutaway-room' : 'fp-cutaway');
 }

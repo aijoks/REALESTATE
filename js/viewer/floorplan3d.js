@@ -97,7 +97,10 @@ function rectangles(m, w, h) {
 }
 
 // One indexed geometry for all wall blocks: group 0 = sides, group 1 = cut tops.
-function wallGeometry(rects, toX, toZ, H) {
+// Blocks are kept `inset` inside the footprint [±hx, ±hz]: the drawing's
+// exterior walls would otherwise sit on (or a few mm outside) the model's own
+// facade faces and z-fight with them / paint a band over the brick.
+function wallGeometry(rects, toX, toZ, H, hx = Infinity, hz = Infinity, inset = 0.03) {
   const pos = [], nor = [], side = [], top = [];
   let v = 0;
   const quad = (a, b, c, d, n, into) => {
@@ -106,8 +109,10 @@ function wallGeometry(rects, toX, toZ, H) {
     into.push(v, v + 1, v + 2, v, v + 2, v + 3);
     v += 4;
   };
+  const cx = (x) => Math.min(hx - inset, Math.max(-hx + inset, x)), cz = (z) => Math.min(hz - inset, Math.max(-hz + inset, z));
   for (const [gx0, gy0, gx1, gy1] of rects) {
-    const x0 = toX(gx0), x1 = toX(gx1), z0 = toZ(gy0), z1 = toZ(gy1);
+    const x0 = cx(toX(gx0)), x1 = cx(toX(gx1)), z0 = cz(toZ(gy0)), z1 = cz(toZ(gy1));
+    if (x1 - x0 < 0.005 || z1 - z0 < 0.005) continue;
     quad([x0, H, z1], [x1, H, z1], [x1, H, z0], [x0, H, z0], [0, 1, 0], top);
     quad([x0, 0, z1], [x1, 0, z1], [x1, H, z1], [x0, H, z1], [0, 0, 1], side);
     quad([x1, 0, z0], [x0, 0, z0], [x0, H, z0], [x1, H, z0], [0, 0, -1], side);
@@ -148,6 +153,9 @@ const FINISH = {
   terrace: { base: '#cbc6bc', tile: 0.6, tones: ['#cdc8be', '#c6c1b6'], seam: 'rgba(90,85,75,0.35)' },
   shaft: { base: '#7b8087', grain: 0.12 },
   stair: { base: '#cfccc6', grain: 0.1 },
+  // Large-format grey stone (restaurant floors, e.g. YOON at 8 W 36th St).
+  slate: { base: '#85868d', tile: [1.2, 0.6], tones: ['#87888f', '#808189', '#8b8c93', '#7d7e86'], seam: 'rgba(40,40,48,0.35)', grain: 0.12 },
+  slateLight: { base: '#b4b4b8', tile: [1.2, 0.6], tones: ['#b6b6ba', '#afafb4', '#bbbbbf'], seam: 'rgba(60,60,70,0.3)', grain: 0.1 },
 };
 // Paint one finish over rect [x0, y0, x1, y1] (canvas px); k = px per metre.
 // `along` = 'x' | 'y': plank direction on the canvas.
@@ -432,8 +440,11 @@ export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
   group.add(drawing);
 
   const wallH = model3d.wallH ?? (furnish ? furnish.wallH ?? 1.35 : 1.15);
-  const wallMesh = new THREE.Mesh(wallGeometry(rects, toX, toZ, wallH), [
-    new THREE.MeshStandardMaterial({ color: '#f8f6f1', roughness: 0.95, envMapIntensity: 0.4 }),
+  const wallMesh = new THREE.Mesh(wallGeometry(rects, toX, toZ, wallH, W / 2, D / 2), [
+    // Pushed back a hair in depth: where a raised wall happens to share a plane with
+    // the model's own window reveals or a piece of furniture, those win cleanly
+    // instead of flickering.
+    new THREE.MeshStandardMaterial({ color: '#f8f6f1', roughness: 0.95, envMapIntensity: 0.4, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 2 }),
     new THREE.MeshStandardMaterial({ color: '#27313d', roughness: 0.6 }),
   ]);
   // Lit by sun and sky but not shadowed by the (hidden) floors above.

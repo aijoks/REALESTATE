@@ -1,6 +1,6 @@
 // Procedural model of a narrow grey stone loft with a dark metal window bay,
 // matched to photos of 8 W 36th St:
-//   - dark granite ground floor: restaurant with a gold mark, and the No. 8
+//   - dark granite ground floor: YOON Haeundae Galbi with its gold mark, and the No. 8
 //     entrance under a small canopy; tall 2nd-floor window above
 //   - ten office floors: smooth grey stone piers framing a wide bay of four
 //     black-framed windows per floor with projecting dark metal spandrels
@@ -81,7 +81,9 @@ export function buildStoneBay(params) {
   // =====================================================================
   const Fb = face(0, -W / 2, 0, D / 2);
   const baseHoles = [
-    { x: 2.9, y: 0.12 + 1.75, w: 4.6, h: 3.5, kind: 'grid', cols: 3, transom: 0.8, room: 'warm', blinds: false, frame: '#141414', reveal: '#2b2a2a', rd: 0.25, sill: false },
+    // YOON's storefront: dark-tinted glass over a dim, warm interior (photos);
+    // the fixed colour also reads as glass from inside the floor cut-away.
+    { x: 2.9, y: 0.12 + 1.75, w: 4.6, h: 3.5, kind: 'grid', cols: 3, transom: 0.8, room: 'warm', roomColor: '#5a4637', blinds: false, frame: '#141414', reveal: '#2b2a2a', rd: 0.25, sill: false },
     { x: 7.9, y: 0.12 + 1.45, w: 1.9, h: 2.9, kind: 'lobby', room: 'lobby', frame: '#141414', reveal: '#2b2a2a', rd: 0.5, sill: false, roomDepth: 4 },
     { x: W / 2, y: g1 + g2 / 2 + 0.1, w: cw, h: 2.5, kind: 'grid', cols: 4, transom: 0.7, frame: black, reveal: '#3a3a3a', rd: 0.3, sill: false, tint: '#9fb0be' },
   ];
@@ -93,19 +95,36 @@ export function buildStoneBay(params) {
   }
   I.trim.add(piece(Fb, W / 2, g1 - 0.35, 0.06, W, 0.7, 0.12), '#2b2a2a');
   {
-    // Gold restaurant mark, "8" and canopy at the entrance.
+    // Gold YOON Haeundae Galbi mark (the brush-stroke 윤 figure of the
+    // restaurant's logo, with its name in small capitals beneath), "8" and
+    // canopy at the entrance.
     const mark = textTexture({
-      width: 256, height: 256, bg: '#2b2a2a',
-      draw(ctx, w, h) {
-        ctx.fillStyle = '#c9a54a';
-        for (let i = 0; i < 6; i++) {
-          ctx.save(); ctx.translate(w / 2, h / 2 + 10); ctx.rotate((i / 6) * Math.PI * 2);
-          ctx.beginPath(); ctx.ellipse(0, -46, 16, 40, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-        }
+      width: 256, height: 320, bg: '#2b2a2a',
+      draw(ctx, w) {
+        ctx.strokeStyle = ctx.fillStyle = '#d2ac55';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const cx = w / 2;
+        ctx.lineWidth = 15;
+        ctx.beginPath(); ctx.ellipse(cx + 4, 62, 30, 27, -0.15, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth = 17;
+        ctx.beginPath(); ctx.moveTo(cx - 74, 108); ctx.quadraticCurveTo(cx - 60, 128, cx - 20, 124); ctx.lineTo(cx + 46, 118); ctx.quadraticCurveTo(cx + 72, 114, cx + 82, 94); ctx.stroke();
+        ctx.lineWidth = 14;
+        ctx.beginPath(); ctx.moveTo(cx - 6, 128); ctx.lineTo(cx - 10, 176); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + 26, 128); ctx.lineTo(cx + 24, 168); ctx.stroke();
+        ctx.lineWidth = 16;
+        ctx.beginPath(); ctx.moveTo(cx - 44, 158); ctx.quadraticCurveTo(cx - 52, 204, cx - 10, 206); ctx.quadraticCurveTo(cx + 46, 208, cx + 70, 192); ctx.stroke();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '600 21px "Helvetica Neue", Helvetica, Arial, sans-serif';
+        ctx.fillText('Y O O N', cx, 252);
+        ctx.font = '500 13px "Helvetica Neue", Helvetica, Arial, sans-serif';
+        ctx.fillText('H A E U N D A E   G A L B I', cx, 280);
       },
     });
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshStandardMaterial({ map: mark, roughness: 0.4, metalness: 0.5 }));
-    m.position.set(-W / 2 + 0.25 + 5.8, 3.1, D / 2 + 0.11);
+    const mm = new THREE.MeshStandardMaterial({ map: mark, roughness: 0.4, metalness: 0.5, emissive: '#ffffff', emissiveMap: mark, emissiveIntensity: 0.25 });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.0), mm);
+    m.position.set(-W / 2 + 0.25 + 5.8, 2.85, D / 2 + 0.11);
     add(m);
     const num = textTexture({ text: '8', width: 128, height: 128, bg: '#2b2a2a', ink: '#e8e4da', font: '500 96px Georgia, serif' });
     const n = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.45), new THREE.MeshStandardMaterial({ map: num, roughness: 0.5 }));

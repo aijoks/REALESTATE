@@ -56,6 +56,33 @@ const MATS = {
   bookC: { color: '#d8cfba', roughness: 0.9 },
   bookD: { color: '#4b6b4a', roughness: 0.9 },
   light: { color: '#fff6e0', emissive: '#ffe7b0', emissiveIntensity: 0.6, roughness: 0.5 },
+  // Korean-barbecue restaurant (YOON, 8 W 36th St), colours sampled from the
+  // restaurant's gallery: butcher-block grill tables, brown leather
+  // banquettes, walnut veneer, mauve felt panels, dark marble and granite,
+  // reclaimed-wood bar fins, rust-metal lattice, brass rails.
+  butcher: { color: '#a8693f', roughness: 0.55 },
+  leather: { color: '#4d3127', roughness: 0.5 },
+  walnutPanel: { color: '#93603f', roughness: 0.5 },
+  walnutDark: { color: '#3e2a20', roughness: 0.6 },
+  mauve: { color: '#73606b', roughness: 1 },
+  brass: { color: '#b08d55', roughness: 0.3, metalness: 0.8 },
+  marbleDark: { color: '#3a3a3f', roughness: 0.3 },
+  granite: { color: '#252427', roughness: 0.25, metalness: 0.1 },
+  reclaimed: { color: '#76624f', roughness: 0.9 },
+  reclaimedB: { color: '#8d7a66', roughness: 0.9 },
+  reclaimedC: { color: '#5a4639', roughness: 0.9 },
+  rust: { color: '#7a4630', roughness: 0.6, metalness: 0.4 },
+  stack: { color: '#4b4b50', roughness: 0.95 },
+  stackB: { color: '#66666b', roughness: 0.95 },
+  chevronTile: { color: '#dcdcde', roughness: 0.35 },
+  seigaiha: { color: '#b3b0aa', roughness: 0.6 },
+  seigaihaInk: { color: '#4a4846', roughness: 0.6 },
+  grill: { color: '#5d5e63', roughness: 0.45, metalness: 0.45 },
+  bottleA: { color: '#3d5a3a', roughness: 0.2, metalness: 0.1 },
+  bottleB: { color: '#8a5a2b', roughness: 0.2, metalness: 0.1 },
+  bottleC: { color: '#d9dcd4', roughness: 0.15, metalness: 0.1 },
+  led: { color: '#ffe2b0', emissive: '#ffcf85', emissiveIntensity: 1.0, roughness: 0.5 },
+  linen: { color: '#f3ead8', emissive: '#ffe0a8', emissiveIntensity: 0.55, roughness: 0.8 },
 };
 
 const _m = new THREE.Matrix4(), _l = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3();
@@ -254,9 +281,9 @@ const sideTable = (k, p) => {
 };
 const rug = (k, p) => {
   const w = p.w ?? 2.4, d = p.d ?? 1.7, c = p.color ?? 'Sand';
-  if (p.round) { k.cyl('rug' + c, w / 2, w / 2, 0.012, 0, 0, 0, 32, 1, d / w); k.cyl('rug' + c + 'In', w / 2 - 0.12, w / 2 - 0.12, 0.014, 0, 0, 0, 32, 1, (d - 0.24) / (w - 0.24)); return; }
+  if (p.round) { k.cyl('rug' + c, w / 2, w / 2, 0.012, 0, 0, 0, 32, 1, d / w); k.cyl('rug' + c + 'In', w / 2 - 0.12, w / 2 - 0.12, 0.02, 0, 0, 0, 32, 1, (d - 0.24) / (w - 0.24)); return; }
   k.box('rug' + c, w, 0.012, d, 0, 0, 0);
-  k.box('rug' + c + 'In', w - 0.24, 0.014, d - 0.24, 0, 0, 0);
+  k.box('rug' + c + 'In', w - 0.24, 0.02, d - 0.24, 0, 0, 0);
 };
 
 // Meeting table with chairs around it. shape 'rect' | 'oval' | 'round'.
@@ -320,7 +347,7 @@ const cafeTable = (k, p) => {
 const monitor = (k, x, z, ry = 0, w = 0.6) => {
   k.add('screen', new THREE.BoxGeometry(w, w * 0.56, 0.025), x, 1.05, z, ry);
   k.add('black', new THREE.BoxGeometry(0.05, 0.25, 0.04), x - Math.sin(ry) * 0.04, 0.85, z - Math.cos(ry) * 0.04, ry);
-  k.add('black', new THREE.BoxGeometry(0.22, 0.015, 0.18), x - Math.sin(ry) * 0.04, 0.74, z - Math.cos(ry) * 0.04, ry);
+  k.add('black', new THREE.BoxGeometry(0.22, 0.015, 0.18), x - Math.sin(ry) * 0.04, 0.758, z - Math.cos(ry) * 0.04, ry); // foot on the desk top (0.75)
 };
 // A desk (front = +z, where the chair is). w/d in metres.
 function deskAt(k, x, z, ry, p = {}) {
@@ -348,7 +375,7 @@ const desks = (k, p) => {
     } else deskAt(k, x, 0, 0, { ...p, w, d });
   }
   if (p.double) k.box('felt', n * w - 0.05, 0.38, 0.03, 0, 0.75, 0);
-  if (p.double) for (const s of [-1, 1]) k.box('white', 0.05, 0.03, d * 2 - 0.04, s * (n * w / 2 - 0.03), 0.72, 0);
+  if (p.double) for (const s of [-1, 1]) k.box('white', 0.05, 0.036, d * 2 - 0.04, s * (n * w / 2 - 0.03), 0.72, 0); // end caps stand 6 mm proud of the desk tops (no z-fight)
 };
 // Reception / podcast desk on an arc. Centre of the arc at local origin,
 // desk spans `span` radians centred on +z (customer side = outside).
@@ -386,7 +413,8 @@ const podcast = (k, p) => arcDesk(k, p, { podcast: true });
 // Glass-fronted phone booth / focus pod (front = +z glass door).
 const booth = (k, p) => {
   const w = p.w ?? 1.1, d = p.d ?? 1.1, h = p.h ?? 1.55, t = 0.06;
-  k.box('concrete', w, 0.05, d, 0, 0, 0);
+  // (base, glass and the front frame are inset a few mm so no faces are coplanar)
+  k.box('concrete', w - 0.012, 0.05, d - 0.012, 0, 0, 0);
   k.box('white', t, h, d, -w / 2 + t / 2, 0, 0);
   k.box('white', t, h, d, w / 2 - t / 2, 0, 0);
   k.box('white', w, h, t, 0, 0, -d / 2 + t / 2);
@@ -394,8 +422,8 @@ const booth = (k, p) => {
   k.box('felt', w - 2 * t, h - 0.2, 0.02, 0, 0.12, -d / 2 + t + 0.01);
   k.box('felt', 0.02, h - 0.2, d - 2 * t, -w / 2 + t + 0.01, 0.12, 0);
   k.box('felt', 0.02, h - 0.2, d - 2 * t, w / 2 - t - 0.01, 0.12, 0);
-  k.box('glass', w - 2 * t, h - 0.05, 0.02, 0, 0.05, d / 2 - 0.02);
-  k.box('black', w, 0.04, 0.05, 0, h - 0.04, d / 2 - 0.025);
+  k.box('glass', w - 2 * t - 0.012, h - 0.09, 0.016, 0, 0.05, d / 2 - 0.02);
+  k.box('black', w - 2 * t, 0.04, 0.05, 0, h - 0.04, d / 2 - 0.025);
   k.box('black', 0.03, h, 0.05, -w / 2 + t + 0.015, 0, d / 2 - 0.025);
   k.box('black', 0.03, h, 0.05, w / 2 - t - 0.015, 0, d / 2 - 0.025);
   k.box('oak', w - 2 * t - 0.04, 0.035, 0.35, 0, 0.98, -d / 2 + t + 0.18);
@@ -533,7 +561,7 @@ const plant = (k, p) => {
   }
   // tall: fiddle-leaf / olive style
   k.cyl(p.pot ?? 'potLight', 0.21, 0.17, 0.42, 0, 0, 0, 14);
-  k.cyl('concrete', 0.19, 0.19, 0.01, 0, 0.41, 0, 14);
+  k.cyl('concrete', 0.19, 0.19, 0.018, 0, 0.41, 0, 14); // soil 8 mm above the rim, not flush with the pot top
   k.rod('walnut', 0.025, [0, 0.42, 0], [0.04, 1.0, 0.02]);
   k.blob('leaf', 0.3, 0.02, 1.08, 0, 1.1);
   k.blob('leafDark', 0.24, 0.17, 1.28, 0.08, 1.1);
@@ -580,7 +608,7 @@ const stair = (k, p) => {
   });
   if (flights === 2) {
     k.box('concrete', w, top, 0.95, 0, 0, -d / 2 + 0.475);
-    k.box('white', 0.06, top + 0.05, d - 0.95, 0, 0, 0.475);
+    k.box('white', 0.06, top + 0.05, d - 0.96, 0, 0, 0.47); // ends 1 cm short of the first riser
     k.rod('black', 0.02, [0, top + 0.12, d / 2], [0, top + 0.12, -d / 2 + 0.95]);
   }
   k.shadow(0, 0, w, d, { a: 0.12 });
@@ -622,7 +650,252 @@ const panels = (k, p) => {
   for (let i = 0; i < n; i++) k.box(i % 2 ? 'felt' : 'sage', w / n - 0.04, 0.9, 0.05, -w / 2 + (w / n) * (i + 0.5), 0.35, 0);
 };
 
+// ---------------------------------------------------------------- restaurant (Korean barbecue)
+// Dining chair: black steel frame, walnut seat and back panel, facing +z.
+function diningChair(k, x, z, ry) {
+  const c = Math.cos(ry), s = Math.sin(ry);
+  const L = (lx, lz) => [x + lx * c + lz * s, z - lx * s + lz * c];
+  for (const [lx, lz] of [[-0.19, -0.18], [0.19, -0.18], [-0.19, 0.18], [0.19, 0.18]]) {
+    const [a, b] = L(lx, lz);
+    k.add('black', new THREE.BoxGeometry(0.025, 0.45, 0.025), a, 0.225, b, ry);
+  }
+  for (const lx of [-0.19, 0.19]) { const [a, b] = L(lx, -0.19); k.add('black', new THREE.BoxGeometry(0.025, 0.46, 0.025), a, 0.68, b, ry, -0.06); }
+  k.add('walnutPanel', new THREE.BoxGeometry(0.43, 0.035, 0.41), x, 0.465, z, ry);
+  const [bx, bz] = L(0, -0.205);
+  k.add('walnutPanel', new THREE.BoxGeometry(0.42, 0.24, 0.025), bx, 0.78, bz, ry, -0.06);
+  k.shadow(x, z, 0.46, 0.46, { a: 0.14, ry: 0 });
+}
+// Grill table: butcher-block top with an inset round charcoal/gas grill and
+// the black down-draft extraction cabinet beneath (no overhead hood — the
+// photos show none). seats = { front, back, left, right } chairs per side.
+const grillTable = (k, p) => {
+  const w = p.w ?? 1.25, d = p.d ?? 0.8, h = 0.74, gx = p.gx ?? 0;
+  const s = { front: 2, back: 2, left: 0, right: 0, ...(p.seats ?? {}) };
+  k.box('butcher', w, 0.05, d, 0, h - 0.05, 0);
+  k.box('black', w - 0.1, 0.06, d - 0.1, 0, h - 0.11, 0);
+  k.box('black', Math.min(0.6, w - 0.3), h - 0.17, Math.min(0.55, d - 0.2), 0, 0.02, 0);
+  k.box('steel', Math.min(0.4, w - 0.5), 0.12, 0.01, 0, 0.12, Math.min(0.55, d - 0.2) / 2 + 0.003);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) k.box('black', 0.035, h - 0.11, 0.035, sx * (w / 2 - 0.08), 0, sz * (d / 2 - 0.08));
+  // grill: steel ring proud of the top, dark domed grate inside it
+  k.cyl('steel', 0.215, 0.215, 0.014, gx, h, 0, 28);
+  k.cyl('grill', 0.12, 0.185, 0.022, gx, h - 0.002, 0, 28);
+  k.shadow(0, 0, w, d, { a: 0.26 });
+  const row = (n, len, fn) => { for (let i = 0; i < n; i++) fn(-len / 2 + (len * (i + 0.5)) / n); };
+  row(s.front, w, (o) => diningChair(k, o, d / 2 + 0.3, Math.PI));
+  row(s.back, w, (o) => diningChair(k, o, -d / 2 - 0.3, 0));
+  row(s.left, d, (o) => diningChair(k, -w / 2 - 0.3, o, Math.PI / 2));
+  row(s.right, d, (o) => diningChair(k, w / 2 + 0.3, o, -Math.PI / 2));
+};
+// Built-in leather banquette (seat faces +z), on a recessed plinth lit by an
+// LED strip, cushions split every ~0.9 m.
+const banquette = (k, p) => {
+  const w = p.w ?? 3, d = p.d ?? 0.62;
+  k.box('walnutDark', w, 0.28, d - 0.14, 0, 0, -0.07);
+  k.box('led', w - 0.04, 0.012, 0.015, 0, 0.02, d / 2 - 0.135);
+  const n = Math.max(1, Math.round(w / 0.9)), cw = w / n;
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + cw * (i + 0.5);
+    k.box('leather', cw - 0.02, 0.16, d - 0.14, x, 0.28, 0.03);
+    k.add('leather', new THREE.BoxGeometry(cw - 0.034, 0.5, 0.13), x, 0.73, -d / 2 + 0.085, 0, -0.08);
+  }
+  k.box('walnutDark', w - 0.006, 0.46, 0.06, 0, 0.0, -d / 2 + 0.032);
+  k.shadow(0, 0.02, w, d, { a: 0.3 });
+};
+// Wall cladding, a thin layer in front of a wall (front = +z, room side).
+//   style: walnut (veneer panels, optional stacked-stone strips every `strip`
+//   m or at `stripAt` offsets) | mauve (felt panels + brass rail) | marble
+//   (dark slabs) | stack (stacked dark stone) | strips (reclaimed-wood
+//   strips) | chevron (white/grey marble chevron) | seigaiha (wave tile).
+const wallPanel = (k, p) => {
+  const w = p.w ?? 2, h = p.h ?? 1.56, t = 0.024, st = p.style ?? 'walnut';
+  const joint = (x, y, jw, jh) => k.box('walnutDark', jw, jh, 0.004, x, y, t / 2 + 0.002);
+  const stackStrip = (x, sw) => {
+    for (let y = 0, i = 0; y < h - 0.01; y += 0.055, i++) {
+      const lh = Math.min(0.05, h - y);
+      k.box(i % 3 === 1 ? 'stackB' : 'stack', sw - ((i * 7) % 3) * 0.012, lh, 0.05 + ((i * 5) % 3) * 0.01, x + (((i * 3) % 3) - 1) * 0.006, y, 0.012);
+    }
+  };
+  if (st === 'walnut') {
+    k.box('walnutPanel', w, h, t, 0, 0, 0);
+    const n = Math.max(1, Math.round(w / 0.6));
+    for (let i = 1; i < n; i++) joint(-w / 2 + (w * i) / n, 0, 0.006, h);
+    joint(0, 0.9, w, 0.006);
+    const strips = p.stripAt ?? (p.strip ? Array.from({ length: Math.floor(w / p.strip) + 1 }, (_, i) => -w / 2 + (p.off ?? 0) + i * p.strip).filter((x) => x > -w / 2 + 0.1 && x < w / 2 - 0.1) : []);
+    for (const x of strips) stackStrip(x, 0.24);
+  } else if (st === 'mauve') {
+    k.box('mauve', w, h, t, 0, 0, 0);
+    const n = Math.max(1, Math.round(w / 0.9));
+    for (let i = 1; i < n; i++) joint(-w / 2 + (w * i) / n, 0, 0.006, h);
+    for (const y of [0.45, 1.35]) joint(0, y, w, 0.006);
+    k.box('brass', w, 0.035, 0.03, 0, 0.88, t / 2 + 0.012);
+  } else if (st === 'marble') {
+    k.box('marbleDark', w, h, t, 0, 0, 0);
+    const n = Math.max(1, Math.round(w / 0.6));
+    for (let i = 1; i < n; i++) k.box('granite', 0.005, h, 0.004, -w / 2 + (w * i) / n, 0, t / 2 + 0.002);
+    for (const y of [0.3, 0.6, 0.9, 1.2]) k.box('granite', w, 0.005, 0.004, 0, y, t / 2 + 0.002);
+  } else if (st === 'stack') {
+    stackStrip(0, w);
+  } else if (st === 'strips') {
+    k.box('walnutDark', w, h, t, 0, 0, 0);
+    const mats = ['reclaimed', 'reclaimedB', 'reclaimedC', 'butcher'];
+    for (let y = 0.5, i = 0; y < h - 0.02; y += 0.05, i++) {
+      let x = -w / 2 + ((i * 0.23) % 0.4) - 0.2;
+      let j = i;
+      while (x < w / 2) {
+        const len = 0.3 + ((j * 7) % 5) * 0.12;
+        const x0 = Math.max(-w / 2, x), x1 = Math.min(w / 2, x + len - 0.01);
+        if (x1 > x0) k.box(mats[(j * 3 + i) % 4], x1 - x0, 0.045, 0.02 + ((j * 5) % 3) * 0.008, (x0 + x1) / 2, y, t / 2 + 0.01);
+        x += len; j++;
+      }
+    }
+  } else {
+    const mat = st === 'chevron' ? 'chevronTile' : 'seigaiha';
+    k.box(mat, w, h, t, 0, 0, 0);
+    if (st === 'chevron') for (let y = 0.1; y < h; y += 0.1) k.box('stackB', w, 0.004, 0.003, 0, y, t / 2 + 0.0015);
+    // seigaiha: rows of overlapping wave scallops, as arcs of thin dark ribs
+    if (st === 'seigaiha') {
+      const R = 0.075, n = Math.max(1, Math.round(w / (2 * R)));
+      for (let y = 0.06, row = 0; y < h - 0.02; y += R * 0.62, row++) {
+        for (let i = 0; i < n; i++) {
+          const cx = -w / 2 + (w * (i + (row % 2 ? 0 : 0.5))) / n;
+          for (let a = 0.25; a < Math.PI - 0.2; a += 0.45) {
+            const x = cx + Math.cos(a) * R, yy = y + Math.sin(a) * R * 0.8;
+            if (Math.abs(x) < w / 2 - 0.01 && yy < h - 0.01) k.add('seigaihaInk', new THREE.BoxGeometry(0.035, 0.008, 0.003), x, yy, t / 2 + 0.0015, 0, 0, a + Math.PI / 2);
+          }
+        }
+      }
+    }
+  }
+};
+// Bar: dark granite top over a front of vertical reclaimed-wood fins, lit from
+// under the top, with timber-seat stools on the customer side (+z).
+const barCounter = (k, p) => {
+  const w = p.w ?? 5, d = 0.56, h = 1.04, n = p.stools ?? Math.floor(w / 0.75);
+  k.box('black', w, h - 0.05, d - 0.12, 0, 0, -0.06);
+  const fins = Math.round(w / 0.11), fw = w / fins, mats = ['reclaimed', 'reclaimedB', 'reclaimedC'];
+  for (let i = 0; i < fins; i++) k.box(mats[(i * 7) % 3], fw - 0.012, h - 0.09, 0.05 + ((i * 5) % 3) * 0.015, -w / 2 + fw * (i + 0.5), 0.02, d / 2 - 0.06);
+  k.box('granite', w + 0.04, 0.045, d + 0.1, 0, h - 0.05, 0.03);
+  k.box('led', w - 0.06, 0.008, 0.012, 0, h - 0.06, d / 2 + 0.05);
+  k.box('steel', w - 0.1, 0.03, 0.36, 0, 0.84, -d / 2 - 0.15);
+  k.shadow(0, 0, w, d, { a: 0.3 });
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + (w * (i + 0.5)) / n, z = d / 2 + 0.42;
+    for (const [lx, lz] of [[-0.14, -0.13], [0.14, -0.13], [-0.14, 0.13], [0.14, 0.13]]) k.rod('black', 0.012, [x + lx * 1.15, 0, z + lz * 1.15], [x + lx * 0.8, 0.74, z + lz * 0.8], 5);
+    k.box('black', 0.3, 0.015, 0.015, x, 0.28, z + 0.15);
+    k.box('walnutPanel', 0.38, 0.05, 0.34, x, 0.74, z);
+    k.shadow(x, z, 0.42, 0.4, { a: 0.12 });
+  }
+};
+// Back bar against a wall (front = +z): walnut cabinets, granite top, two
+// shelves of bottles in front of the wall cladding.
+const backBar = (k, p) => {
+  const w = p.w ?? 4, d = 0.5;
+  k.box('walnutDark', w, 0.86, d, 0, 0, 0);
+  k.box('granite', w + 0.02, 0.04, d + 0.03, 0, 0.86, 0.01);
+  const bottles = ['bottleA', 'bottleB', 'bottleC', 'bottleA', 'bottleC'];
+  for (const y of [1.02, 1.3]) {
+    k.box('walnutPanel', w - 0.2, 0.03, 0.24, 0, y, -d / 2 + 0.12);
+    for (let x = -w / 2 + 0.2, i = 0; x < w / 2 - 0.2; x += 0.13, i++) {
+      if (i % 9 === 8) continue;
+      const m = bottles[(i * 3 + (y > 1.2 ? 1 : 0)) % bottles.length];
+      k.cyl(m, 0.034, 0.034, 0.2, x, y + 0.03, -d / 2 + 0.12, 8);
+      k.cyl(m, 0.012, 0.03, 0.08, x, y + 0.23, -d / 2 + 0.12, 6);
+    }
+  }
+  k.shadow(0, 0, w, d, { a: 0.3 });
+};
+// Host stand: reclaimed-wood podium.
+const hostStand = (k) => {
+  const mats = ['reclaimedB', 'reclaimed', 'reclaimedC', 'reclaimedB'];
+  for (let i = 0; i < 4; i++) k.box(mats[i], 0.115, 1.08, 0.42, -0.18 + i * 0.12, 0, 0);
+  k.box('granite', 0.5, 0.03, 0.44, 0, 1.08, 0);
+  k.shadow(0, 0, 0.5, 0.44, { a: 0.3 });
+};
+// Waiting bench: dark timber slab on black legs.
+const bench = (k, p) => {
+  const w = p.w ?? 1.4;
+  k.box('walnutDark', w, 0.06, 0.4, 0, 0.4, 0);
+  for (const s of [-1, 1]) k.box('black', 0.05, 0.4, 0.34, s * (w / 2 - 0.1), 0, 0);
+  k.shadow(0, 0, w, 0.4, { a: 0.2 });
+};
+// Rust-finished metal lattice screen with a few shelves.
+const lattice = (k, p) => {
+  const w = p.w ?? 2.4, h = p.h ?? 1.85, c = 0.33, dd = 0.3;
+  const nx = Math.max(1, Math.round(w / c)), ny = Math.max(1, Math.round(h / c));
+  for (let i = 0; i <= nx; i++) for (const z of [-dd / 2, dd / 2]) k.box('rust', 0.03, h, 0.03, -w / 2 + (w * i) / nx, 0, z);
+  for (let j = 1; j <= ny; j++) {
+    const y = (h * j) / ny - 0.03;
+    for (const z of [-dd / 2, dd / 2]) k.box('rust', w, 0.03, 0.03, 0, y, z);
+    for (let i = 0; i <= nx; i++) k.box('rust', 0.03, 0.03, dd, -w / 2 + (w * i) / nx, y, 0);
+  }
+  k.shadow(0, 0, w, dd + 0.05, { a: 0.18 });
+};
+// Linen cylinder pendant over a table; the cord stops just under the cut.
+const pendant = (k, p) => {
+  const y0 = p.h0 ?? 1.5, top = p.top ?? 1.9;
+  k.cyl('linen', 0.1, 0.1, 0.3, 0, y0, 0, 16);
+  k.rod('black', 0.006, [0, y0 + 0.3, 0], [0, top, 0], 4);
+};
+// Stair balustrade: glass panels following the stair pitch (stair rising along
+// local +x from -w/2 to +w/2, reaching `top`), black handrail.
+const stairGlass = (k, p) => {
+  const w = p.w ?? 5, top = p.top ?? 1.9, n = Math.max(2, Math.round(w / 1.1)), seg = w / n, gh = 0.95;
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + seg * (i + 0.5);
+    const y = (top * (i + 0.5)) / n;
+    k.box('glass', seg - 0.03, Math.min(gh, top + 0.05 - y), 0.02, x, y, 0);
+  }
+  const ry = (x) => Math.min(top + 0.02, gh + 0.04 + (top * (x + w / 2)) / w);
+  for (let i = 0; i < n; i++) {
+    const xa = -w / 2 + seg * i, xb = xa + seg;
+    k.rod('black', 0.02, [xa, ry(xa), 0], [xb, ry(xb), 0], 6);
+  }
+};
+// Kitchen: stainless cook line on the back wall with a canopy hood (front +z).
+const cookLine = (k, p) => {
+  const w = p.w ?? 4, d = 0.84;
+  k.box('steel', w, 0.86, d, 0, 0, 0);
+  k.box('chrome', w, 0.04, d, 0, 0.86, 0);
+  const n = Math.max(1, Math.floor((w - 0.4) / 0.5));
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + 0.45 + i * 0.5;
+    k.cyl('black', 0.15, 0.15, 0.02, x, 0.9, 0.05, 12);
+  }
+  k.box('steel', w, 0.5, 0.04, 0, 0.9, -d / 2 + 0.02);
+  k.box('steel', w + 0.1, 0.4, 1.05, 0, 1.45, -d / 2 + 0.525);
+  k.box('black', w, 0.01, 0.95, 0, 1.445, -d / 2 + 0.525);
+  k.shadow(0, 0, w, d, { a: 0.3 });
+};
+const prepTable = (k, p) => {
+  const w = p.w ?? 1.8, d = p.d ?? 0.75;
+  k.box('chrome', w, 0.04, d, 0, 0.86, 0);
+  k.box('steel', w - 0.08, 0.025, d - 0.08, 0, 0.22, 0);
+  legs4(k, 'steel', w, d, 0.86, 0.05, 0.04);
+  k.shadow(0, 0, w, d, { a: 0.22 });
+};
+const reachIn = (k, p) => {
+  const w = p.w ?? 1.4, d = 0.8;
+  k.box('steel', w, 1.85, d, 0, 0, 0);
+  const n = Math.max(1, Math.round(w / 0.7));
+  for (let i = 0; i < n; i++) {
+    const x = -w / 2 + (w * (i + 0.5)) / n;
+    k.box('chrome', w / n - 0.04, 1.6, 0.012, x, 0.15, d / 2 + 0.006);
+    k.box('black', 0.025, 0.4, 0.03, x + (i % 2 ? -1 : 1) * (w / n / 2 - 0.08), 0.95, d / 2 + 0.02);
+  }
+  k.shadow(0, 0, w, d, { a: 0.3 });
+};
+const dishSink = (k, p) => {
+  const w = p.w ?? 2.4, d = 0.7;
+  k.box('steel', w, 0.86, d, 0, 0, 0);
+  k.box('chrome', w, 0.04, d, 0, 0.86, 0);
+  for (let i = 0; i < 3; i++) k.box('screen', 0.5, 0.008, 0.5, -0.6 + i * 0.6, 0.9, 0.02);
+  k.box('chrome', w, 0.3, 0.04, 0, 0.9, -d / 2 + 0.02);
+  k.shadow(0, 0, w, d, { a: 0.25 });
+};
+
 const TYPES = {
+  grillTable, banquette, wallPanel, barCounter, backBar, hostStand, bench, lattice, pendant, stairGlass,
+  cookLine, prepTable, reachIn, dishSink,
   mic, panels,
   desk, desks, taskChair: (k, p) => taskChair(k, 0, 0, 0, p.fab), boardChair: (k, p) => boardChair(k, 0, 0, 0, p.fab),
   shellChair: (k, p) => shellChair(k, 0, 0, 0, p.fab), stool: (k) => stool(k, 0, 0),

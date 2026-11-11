@@ -488,7 +488,7 @@ export const properties = [
       },
       hotspots: [
         { id: 'entrance', label: 'Lobby entrance', text: 'No. 8 entrance under a granite canopy.', at: [0.75, 0.06, 'front'] },
-        { id: 'retail', label: 'Restaurant', text: 'Restaurant behind the dark granite storefront.', at: [0.28, 0.05, 'front'] },
+        { id: 'retail', label: 'Restaurant', text: 'YOON Haeundae Galbi, Korean barbecue, behind the dark granite storefront.', at: [0.28, 0.05, 'front'] },
         { id: 'bay', label: 'Window bay', text: 'Four black-framed windows across every office floor.', at: [0.5, 0.55, 'front'] },
         { id: 'banner', label: 'First Pioneer banner', text: 'The west wall rises above the neighbouring garage.', at: [0.78, 0.57, 'right'] },
       ],
