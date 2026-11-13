@@ -101,7 +101,7 @@ export class BuildingViewer {
         const copies = new Map();
         const own = (mm) => { if (!copies.has(mm)) { const c = mm.clone(); copies.set(mm, c); this.buildingMats.add(c); } return copies.get(mm); };
         this.model.group.traverse((o) => { if (o.material) o.material = Array.isArray(o.material) ? o.material.map(own) : own(o.material); });
-        this._fp = { uFPOn: { value: 0 }, uFPCut: { value: 0 }, uFPFloor: { value: 0 }, uFPHalf: { value: new THREE.Vector2() } };
+        this._fp = { uFPOn: { value: 0 }, uFPCut: { value: 0 }, uFPFloor: { value: 0 }, uFPBox: { value: [0, 1, 2, 3].map(() => new THREE.Vector4(0, 0, 0, 0)) } };
         for (const mm of this.buildingMats) addCutaway(mm, this._fp);
       }
       // Bake static scenery into a few meshes (hundreds fewer draw calls).
@@ -425,10 +425,11 @@ export class BuildingViewer {
     const { width: W, depth: D } = this.model;
     const key = `${plan.src}|${n}`;
     if (this.plan?.key !== key) {
-      const g = await buildPlanFloor({ src: plan.src, model3d: plan.model3d, W, D, maxAniso: this.renderer.capabilities.getMaxAnisotropy() });
+      const g = await buildPlanFloor({ src: plan.model3d.src ?? plan.src, model3d: plan.model3d, W, D, footprint: this.model.footprint, maxAniso: this.renderer.capabilities.getMaxAnisotropy() });
       if (token !== this._planToken) { g.userData.dispose(); return; }
       this._removePlan();
-      g.position.y = y0 + 0.02;
+      // (a ground-floor plan may sit a little higher, clear of site paving drawn under the building)
+      g.position.y = y0 + (n === 1 ? this.model.groundLift ?? 0.02 : 0.02);
       this.scene.add(g);
       this.plan = { key, group: g, n };
     }
@@ -466,6 +467,8 @@ export class BuildingViewer {
   }
   // Cut-away: hide the building above `cut`, and everything inside the facade
   // (inset ~0.6 m) above `floor`, leaving the outer walls around the plan.
+  // The inside is the model's footprint rectangles (up to 4, e.g. an L-shape)
+  // or else its whole width × depth.
   _clip(cut, floor) {
     const on = cut != null;
     const u = this._fp;
@@ -474,7 +477,12 @@ export class BuildingViewer {
     if (on) {
       u.uFPCut.value = cut;
       u.uFPFloor.value = floor;
-      u.uFPHalf.value.set(this.model.width / 2 - 0.6, this.model.depth / 2 - 0.6);
+      const { width: W, depth: D, footprint } = this.model;
+      const rects = footprint?.length ? footprint.slice(0, 4) : [[-W / 2, -D / 2, W / 2, D / 2]];
+      u.uFPBox.value.forEach((v, i) => {
+        const r = rects[i];
+        if (r) v.set(r[0] + 0.6, r[1] + 0.6, r[2] - 0.6, r[3] - 0.6); else v.set(0, 0, -1, -1); // empty
+      });
     }
     if (on !== !!this._clipped) {
       for (const mm of this.buildingMats ?? []) {
@@ -648,11 +656,15 @@ function addCutaway(mat, u) {
         fpw = instanceMatrix * fpw;
       #endif
       vFPWorld = (modelMatrix * fpw).xyz;`);
-    sh.fragmentShader = sh.fragmentShader.replace('void main() {', `uniform float uFPOn; uniform float uFPCut; uniform float uFPFloor; uniform vec2 uFPHalf; varying vec3 vFPWorld;
+    sh.fragmentShader = sh.fragmentShader.replace('void main() {', `uniform float uFPOn; uniform float uFPCut; uniform float uFPFloor; uniform vec4 uFPBox[4]; varying vec3 vFPWorld;
+      bool fpInside(vec2 p) {
+        for (int i = 0; i < 4; i++) if (p.x > uFPBox[i].x && p.y > uFPBox[i].y && p.x < uFPBox[i].z && p.y < uFPBox[i].w) return true;
+        return false;
+      }
       void main() {
         if (uFPOn > 0.5) {
           if (vFPWorld.y > uFPCut) discard;
-          if (vFPWorld.y > uFPFloor && ${room ? 'true' : '(abs(vFPWorld.x) < uFPHalf.x && abs(vFPWorld.z) < uFPHalf.y)'}) discard;
+          if (vFPWorld.y > uFPFloor && ${room ? 'true' : 'fpInside(vFPWorld.xz)'}) discard;
         }`);
   };
   mat.customProgramCacheKey = () => (room ? 'fp-cutaway-room' : 'fp-cutaway');

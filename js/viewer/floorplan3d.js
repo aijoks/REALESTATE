@@ -12,6 +12,14 @@
 //         [x0, y0, x1, y1] (exterior wall lines; may run past the image when
 //         the drawing only shows part of the lot). It is stretched onto the
 //         model's width × depth, front (street) at +z.
+//   src : (optional) image used for the cut-away instead of the plan's own
+//         src — e.g. a building-only crop of a site plan (box is then
+//         measured in that image, and furnishings are keyed by it).
+//
+// Buildings that are not a plain box (e.g. the L-shaped Mona Lisa Plaza) pass
+// their real outline as `footprint`: world rectangles [x0, z0, x1, z1] whose
+// union is the building (they may overlap). The slab, the drawing and the
+// raised walls are then kept to that outline instead of the full W × D box.
 //
 // Furnished plans (js/data/furnishings.js, keyed by the plan's src) go further:
 // the floor becomes a finished interior — room-by-room floor finishes (oak,
@@ -159,12 +167,13 @@ const FINISH = {
 };
 // Paint one finish over rect [x0, y0, x1, y1] (canvas px); k = px per metre.
 // `along` = 'x' | 'y': plank direction on the canvas.
-function paintFinish(ctx, name, [x0, y0, x1, y1], k, along = 'y', seed = 1) {
+// `poly` (canvas points) clips the finish to a non-rectangular room.
+function paintFinish(ctx, name, [x0, y0, x1, y1], k, along = 'y', seed = 1, poly = null) {
   const f = FINISH[name] ?? FINISH.oak;
   const r = rng(seed * 7919 + 13);
   ctx.save();
   ctx.beginPath();
-  ctx.rect(x0, y0, x1 - x0, y1 - y0);
+  if (poly) { ctx.moveTo(...poly[0]); poly.slice(1).forEach((q) => ctx.lineTo(...q)); ctx.closePath(); } else ctx.rect(x0, y0, x1 - x0, y1 - y0);
   ctx.clip();
   ctx.fillStyle = f.base;
   ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
@@ -274,7 +283,41 @@ function softLayer(ctx, kpx, res, passes, fill) {
   ctx.restore();
 }
 
-export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
+// Union of (possibly overlapping) rectangles → disjoint grid cells, with, per
+// cell, which of its sides lie on the outline (neighbour outside).
+function footprintCells(rects) {
+  const xs = [...new Set(rects.flatMap((r) => [r[0], r[2]]))].sort((a, b) => a - b);
+  const zs = [...new Set(rects.flatMap((r) => [r[1], r[3]]))].sort((a, b) => a - b);
+  const inside = (x, z) => rects.some(([a, b, c, d]) => x > a && x < c && z > b && z < d);
+  const on = (i, j) => i >= 0 && j >= 0 && i < xs.length - 1 && j < zs.length - 1 && inside((xs[i] + xs[i + 1]) / 2, (zs[j] + zs[j + 1]) / 2);
+  const cells = [];
+  for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < zs.length - 1; j++) {
+    if (!on(i, j)) continue;
+    cells.push({ r: [xs[i], zs[j], xs[i + 1], zs[j + 1]], out: [!on(i - 1, j), !on(i, j - 1), !on(i + 1, j), !on(i, j + 1)] });
+  }
+  return cells;
+}
+// The floor slab over those cells, `inset` inside the outline: tops, bottoms
+// and the outline's sides only (no faces between cells).
+function slabGeometry(cells, inset, t) {
+  const pos = [], nor = [];
+  const quad = (a, b, c, d, n) => { pos.push(...a, ...b, ...c, ...a, ...c, ...d); for (let i = 0; i < 6; i++) nor.push(...n); };
+  for (const { r, out } of cells) {
+    const x0 = r[0] + (out[0] ? inset : 0), z0 = r[1] + (out[1] ? inset : 0), x1 = r[2] - (out[2] ? inset : 0), z1 = r[3] - (out[3] ? inset : 0);
+    quad([x0, 0, z1], [x1, 0, z1], [x1, 0, z0], [x0, 0, z0], [0, 1, 0]);
+    quad([x0, -t, z0], [x1, -t, z0], [x1, -t, z1], [x0, -t, z1], [0, -1, 0]);
+    if (out[0]) quad([x0, -t, z0], [x0, -t, z1], [x0, 0, z1], [x0, 0, z0], [-1, 0, 0]);
+    if (out[2]) quad([x1, -t, z1], [x1, -t, z0], [x1, 0, z0], [x1, 0, z1], [1, 0, 0]);
+    if (out[1]) quad([x1, -t, z0], [x0, -t, z0], [x0, 0, z0], [x1, 0, z0], [0, 0, -1]);
+    if (out[3]) quad([x0, -t, z1], [x1, -t, z1], [x1, 0, z1], [x0, 0, z1], [0, 0, 1]);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  return g;
+}
+
+export async function buildPlanFloor({ src, model3d, W, D, footprint = null, maxAniso = 8 }) {
   const img = await loadImage(src);
   const rot = model3d.rot ?? 0;
   const canvas = rotated(img, rot);
@@ -295,11 +338,13 @@ export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
   const kpm = (cw / PW + ch / PD) / 2;
 
   // Floor slab (pale oak) just inside the facade, then the drawing on top.
+  const outline = footprint?.length ? footprint : [[-W / 2, -D / 2, W / 2, D / 2]];
+  const inOutline = (X, Z, m) => outline.some(([a, b, c, d]) => X > a + m && X < c - m && Z > b + m && Z < d - m);
   const slab = new THREE.Mesh(
-    new THREE.BoxGeometry(W - 0.25, 0.12, D - 0.25),
+    footprint?.length ? slabGeometry(footprintCells(outline), 0.125, 0.12) : new THREE.BoxGeometry(W - 0.25, 0.12, D - 0.25),
     new THREE.MeshBasicMaterial({ color: '#efe5d3' }),
   );
-  slab.position.y = -0.06;
+  if (!footprint?.length) slab.position.y = -0.06;
   slab.receiveShadow = true;
   group.add(slab);
 
@@ -321,6 +366,12 @@ export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
       const lum = px[k] * 0.3 + px[k + 1] * 0.59 + px[k + 2] * 0.11;
       m[y * gw + x] = px[k + 3] > 140 && lum < 120 ? 1 : 0;
     }
+  }
+  // Nothing raised outside the building's real outline.
+  if (footprint?.length) {
+    const cxw = (x) => cx - PW / 2 + ((x + 0.5) / gw) * PW, czw = (y) => cz - PD / 2 + ((y + 0.5) / gh) * PD;
+    const mrg = 0.03 + cell / 2;
+    for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) if (m[y * gw + x] && !inOutline(cxw(x), czw(y), mrg)) m[y * gw + x] = 0;
   }
   // Symbols the furniture replaces (e.g. solid-filled plants) are not walls.
   const [GW, GH] = furnish?.grid ?? [1, 1];
@@ -362,7 +413,13 @@ export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
     const ctx = out.getContext('2d');
     const fx0 = bx0 * cw, fy0 = by0 * ch, fx1 = bx1 * cw, fy1 = by1 * ch;
     paintFinish(ctx, furnish.base ?? 'oak', [fx0, fy0, fx1, fy1], kpx, 'y', 1);
-    (furnish.rooms ?? []).forEach(([name, ...rc], i) => paintFinish(ctx, name, gridRect(rc), kpx, rc[4] ?? 'y', i + 2));
+    (furnish.rooms ?? []).forEach((room, i) => {
+      // [finish, x0, y0, x1, y1, along] or { f: finish, poly: [[x, y], ...], along } (e.g. diagonal lobbies)
+      if (Array.isArray(room)) { const [name, ...rc] = room; paintFinish(ctx, name, gridRect(rc), kpx, rc[4] ?? 'y', i + 2); return; }
+      const pts = room.poly.map(([x, y]) => worldToCanvas(...gridToWorld(x, y)));
+      const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+      paintFinish(ctx, room.f, [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)], kpx, room.along ?? 'y', i + 2, pts);
+    });
 
     // Ambient occlusion along walls, then contact shadows under furniture.
     const skx = cw / gw, sky = ch / gh;
@@ -419,6 +476,21 @@ export async function buildPlanFloor({ src, model3d, W, D, maxAniso = 8 }) {
       ctx.fillText(text, tx, ty);
     }
     texCanvas = out;
+  }
+
+  // Keep the drawing to the building's outline (an L-shape leaves its notch empty).
+  if (footprint?.length) {
+    if (texCanvas === canvas) { const c = document.createElement('canvas'); c.width = cw; c.height = ch; c.getContext('2d').drawImage(canvas, 0, 0); texCanvas = c; }
+    const x = texCanvas.getContext('2d');
+    x.save();
+    x.globalCompositeOperation = 'destination-in';
+    x.beginPath();
+    for (const [a, b, c, d] of outline) {
+      const [p0, q0] = worldToCanvas(a, b), [p1, q1] = worldToCanvas(c, d);
+      x.rect(Math.min(p0, p1), Math.min(q0, q1), Math.abs(p1 - p0), Math.abs(q1 - q0));
+    }
+    x.fill();
+    x.restore();
   }
 
   const tex = new THREE.CanvasTexture(texCanvas);

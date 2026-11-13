@@ -59,9 +59,11 @@ export const floorPlans = {
     { floors: [4], label: 'Suite 402', kind: 'Suite', src: P('34-09-queens-blvd', 'floor-04-suite-402'), note: '4th floor with the new 4,800 SF division (Suite 402) shaded; freight elevator and shared WC on 34th Street.', source: SRC.loopnetQB },
   ],
   '7225-n-mona-lisa': [
-    { floors: [1], label: 'Ground floor', kind: 'Site plan', src: P('7225-n-mona-lisa', 'floor-01-site-plan'), note: 'Ground-floor site plan: Bayada HealthCare suites and Suite 101 (2,170 SF) off the lobby, parking all round.', source: SRC.monaLisa },
+    // The cut-aways use building-only crops of the brochure drawings (ink re-traced, 2.5×); the
+    // model's L-shaped outline (js/viewer/monalisa.js) keeps them off the parking notch.
+    { floors: [1], label: 'Ground floor', kind: 'Site plan', src: P('7225-n-mona-lisa', 'floor-01-site-plan'), model3d: { src: P('7225-n-mona-lisa', 'floor-01-building'), box: [0.0398, 0.05, 0.9602, 0.9457] }, note: 'Ground-floor site plan: Bayada HealthCare suites and Suite 101 (2,170 SF) off the lobby, parking all round.', source: SRC.monaLisa },
     { floors: [1], label: 'Suite 101', kind: 'Suite', src: P('7225-n-mona-lisa', 'floor-01-suite-101'), note: 'Suite 101 (2,170 SF), directly off the ground-floor lobby, with windows on three sides.', source: SRC.monaLisa },
-    { floors: [2], label: '2nd floor', kind: 'Full floor', src: P('7225-n-mona-lisa', 'floor-02-plate'), note: 'Second-floor plate with tenant suites (Spencer Construction, Gentle Dental, Tetra Tech, Morgan Cohen & Bach, Frost Insurance).', source: SRC.monaLisa },
+    { floors: [2], label: '2nd floor', kind: 'Full floor', src: P('7225-n-mona-lisa', 'floor-02-plate'), model3d: { src: P('7225-n-mona-lisa', 'floor-02-building'), box: [0.0253, -0.0048, 0.978, 0.9635] }, note: 'Second-floor plate with tenant suites (Spencer Construction, Gentle Dental, Tetra Tech, Morgan Cohen & Bach, Frost Insurance).', source: SRC.monaLisa },
   ],
   // No drawing of the restaurant has been published: this one is an
   // illustrative layout drawn for the site from YOON's own gallery photos

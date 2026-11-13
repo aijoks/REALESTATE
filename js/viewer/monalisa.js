@@ -257,5 +257,9 @@ export function buildMonaLisa(params) {
       default: return V(0, y, 0);
     }
   };
-  return { group: g, width: W, depth: D, height: 12, floorRange, hotspotPosition };
+  // The L-shaped outline (main block + west wing, overlapping), so floor-plan
+  // cut-aways keep to the building and leave the parking notch alone.
+  const footprint = [[W / 2 - mainW, -front, W / 2, front], [-W / 2, bz - 0.5 - (DB - 1) / 2, W / 2, bz - 0.5 + (DB - 1) / 2]];
+  // Ground-floor plans sit clear of the site's parking-lot paving (y ≈ 0.035).
+  return { group: g, width: W, depth: D, height: 12, floorRange, hotspotPosition, footprint, groundLift: 0.1 };
 }

@@ -7,6 +7,8 @@
 //
 //   base  : floor finish everywhere inside the footprint
 //   rooms : [finish, x0, y0, x1, y1, ('x' | 'y' plank direction on screen)]
+//           or { f: finish, poly: [[x, y], ...], along } for rooms that are
+//           not axis-aligned rectangles (diagonal lobbies, chamfered suites)
 //           finishes: oak, oakDark, carpet, carpetBlue, tile, stone,
 //           concrete, terrace, shaft, stair
 //   erase : [x0, y0, x1, y1] — text labels and flat furniture symbols painted
@@ -775,6 +777,216 @@ export const furnishings = {
       {t: 'wallPanel', x: 381.3, y: 504.0, r: 270, w: 3.2, style: 'walnut', strip: 0.0, stripAt: [-1.3]},
       {t: 'wallPanel', x: 554.7, y: 504.0, r: 90, w: 3.2, style: 'mauve'},
       {t: 'wallPanel', x: 468.0, y: 377.3, r: 0, w: 2.2, style: 'chevron'},
+    ],
+  },
+  // ------------------------------------------------------------------ 7225 N Mona Lisa Rd, ground floor
+  // Building-only crop of the brochure's site plan (floorplans.js). Three
+  // BAYADA HealthCare suites (130 and 100 in the west wing, 125 in the main
+  // block), Suite 101 (available, left as a vacant shell), and the diagonal
+  // core: entry lobby from the parking notch, elevator, stair and restrooms.
+  // The model's wing facade sits ~5.5 m in front of the drawn wing wall: that
+  // band is the covered walkway (terrace finish), as is the stepped NE corner
+  // the drawing leaves outside the building.
+  [F('7225-n-mona-lisa', 'floor-01-building')]: {
+    grid: [2200, 1750],
+    base: 'stone',
+    rooms: [
+      // outside the drawn walls but inside the model: covered walkway, NE steps
+      ['terrace', 60, 1428, 1393, 1680], ['terrace', 1645, 40, 2140, 148], ['terrace', 1905, 140, 2140, 322], ['terrace', 1240, 40, 1281, 400],
+      { f: 'terrace', poly: [[1380, 1545], [1474, 1658], [1380, 1658]] },
+      // suites (carpet tile), Suite 101 vacant (bare slab)
+      ['carpet', 88, 596, 810, 1424],
+      { f: 'carpet', poly: [[818, 596], [1132, 596], [1181, 728], [1402, 946], [1392, 1424], [818, 1424]] },
+      { f: 'carpetBlue', poly: [[1672, 578], [2112, 578], [2112, 1652], [1470, 1652], [1395, 1560], [1395, 1110], [1473, 1018], [1681, 826], [1777, 726]] },
+      { f: 'concrete', poly: [[1284, 88], [1642, 88], [1642, 150], [1902, 150], [1902, 325], [2090, 325], [2090, 574], [1672, 576], [1594, 515], [1517, 515], [1444, 549], [1284, 400]] },
+      // restrooms and the janitor's chase in 130
+      ['tile', 662, 852, 768, 1040], ['shaft', 768, 1068, 810, 1172],
+      // reception / waiting in 130 (oak)
+      ['oak', 96, 1232, 600, 1420, 'x'],
+    ],
+    erase: [
+      // suite labels (redrawn small as tags)
+      [436, 886, 524, 940], [234, 948, 736, 1000],
+      [1050, 890, 1140, 940], [850, 950, 1335, 1000],
+      [1710, 1070, 1800, 1120], [1510, 1135, 1995, 1185],
+      [1508, 240, 1772, 478],
+      // 130's drawn reception desk (the 3D one replaces it)
+      [358, 1290, 487, 1396],
+    ],
+    tags: [
+      ['130 · BAYADA', 450, 925, 0.55], ['100 · BAYADA', 1060, 925, 0.55], ['125 · BAYADA', 1760, 1160, 0.55],
+      ['101 · AVAILABLE', 1590, 330, 0.6], ['LOBBY', 1290, 560, 0.4],
+    ],
+    items: [
+      // --- 130: offices along the rear wall, two by the west windows, open work area
+      { t: 'shelf', x: 270, y: 622, r: 0, w: 2.2, d: 0.4 },
+      { t: 'office', box: [100, 706, 374, 846], desks: 2, wall: 'top' },
+      { t: 'office', box: [388, 604, 596, 846], desks: 2, wall: 'top' },
+      { t: 'office', box: [604, 604, 806, 846], desks: 2, wall: 'top' },
+      { t: 'office', box: [96, 924, 240, 1064], desks: 1, wall: 'left' },
+      { t: 'office', box: [96, 1078, 240, 1220], desks: 1, wall: 'left' },
+      { t: 'desks', x: 440, y: 1110, r: 0, n: 4, w: 1.3, d: 0.7, double: true },
+      { t: 'printer', x: 630, y: 1180, r: 270 },
+      // reception facing the front door, waiting chairs by the west windows
+      { t: 'reception', x: 422, y: 1300, r: 0, R: 1.2, span: 1.7, deep: 0.55 },
+      { t: 'armchair', x: 128, y: 1300, r: 270, fab: 'navy' }, { t: 'armchair', x: 128, y: 1372, r: 270, fab: 'navy' },
+      { t: 'sideTable', x: 124, y: 1336 },
+      { t: 'plant', x: 560, y: 1395, size: 'tall' }, { t: 'plant', x: 116, y: 1250, size: 'small' },
+      // restrooms
+      { t: 'toilet', x: 738, y: 864, r: 90 }, { t: 'toilet', x: 738, y: 932, r: 90 },
+      { t: 'vanity', x: 752, y: 994, r: 90, w: 0.55 },
+
+      // --- 100: corner office, four offices on the front, bench in the middle
+      { t: 'office', box: [886, 606, 1052, 760], desks: 2, wall: 'top' },
+      { t: 'office', box: [824, 1060, 956, 1220], desks: 1, wall: 'left' },
+      { t: 'office', box: [824, 1230, 956, 1414], desks: 2, wall: 'bottom' },
+      { t: 'office', box: [974, 1272, 1190, 1414], desks: 2, wall: 'bottom' },
+      { t: 'office', box: [1200, 1206, 1380, 1414], desks: 2, wall: 'bottom' },
+      { t: 'desks', x: 1030, y: 1085, r: 0, n: 3, w: 1.3, d: 0.7, double: true },
+      { t: 'credenza', x: 1250, y: 1180, r: 180, w: 1.8, d: 0.45 },
+      { t: 'plant', x: 860, y: 880, size: 'tall' },
+
+      // --- 125: offices, two cubicle benches, team area under 101
+      { t: 'office', box: [1460, 1044, 1620, 1210], desks: 2, wall: 'top' },
+      { t: 'office', box: [1892, 1222, 2084, 1462], desks: 2, wall: 'right' },
+      { t: 'office', box: [1892, 1478, 2084, 1644], desks: 2, wall: 'right' },
+      { t: 'desks', x: 1545, y: 1372, r: 90, n: 3, w: 1.3, d: 0.7, double: true },
+      { t: 'desks', x: 1715, y: 1372, r: 90, n: 3, w: 1.3, d: 0.7, double: true },
+      { t: 'desks', x: 1955, y: 740, r: 0, n: 3, w: 1.3, d: 0.7, double: true },
+      { t: 'desks', x: 1955, y: 925, r: 0, n: 3, w: 1.3, d: 0.7, double: true },
+      { t: 'confTable', x: 1790, y: 860, r: 90, w: 2.4, d: 1.05, seats: 6, ends: 0 },
+      { t: 'shelf', x: 1603, y: 1630, r: 180, w: 1.6, d: 0.38 },
+      { t: 'plant', x: 2080, y: 1040, size: 'tall' }, { t: 'plant', x: 1430, y: 1180, size: 'bush' },
+
+      // --- core: elevator, stair, restrooms
+      { t: 'elevator', x: 1344, y: 649, r: 135, w: 1.0 },
+      { t: 'stair', x: 1320, y: 824, r: 135, w: 2.0, d: 3.3, flights: 2 },
+      { t: 'plant', x: 1262, y: 470, size: 'tall' }, { t: 'plant', x: 1610, y: 735, size: 'small' },
+      { t: 'vanity', x: 1616, y: 600, r: 45, w: 0.5 }, { t: 'vanity', x: 1647, y: 626, r: 45, w: 0.5 },
+      { t: 'toilet', x: 1694, y: 684, r: 45 }, { t: 'toilet', x: 1740, y: 728, r: 45 },
+      { t: 'vanity', x: 1542, y: 812, r: 135, w: 0.5 }, { t: 'vanity', x: 1518, y: 836, r: 135, w: 0.5 },
+      { t: 'toilet', x: 1462, y: 890, r: 135 }, { t: 'toilet', x: 1438, y: 918, r: 135 },
+    ],
+  },
+
+  // ------------------------------------------------------------------ 7225 N Mona Lisa Rd, 2nd floor
+  // Building-only crop of the brochure's (schematic) 2nd-floor plate: suite
+  // outlines only, so the fit-outs inside the suites are illustrative, after
+  // each tenant's business. The drawn 202 front wall sits ~5 m behind the
+  // model's wing facade and is painted out (202 runs to the windows); the
+  // stair and elevator stand where the ground-floor core puts them.
+  [F('7225-n-mona-lisa', 'floor-02-building')]: {
+    grid: [2275, 1575],
+    base: 'stone',
+    rooms: [
+      // outside the drawn suites: stepped NE corner, walkway along the east front
+      ['terrace', 1675, -20, 2245, 176], ['terrace', 1925, 170, 2245, 320], ['terrace', 2107, 1055, 2245, 1540], ['terrace', 1825, 1417, 2112, 1540],
+      ['carpetBlue', 60, 515, 372, 837],
+      ['carpet', 445, 515, 629, 886], ['carpet', 632, 515, 799, 886],
+      { f: 'carpet', poly: [[802, 515], [1120, 512], [1212, 600], [1162, 662], [1250, 725], [1250, 886], [802, 886]] },
+      // 202 (with the finger corridor beside 204)
+      { f: 'carpet', poly: [[57, 840], [372, 840], [372, 932], [1520, 932], [1537, 955], [1537, 1530], [57, 1530]] },
+      ['oak', 375, 512, 443, 934],
+      // 203 Gentle Dental: vinyl-look tile in the clinic, oak in reception
+      { f: 'tile', poly: [[1295, -20], [1675, -20], [1675, 175], [1925, 175], [1925, 320], [2225, 320], [2225, 875], [2045, 875], [2045, 782], [1775, 782], [1295, 362]] },
+      ['oak', 1298, -20, 1520, 340, 'x'],
+      { f: 'carpetBlue', poly: [[1775, 782], [2045, 782], [2045, 875], [2225, 875], [2225, 1055], [1775, 1055]] },
+      { f: 'carpet', poly: [[1537, 932], [1650, 825], [1775, 825], [1775, 1055], [2107, 1055], [2107, 1417], [1825, 1417], [1825, 1530], [1537, 1530]] },
+      // elevator shaft
+      { f: 'shaft', poly: [[1438, 509], [1500, 565], [1438, 621], [1376, 565]] },
+    ],
+    erase: [
+      // the drawn 202 front wall and the stub of the main block's front behind it
+      [50, 1302, 1300, 1334], [1282, 1305, 1309, 1530],
+      // labels (redrawn small as tags)
+      [108, 556, 330, 752], [452, 618, 802, 730], [812, 593, 1158, 818], [1158, 738, 1202, 818],
+      [458, 990, 1134, 1160], [1608, 340, 2044, 496], [1846, 816, 2164, 990], [1566, 1070, 2074, 1314],
+    ],
+    tags: [
+      ['204 · FROST', 130, 812, 0.34], ['206', 536, 620, 0.42], ['208', 715, 620, 0.42], ['210 · SPENCER', 960, 560, 0.42],
+      ['202 · SPENCER CONSTRUCTION', 560, 965, 0.5], ['203 · GENTLE DENTAL', 1560, 120, 0.46],
+      ['220 · TETRA TECH', 1990, 1020, 0.38], ['200 · MORGAN, COHEN & BACH', 1700, 1475, 0.4],
+    ],
+    items: [
+      // --- core: elevator in its shaft, stair up from the ground-floor lobby
+      { t: 'elevator', x: 1405, y: 538, r: 135, w: 1.0 },
+      { t: 'partition', x: 1469, y: 537, r: 45, w: 2.2 }, { t: 'partition', x: 1407, y: 593, r: 45, w: 2.2 }, { t: 'partition', x: 1469, y: 593, r: 135, w: 2.2 },
+      { t: 'stair', x: 1375, y: 706, r: 135, w: 2.0, d: 3.3, flights: 2 },
+      { t: 'plant', x: 1300, y: 420, size: 'tall' }, { t: 'bench', x: 1520, y: 800, r: 135, w: 1.6 },
+
+      // --- 204 Frost Insurance: three agents' desks, a small meeting table
+      { t: 'office', box: [70, 525, 364, 690], desks: 3, wall: 'top' },
+      { t: 'confTable', x: 262, y: 740, r: 0, w: 1.6, d: 0.9, seats: 4, ends: 0 },
+      { t: 'plant', x: 345, y: 815, size: 'small' },
+      // --- 206 / 208 Spencer offices
+      { t: 'office', box: [452, 522, 624, 880], desks: 2, wall: 'top' },
+      { t: 'credenza', x: 538, y: 860, r: 180, w: 1.4, d: 0.42 },
+      { t: 'office', box: [638, 522, 794, 880], desks: 2, wall: 'top' },
+      { t: 'shelf', x: 716, y: 862, r: 180, w: 1.4, d: 0.36 },
+      // --- 210 Spencer Construction: boardroom and two offices
+      { t: 'confTable', x: 935, y: 690, r: 0, w: 3.4, d: 1.2, seats: 10, ends: 2 },
+      { t: 'tv', x: 935, y: 528, r: 0, w: 1.6 },
+      { t: 'office', box: [1050, 770, 1244, 880], desks: 2, wall: 'bottom' },
+      { t: 'plant', x: 820, y: 860, size: 'tall' },
+
+      // --- 202 Spencer Construction: open office, plan table, kitchen, meeting room
+      { t: 'desks', x: 225, y: 1100, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      { t: 'desks', x: 540, y: 1100, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      { t: 'desks', x: 855, y: 1100, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      { t: 'desks', x: 225, y: 1330, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      { t: 'desks', x: 540, y: 1330, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      { t: 'highTable', x: 865, y: 1330, r: 0, w: 2.4, d: 1.2, stools: 3 },
+      { t: 'shelf', x: 865, y: 1462, r: 180, w: 2.6, d: 0.4 },
+      { t: 'kitchen', x: 1075, y: 955, r: 0, w: 3.0, d: 0.62, sink: -0.4, fridge: 'right' },
+      { t: 'cafeTable', x: 1070, y: 1060, r: 0.4, chairs: 4 },
+      { t: 'printer', x: 120, y: 1222, r: 90 },
+      { t: 'glassWall', x: 1180, y: 1230, r: 90, w: 7.6 },
+      { t: 'confTable', x: 1360, y: 1220, r: 90, w: 3.2, d: 1.2, seats: 10, ends: 2 },
+      { t: 'tv', x: 1360, y: 958, r: 0, w: 1.5 },
+      { t: 'plant', x: 1205, y: 1460, size: 'tall' }, { t: 'plant', x: 80, y: 1460, size: 'bush' }, { t: 'plant', x: 1110, y: 1460, size: 'small' },
+
+      // --- 203 Gentle Dental: reception & waiting off the lobby, seven operatories
+      // on the outside walls, sterilization centre, doctor's office
+      { t: 'reception', x: 1600, y: 470, r: 45, R: 1.2, span: 1.7, deep: 0.55, fab: 'sage' },
+      { t: 'armchair', x: 1330, y: 120, r: 270, fab: 'sage' }, { t: 'armchair', x: 1330, y: 190, r: 270, fab: 'sage' }, { t: 'armchair', x: 1330, y: 260, r: 270, fab: 'sage' },
+      { t: 'armchair', x: 1400, y: 30, r: 0, fab: 'sage' }, { t: 'armchair', x: 1465, y: 30, r: 0, fab: 'sage' },
+      { t: 'coffeeTable', x: 1420, y: 170, r: 90, w: 1.0, d: 0.55 },
+      { t: 'plant', x: 1325, y: 30, size: 'tall' }, { t: 'plant', x: 1500, y: 300, size: 'small' },
+      // operatories on the east wall
+      { t: 'dentalChair', x: 2168, y: 384, r: 270 }, { t: 'dentalChair', x: 2168, y: 492, r: 270 }, { t: 'dentalChair', x: 2168, y: 600, r: 270 },
+      { t: 'dentalChair', x: 2168, y: 708, r: 270 }, { t: 'dentalChair', x: 2168, y: 816, r: 270 },
+      { t: 'partition', x: 2152, y: 438, r: 0, w: 3.8 }, { t: 'partition', x: 2152, y: 546, r: 0, w: 3.8 },
+      { t: 'partition', x: 2152, y: 654, r: 0, w: 3.8 }, { t: 'partition', x: 2152, y: 762, r: 0, w: 3.8 },
+      { t: 'partition', x: 2152, y: 326, r: 0, w: 3.8, h: 0.9 },
+      // operatories on the north step
+      { t: 'dentalChair', x: 1740, y: 228, r: 180 }, { t: 'dentalChair', x: 1862, y: 228, r: 180 },
+      { t: 'partition', x: 1801, y: 252, r: 90, w: 4.2 },
+      // sterilization / lab counter on the north wall, centre island
+      { t: 'kitchen', x: 1590, y: 26, r: 0, w: 4.0, d: 0.62, sink: 0.6, fridge: null, coffee: false },
+      { t: 'island', x: 1890, y: 440, r: 0, w: 2.6, d: 0.9, stools: 0, cab: 'white' },
+      // doctor's office
+      { t: 'partition', x: 1895, y: 602, r: 0, w: 5.0 }, { t: 'partition', x: 1992, y: 692, r: 90, w: 5.0 },
+      { t: 'office', box: [1812, 612, 1984, 776], desks: 1, wall: 'right' },
+      { t: 'shelf', x: 1830, y: 700, r: 90, w: 1.6, d: 0.36 },
+
+      // --- 220 Tetra Tech: bench of desks and a small meeting table
+      { t: 'office', box: [1786, 884, 2214, 1050], desks: 6, layout: 'bench' },
+      { t: 'confTable', x: 1905, y: 830, r: 0, w: 1.8, d: 0.9, seats: 4, ends: 0 },
+
+      // --- 200 Morgan, Cohen & Bach: reception at the lobby door, partners'
+      // offices on the east side, paralegals, conference room and library
+      { t: 'reception', x: 1690, y: 1000, r: 135, R: 1.2, span: 1.6, deep: 0.55 },
+      { t: 'armchair', x: 1575, y: 1060, r: 270, fab: 'cognac' }, { t: 'armchair', x: 1575, y: 1125, r: 270, fab: 'cognac' },
+      { t: 'partition', x: 1962, y: 1237, r: 90, w: 10.2 },
+      { t: 'partition', x: 2034, y: 1180, r: 0, w: 3.7 }, { t: 'partition', x: 2034, y: 1300, r: 0, w: 3.7 },
+      { t: 'office', box: [1970, 1062, 2100, 1176], desks: 1, wall: 'right', w: 1.6 },
+      { t: 'office', box: [1970, 1186, 2100, 1296], desks: 1, wall: 'right', w: 1.6 },
+      { t: 'office', box: [1970, 1306, 2100, 1412], desks: 1, wall: 'right', w: 1.6 },
+      { t: 'office', box: [1700, 1150, 1940, 1290], desks: 4, layout: 'bench' },
+      { t: 'confTable', x: 1690, y: 1420, r: 0, w: 3.0, d: 1.15, seats: 8, ends: 2, top: 'walnut' },
+      { t: 'shelf', x: 1556, y: 1400, r: 270, w: 2.6, d: 0.38, top: 'walnut' },
+      { t: 'shelf', x: 1556, y: 1250, r: 270, w: 2.6, d: 0.38, top: 'walnut' },
+      { t: 'plant', x: 1800, y: 1500, size: 'tall' },
     ],
   },
 };

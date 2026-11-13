@@ -83,6 +83,10 @@ const MATS = {
   bottleC: { color: '#d9dcd4', roughness: 0.15, metalness: 0.1 },
   led: { color: '#ffe2b0', emissive: '#ffcf85', emissiveIntensity: 1.0, roughness: 0.5 },
   linen: { color: '#f3ead8', emissive: '#ffe0a8', emissiveIntensity: 0.55, roughness: 0.8 },
+  // Dental / medical suites (Gentle Dental at Mona Lisa Plaza).
+  vinylTeal: { color: '#3f8f93', roughness: 0.45 },
+  vinylSlate: { color: '#5d6a78', roughness: 0.5 },
+  wallCap: { color: '#27313d', roughness: 0.6 },
 };
 
 const _m = new THREE.Matrix4(), _l = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _s = new THREE.Vector3(), _p = new THREE.Vector3();
@@ -390,7 +394,7 @@ const arcDesk = (k, p, { podcast = false } = {}) => {
     k.add(podcast ? 'walnut' : 'white', new THREE.BoxGeometry(seg + 0.01, h, 0.05), cx, h / 2, cz, a);
     const ti = R - deep / 2;
     k.add(podcast ? 'walnut' : 'oak', new THREE.BoxGeometry((span / n) * (R - deep / 2) * 1.08, 0.04, deep), Math.sin(a) * ti, (podcast ? h : 0.74), Math.cos(a) * ti, a);
-    if (!podcast) k.add('oak', new THREE.BoxGeometry(seg + 0.01, 0.035, 0.3), Math.sin(a) * (R + 0.08), h, Math.cos(a) * (R + 0.08), a);
+    if (!podcast) k.add('oak', new THREE.BoxGeometry(seg + 0.02, 0.035, 0.3), Math.sin(a) * (R + 0.08), h, Math.cos(a) * (R + 0.08), a);
   }
   k.shadow(0, R - deep / 2, R * span, deep + 0.2, { a: 0.2 });
   if (podcast) {
@@ -585,7 +589,7 @@ const elevator = (k, p) => {
   k.box('steel', w + 0.3, h, 0.06, 0, 0, 0);
   k.box('chrome', w / 2 - 0.01, h - 0.08, 0.03, -w / 4, 0, 0.04);
   k.box('chrome', w / 2 - 0.01, h - 0.08, 0.03, w / 4, 0, 0.04);
-  k.box('black', 0.01, h - 0.08, 0.035, 0, 0, 0.045);
+  k.box('black', 0.01, h - 0.09, 0.035, 0, 0, 0.045); // a hair lower than the leaves (no shared top face)
   k.box('screen', 0.06, 0.12, 0.02, w / 2 + 0.22, 1.0, 0.04);
   k.box('steel', w + 0.4, 0.01, 0.4, 0, 0, 0.22);
 };
@@ -621,7 +625,8 @@ const door = (k, p) => {
 // Freestanding partition / glass wall segment along x.
 const glassWall = (k, p) => {
   const w = p.w ?? 3, h = p.h ?? 1.32;
-  k.box('glass', w, h, 0.02, 0, 0, 0);
+  // (glass a few mm inside the frame, so no faces are shared)
+  k.box('glass', w - 0.012, h - 0.036, 0.02, 0, 0.03, 0);
   k.box('black', w, 0.03, 0.05, 0, h - 0.03, 0);
   k.box('black', w, 0.03, 0.05, 0, 0, 0);
   const n = Math.max(1, Math.round(w / 1.2));
@@ -893,7 +898,56 @@ const dishSink = (k, p) => {
   k.shadow(0, 0, w, d, { a: 0.25 });
 };
 
+// ---------------------------------------------------------------- medical
+// Dental operatory chair (patient's feet toward +z, headrest at -z): pedestal,
+// reclined upholstered seat / back / headrest, the doctor's delivery tray on
+// an arm, the operatory light on a post (kept under the cut), doctor's and
+// assistant's stools either side of the head.
+const dentalChair = (k, p) => {
+  const fab = p.fab ?? 'vinylTeal';
+  k.box('white', 0.62, 0.08, 1.1, 0, 0, 0.05); // floor plate
+  k.box('white', 0.34, 0.36, 0.42, 0, 0.08, 0.05);
+  k.box('offWhite', 0.6, 0.06, 1.0, 0, 0.44, 0.2);
+  k.add(fab, new THREE.BoxGeometry(0.58, 0.12, 0.62), 0, 0.56, 0.32, 0, -0.12); // seat + legs rest
+  k.add(fab, new THREE.BoxGeometry(0.56, 0.12, 0.66), 0, 0.68, -0.33, 0, 0.42); // reclined back
+  k.add(fab, new THREE.BoxGeometry(0.3, 0.1, 0.24), 0, 0.84, -0.7, 0, 0.3); // headrest
+  for (const sx of [-1, 1]) k.box('white', 0.06, 0.05, 0.42, sx * 0.33, 0.66, 0.0); // arm rests
+  // delivery unit on the patient's right, light post at the foot
+  k.rod('steel', 0.025, [0.42, 0.44, 0.2], [0.5, 0.92, 0.1]);
+  k.box('white', 0.42, 0.05, 0.32, 0.6, 0.92, 0.0);
+  k.box('steel', 0.36, 0.01, 0.26, 0.6, 0.97, 0.0);
+  k.cyl('white', 0.04, 0.04, 1.32, -0.5, 0, 0.45, 10);
+  k.rod('white', 0.025, [-0.5, 1.3, 0.45], [-0.15, 1.28, -0.2]);
+  k.add('white', new THREE.BoxGeometry(0.34, 0.1, 0.16), -0.12, 1.24, -0.24, 0.5);
+  k.add('light', new THREE.BoxGeometry(0.26, 0.02, 0.1), -0.12, 1.185, -0.24, 0.5);
+  k.shadow(0, 0.05, 0.8, 1.6, { a: 0.24 });
+  if (p.stools !== false) {
+    for (const [x, z, f] of [[-0.62, -0.75, 'vinylSlate'], [0.62, -0.62, 'vinylSlate']]) {
+      k.cyl('black', 0.25, 0.25, 0.04, x, 0, z, 10);
+      k.cyl('chrome', 0.025, 0.025, 0.42, x, 0.04, z, 8);
+      k.cyl(f, 0.22, 0.22, 0.08, x, 0.46, z, 16);
+      k.shadow(x, z, 0.5, 0.5, { round: true, a: 0.14 });
+    }
+  }
+};
+// Low solid partition along x (h ≤ the raised walls), with a dark cap like them.
+const partition = (k, p) => {
+  const w = p.w ?? 2, h = p.h ?? 1.25, t = p.th ?? 0.1;
+  k.box('white', w, h, t, 0, 0, 0);
+  k.box('wallCap', w + 0.004, 0.012, t + 0.004, 0, h, 0);
+  k.shadow(0, 0, w, t + 0.12, { a: 0.18 });
+};
+// Exam / treatment table (long axis along x).
+const examTable = (k, p) => {
+  const w = p.w ?? 1.9;
+  k.box('white', w - 0.3, 0.6, 0.5, 0, 0, 0);
+  k.box(p.fab ?? 'vinylSlate', w, 0.12, 0.66, 0, 0.6, 0);
+  k.add(p.fab ?? 'vinylSlate', new THREE.BoxGeometry(0.5, 0.1, 0.64), -w / 2 + 0.3, 0.86, 0, 0, 0, -0.5);
+  k.shadow(0, 0, w, 0.7, { a: 0.22 });
+};
+
 const TYPES = {
+  dentalChair, partition, examTable,
   grillTable, banquette, wallPanel, barCounter, backBar, hostStand, bench, lattice, pendant, stairGlass,
   cookLine, prepTable, reachIn, dishSink,
   mic, panels,
