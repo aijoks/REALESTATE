@@ -20,6 +20,11 @@
 //           plus `office` = { box: [x0, y0, x1, y1], desks, wall, layout } which
 //           lays out desks for a room from its desk count.
 //   wallH : height of the raised walls (m)
+//   compose: (optional) other drawings laid into this one — see
+//           js/viewer/floorplan3d.js and js/data/compose.js. Layouts keyed by
+//           name rather than src are picked by a plan's model3d.layout.
+
+import { layouts120e56 } from './layouts-120-e-56th.js';
 
 const F = (id, file) => `assets/properties/${id}/plans/${file}.webp`;
 
@@ -516,119 +521,18 @@ export const furnishings = {
     ],
   },
 
-  // ------------------------------------------------------------------ 120 E 56th St (1960s typical floors: open
-  // floors around a central core — furnished as a modern office: reception in
-  // the core recess, benches between the column lines, meeting tables and
-  // lounges in the corner bays; terraces get planters and café tables).
-  [F('120-e-56th', 'typical-floors-03-09-1960s')]: {
-    grid: [1397, 2000],
-    base: 'oak',
-    rooms: [
-      ['terrace', 300, 60, 1045, 268], ['terrace', 318, 1778, 1035, 2000],
-      ['stone', 280, 1005, 1060, 1138], ['stone', 556, 1138, 842, 1290],
-      ['tile', 78, 1138, 304, 1282], ['tile', 1060, 1138, 1282, 1282],
-      ['shaft', 580, 870, 666, 1000], ['shaft', 700, 870, 800, 1000],
-      ['stair', 58, 903, 232, 1133], ['stair', 1132, 903, 1310, 1133],
-      ['carpet', 62, 1785, 300, 1990], ['carpet', 1048, 1785, 1306, 1990],
-    ],
-    erase: [
-      [30, 40, 1340, 112], [620, 1070, 750, 1092], [150, 1238, 222, 1260], [1105, 1240, 1220, 1262], [100, 192, 250, 240], [1115, 192, 1268, 240],
-      [582, 872, 664, 998], [702, 872, 798, 998], [60, 905, 230, 1130], [1135, 905, 1308, 1130],
-      [92, 1155, 128, 1190], [92, 1225, 128, 1262], [268, 1185, 302, 1275], [1232, 1158, 1270, 1192], [1232, 1228, 1270, 1265], [1066, 1190, 1102, 1282],
-    ],
-    items: [
-      // north half: two pairs of benches either side of a round meeting table
-      { t: 'desks', x: 330, y: 420, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 330, y: 600, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1000, y: 420, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1000, y: 600, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'confTable', x: 665, y: 510, r: 0, shape: 'round', w: 1.2, d: 1.2, seats: 4, top: 'oak', a0: 0.785 },
-      { t: 'plant', x: 665, y: 330, size: 'tall' },
-      // rear corner bays (the 7th-floor terraces): sofas
-      { t: 'sofa', x: 180, y: 200, r: 0, seats: 3, w: 2.2, fab: 'navy' }, { t: 'plant', x: 85, y: 285, size: 'small' },
-      { t: 'sofa', x: 1190, y: 200, r: 0, seats: 3, w: 2.2, fab: 'navy' }, { t: 'plant', x: 1290, y: 285, size: 'small' },
-      // core: reception in the recess, elevators, stairs, restrooms
-      { t: 'reception', x: 700, y: 1178, r: 0, R: 1.15, span: 1.7, deep: 0.55 },
-      { t: 'plant', x: 585, y: 1275, size: 'bush' }, { t: 'plant', x: 815, y: 1275, size: 'bush' },
-      { t: 'elevator', x: 623, y: 1008, r: 0, w: 1.0 }, { t: 'elevator', x: 750, y: 1008, r: 0, w: 1.0 },
-      { t: 'stair', x: 145, y: 1018, r: 0, w: 2.6, d: 3.6, flights: 2 },
-      { t: 'stair', x: 1221, y: 1018, r: 0, w: 2.6, d: 3.6, flights: 2 },
-      { t: 'toilet', x: 111, y: 1172, r: 270 }, { t: 'toilet', x: 111, y: 1243, r: 270 }, { t: 'vanity', x: 288, y: 1228, r: 90, w: 1.0, sinks: 2 },
-      { t: 'toilet', x: 1250, y: 1175, r: 90 }, { t: 'toilet', x: 1250, y: 1247, r: 90 }, { t: 'vanity', x: 1082, y: 1236, r: 270, w: 1.0, sinks: 2 },
-      // south half (street front): waiting area, benches, meeting table
-      { t: 'rug', x: 690, y: 1440, r: 0, w: 3.0, d: 2.2, color: 'Sand' },
-      { t: 'sofa', x: 690, y: 1490, r: 180, seats: 3, w: 2.3, fab: 'charcoal' },
-      { t: 'coffeeTable', x: 690, y: 1420, r: 0, w: 1.1, d: 0.55 },
-      { t: 'armchair', x: 610, y: 1390, r: 240, fab: 'cognac' }, { t: 'armchair', x: 770, y: 1390, r: 120, fab: 'cognac' },
-      { t: 'desks', x: 330, y: 1470, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 330, y: 1650, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1040, y: 1470, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1040, y: 1650, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'confTable', x: 690, y: 1665, r: 0, w: 2.4, d: 1.0, seats: 6, ends: 0 },
-      // street corner bays: a private office and a small meeting table
-      { t: 'office', box: [72, 1792, 298, 1982], desks: 2, wall: 'bottom' },
-      { t: 'confTable', x: 1180, y: 1890, r: 0, shape: 'round', w: 1.1, d: 1.1, seats: 4, top: 'walnut', a0: 0.785 },
-      { t: 'plant', x: 1280, y: 1960, size: 'tall' },
-    ],
-  },
-
-  [F('120-e-56th', 'typical-floors-10-12-1960s')]: {
-    grid: [1468, 2000],
-    base: 'oak',
-    rooms: [
-      ['terrace', 40, 60, 1360, 362], ['terrace', 330, 1782, 1072, 1996],
-      ['stone', 300, 1005, 1090, 1138], ['stone', 581, 1138, 866, 1290],
-      ['tile', 106, 1138, 328, 1285], ['tile', 1086, 1138, 1302, 1285],
-      ['shaft', 605, 870, 701, 997], ['shaft', 725, 870, 822, 997],
-      ['stair', 83, 903, 256, 1133], ['stair', 1155, 903, 1332, 1133],
-      ['carpet', 85, 1795, 325, 1990], ['carpet', 1080, 1795, 1332, 1990],
-    ],
-    erase: [
-      [40, 95, 1372, 258], [655, 1062, 780, 1086], [165, 1235, 245, 1258], [1138, 1238, 1250, 1262], [975, 308, 1270, 336], [560, 1872, 855, 1900],
-      [607, 872, 699, 995], [727, 872, 820, 995], [85, 905, 254, 1130], [1158, 905, 1330, 1130],
-      [118, 1154, 158, 1190], [118, 1222, 158, 1260], [290, 1180, 325, 1275], [1252, 1158, 1292, 1194], [1252, 1230, 1292, 1268], [1084, 1185, 1118, 1280],
-    ],
-    items: [
-      { t: 'desks', x: 355, y: 492, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 355, y: 655, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1060, y: 492, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1060, y: 655, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'confTable', x: 707, y: 575, r: 0, shape: 'round', w: 1.2, d: 1.2, seats: 4, top: 'oak', a0: 0.785 },
-      { t: 'plant', x: 707, y: 420, size: 'tall' },
-      // 10th-floor street terrace and 12th-floor rear terrace
-      { t: 'planter', x: 350, y: 290, r: 0, w: 3.2, d: 0.45 }, { t: 'planter', x: 1060, y: 290, r: 0, w: 3.2, d: 0.45 },
-      { t: 'cafeTable', x: 707, y: 315, r: 0.35, chairs: 2, a0: 0, top: 'white' },
-      { t: 'planter', x: 707, y: 1975, r: 0, w: 5.0, d: 0.45 },
-      { t: 'cafeTable', x: 560, y: 1880, r: 0.4, chairs: 4, top: 'white' }, { t: 'cafeTable', x: 855, y: 1880, r: 0.4, chairs: 4, top: 'white' },
-      { t: 'plant', x: 360, y: 1810, size: 'bush' }, { t: 'plant', x: 1045, y: 1810, size: 'bush' },
-      // core
-      { t: 'reception', x: 727, y: 1178, r: 0, R: 1.15, span: 1.7, deep: 0.55 },
-      { t: 'plant', x: 608, y: 1275, size: 'bush' }, { t: 'plant', x: 840, y: 1275, size: 'bush' },
-      { t: 'elevator', x: 653, y: 1008, r: 0, w: 1.0 }, { t: 'elevator', x: 773, y: 1008, r: 0, w: 1.0 },
-      { t: 'stair', x: 170, y: 1018, r: 0, w: 2.6, d: 3.6, flights: 2 },
-      { t: 'stair', x: 1244, y: 1018, r: 0, w: 2.6, d: 3.6, flights: 2 },
-      { t: 'toilet', x: 138, y: 1171, r: 270 }, { t: 'toilet', x: 138, y: 1240, r: 270 }, { t: 'vanity', x: 309, y: 1226, r: 90, w: 1.0, sinks: 2 },
-      { t: 'toilet', x: 1272, y: 1176, r: 90 }, { t: 'toilet', x: 1272, y: 1248, r: 90 }, { t: 'vanity', x: 1101, y: 1232, r: 270, w: 1.0, sinks: 2 },
-      // south half
-      { t: 'rug', x: 720, y: 1440, r: 0, w: 3.0, d: 2.2, color: 'Grey' },
-      { t: 'sofa', x: 720, y: 1490, r: 180, seats: 3, w: 2.3, fab: 'navy' },
-      { t: 'coffeeTable', x: 720, y: 1420, r: 0, w: 1.1, d: 0.55 },
-      { t: 'armchair', x: 640, y: 1390, r: 240, fab: 'sand' }, { t: 'armchair', x: 800, y: 1390, r: 120, fab: 'sand' },
-      { t: 'desks', x: 355, y: 1470, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 355, y: 1650, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1065, y: 1470, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1065, y: 1650, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'confTable', x: 720, y: 1665, r: 0, w: 2.4, d: 1.0, seats: 6, ends: 0 },
-      { t: 'office', box: [95, 1800, 318, 1982], desks: 2, wall: 'bottom' },
-      { t: 'confTable', x: 1205, y: 1890, r: 0, shape: 'round', w: 1.1, d: 1.1, seats: 4, top: 'walnut', a0: 0.785 },
-    ],
-  },
+  // ------------------------------------------------------------------ 120 E 56th St
+  // Floors 3–12 (suite layouts, composites with the 5th-floor plan and the
+  // test fits) are built in js/data/layouts-120-e-56th.js. Floors 13–15: one
+  // plate under the crown with terraces on three sides and no suite evidence —
+  // a single tenant floor, sparsely furnished (≈12 desks on ≈5,400 SF).
+  ...layouts120e56,
 
   [F('120-e-56th', 'typical-floors-13-15-1960s')]: {
     grid: [1506, 2000],
     base: 'oak',
     rooms: [
-      ['terrace', 54, 0, 1416, 298], ['terrace', 54, 1470, 445, 1698], ['terrace', 1022, 1470, 1416, 1698],
+      ['concrete', 0, 0, 1506, 188], ['terrace', 54, 188, 1416, 298], ['terrace', 54, 1470, 445, 1698], ['terrace', 1022, 1470, 1416, 1698],
       ['stone', 330, 868, 1150, 1005], ['stone', 605, 1005, 903, 1140],
       ['tile', 100, 1005, 338, 1162], ['tile', 1130, 1005, 1362, 1162],
       ['shaft', 627, 723, 730, 858], ['shaft', 755, 723, 858, 858],
@@ -645,9 +549,9 @@ export const furnishings = {
       { t: 'cafeTable', x: 740, y: 255, r: 0.35, chairs: 2, a0: 0, top: 'white' },
       { t: 'cafeTable', x: 255, y: 1580, r: 0.4, chairs: 4, top: 'white' }, { t: 'planter', x: 255, y: 1655, r: 0, w: 4.5, d: 0.4 },
       { t: 'cafeTable', x: 1210, y: 1580, r: 0.4, chairs: 4, top: 'white' }, { t: 'planter', x: 1210, y: 1655, r: 0, w: 4.5, d: 0.4 },
-      // north: benches, a meeting table by the columns
-      { t: 'desks', x: 320, y: 440, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1060, y: 430, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
+      // north: one bench of six, a private office desk, a meeting table
+      { t: 'desks', x: 330, y: 450, r: 0, n: 3, w: 1.4, d: 0.7, double: true },
+      { t: 'desk', x: 1130, y: 375, r: 180, w: 1.6, d: 0.75 }, { t: 'credenza', x: 1320, y: 520, r: 90, w: 1.6, d: 0.45 },
       { t: 'confTable', x: 712, y: 450, r: 0, w: 2.4, d: 1.0, seats: 6, ends: 0, top: 'oak', fab: 'navy' },
       { t: 'plant', x: 712, y: 330, size: 'tall' }, { t: 'plant', x: 100, y: 330, size: 'small' }, { t: 'plant', x: 1385, y: 330, size: 'small' },
       // core
@@ -658,9 +562,8 @@ export const furnishings = {
       { t: 'toilet', x: 1333, y: 1041, r: 90 }, { t: 'toilet', x: 1333, y: 1119, r: 90 }, { t: 'vanity', x: 1154, y: 1106, r: 270, w: 1.1, sinks: 2 },
       // south: reception, benches, lounge in the bay window
       { t: 'reception', x: 754, y: 1190, r: 0, R: 1.15, span: 1.7, deep: 0.55 },
-      { t: 'desks', x: 300, y: 1330, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'desks', x: 1170, y: 1330, r: 0, n: 4, w: 1.4, d: 0.7, double: true },
-      { t: 'rug', x: 733, y: 1560, r: 0, w: 3.4, d: 2.4, color: 'Navy' },
+      { t: 'desks', x: 300, y: 1330, r: 0, n: 2, w: 1.4, d: 0.7, double: true },
+      { t: 'desks', x: 1190, y: 1330, r: 0, n: 1, w: 1.4, d: 0.7, double: true },
       { t: 'sofa', x: 733, y: 1640, r: 180, seats: 3, w: 2.4, fab: 'sand', pillow: 'navy' },
       { t: 'coffeeTable', x: 733, y: 1560, r: 0, round: true, w: 1.0, d: 0.6 },
       { t: 'armchair', x: 625, y: 1505, r: 300, fab: 'cognac' }, { t: 'armchair', x: 841, y: 1505, r: 60, fab: 'cognac' },

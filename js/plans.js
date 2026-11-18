@@ -88,16 +88,23 @@ export function initPlans(p, viewer) {
     stack.querySelectorAll('button').forEach((b) => b.classList.toggle('on', Number(b.dataset.floor) === f));
     tabs.innerHTML = list.map((i) => `<button type="button" role="tab" data-i="${i}">${plans[i].label}</button>`).join('');
     tabs.hidden = list.length < 2;
-    const keep = list.includes(planIdx) ? planIdx : list[0];
-    showPlan(keep);
+    showPlan(bestFor(f) ?? list[0]);
     if (focus3d) show3d();
   }
 
+  // The floor's most specific plan that has a 3D cut-away (a suite or test fit
+  // drawn for this floor before a typical plan shared with others).
+  const bestFor = (f) => {
+    const list = (byFloor.get(f) ?? []).filter((k) => plans[k].model3d);
+    if (!list.length) return null;
+    return list.reduce((a, k) => (plans[k].floors.length < plans[a].floors.length ? k : a));
+  };
   // The plan to lay into the 3D model for the current floor: the one on screen
-  // if it is a full-floor plan, else the floor's full-floor/typical plan.
+  // if it has a cut-away, else the floor's best one.
   const plan3dFor = (f, i) => {
     if (plans[i]?.model3d && plans[i].floors.includes(f)) return plans[i];
-    return (byFloor.get(f) ?? []).map((k) => plans[k]).find((pl) => pl.model3d) ?? null;
+    const k = bestFor(f);
+    return k == null ? null : plans[k];
   };
   function show3d() {
     if (!viewer?.model) return;
@@ -112,7 +119,7 @@ export function initPlans(p, viewer) {
   });
   tabs.addEventListener('click', (e) => {
     const b = e.target.closest('button[data-i]');
-    if (b) { showPlan(Number(b.dataset.i)); if (viewer?.plan) show3d(); }
+    if (b) { showPlan(Number(b.dataset.i)); show3d(); }
   });
   to3d.addEventListener('click', () => {
     const tour = document.getElementById('tour');
@@ -133,7 +140,7 @@ export function initPlans(p, viewer) {
       pill.hidden = n == null;
       document.getElementById('hint')?.classList.toggle('hidden-for-plan', n != null);
       if (n == null) return;
-      lab.textContent = `${ord(n)} plan`;
+      lab.textContent = pl.kind === 'Suite' || pl.kind === 'Test fit' ? `${ord(n).replace(' floor', '')} · ${pl.label}` : `${ord(n)} plan`;
       up.disabled = !floors3d.some((f) => f > n);
       down.disabled = !floors3d.some((f) => f < n);
       if (floor !== n) showFloor(n, { focus3d: false });

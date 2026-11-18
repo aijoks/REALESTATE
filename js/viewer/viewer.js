@@ -423,9 +423,12 @@ export class BuildingViewer {
     const token = (this._planToken = (this._planToken ?? 0) + 1);
     const [y0, y1] = this.model.floorRange(n);
     const { width: W, depth: D } = this.model;
-    const key = `${plan.src}|${n}`;
+    const m3 = plan.model3d;
+    const layout = (typeof m3.layout === 'function' ? m3.layout(n) : m3.layout) ?? null;
+    const src = m3.src ?? plan.src;
+    const key = `${layout ?? src}|${n}`;
     if (this.plan?.key !== key) {
-      const g = await buildPlanFloor({ src: plan.model3d.src ?? plan.src, model3d: plan.model3d, W, D, footprint: this.model.footprint, maxAniso: this.renderer.capabilities.getMaxAnisotropy() });
+      const g = await buildPlanFloor({ src, model3d: m3, layout, W, D, footprint: this.model.footprint, maxAniso: this.renderer.capabilities.getMaxAnisotropy() });
       if (token !== this._planToken) { g.userData.dispose(); return; }
       this._removePlan();
       // (a ground-floor plan may sit a little higher, clear of site paving drawn under the building)
@@ -444,10 +447,19 @@ export class BuildingViewer {
     // see into the rooms over the raised walls, framed on the floor's centre.
     const r = Math.max(W, D);
     const k = this.plan.group.userData.furnished ? 1 : 0;
-    const target = new THREE.Vector3(0, y0, D * (-0.06 + 0.11 * k));
-    const pos = new THREE.Vector3(W * (0.45 - 0.1 * k), y0 + r * (0.82 + 0.16 * k), D * 0.5 + r * (0.48 - 0.14 * k));
-    pos.sub(target).multiplyScalar(1 + 0.1 * k).add(target);
-    this.flyTo(pos, target, 2.0, 36);
+    const focus = this.plan.group.userData.focus;
+    if (focus) {
+      // A suite: frame it, from the same street-side corner, a little closer.
+      const R = Math.max(12, Math.max(focus.w, focus.d) * 1.15);
+      const target = new THREE.Vector3(focus.x, y0, focus.z + R * 0.04);
+      const pos = new THREE.Vector3(focus.x + R * 0.32, y0 + R * 1.12, focus.z + R * 0.62);
+      this.flyTo(pos, target, 2.0, 36);
+    } else {
+      const target = new THREE.Vector3(0, y0, D * (-0.06 + 0.11 * k));
+      const pos = new THREE.Vector3(W * (0.45 - 0.1 * k), y0 + r * (0.82 + 0.16 * k), D * 0.5 + r * (0.48 - 0.14 * k));
+      pos.sub(target).multiplyScalar(1 + 0.1 * k).add(target);
+      this.flyTo(pos, target, 2.0, 36);
+    }
     this.onPlan?.(n, plan);
   }
   clearPlan() {

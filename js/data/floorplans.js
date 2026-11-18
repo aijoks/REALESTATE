@@ -11,10 +11,14 @@
 //   src    : assets/properties/<id>/plans/<file>.webp
 //   note   : one line under the plan
 //   source : where it was published
-//   model3d: (full-floor plans only) how the drawing sits on the 3D model —
-//            see js/viewer/floorplan3d.js. Plans with it are laid into the
-//            building as a cut-away floor when that storey is picked, and
-//            furnished from js/data/furnishings.js (keyed by src).
+//   model3d: how the drawing sits on the 3D model — see
+//            js/viewer/floorplan3d.js. Plans with it are laid into the
+//            building as a cut-away floor when that storey or tab is picked,
+//            and furnished from js/data/furnishings.js (keyed by src, or by
+//            model3d.layout). A suite plan's cut-away is its whole floor:
+//            model3d.src names the floor's drawing and the layout composites
+//            the suite's own drawing into it. Picking a floor shows its most
+//            specific plan (a suite or test fit before a shared typical).
 
 const SRC = {
   loopnet10e38: { name: 'LoopNet listing — architect’s plans by Tuller Feld McNealus (Mar 2023)', url: 'https://www.loopnet.com/Listing/10-E-38th-St-New-York-NY/35969074/' },
@@ -30,16 +34,30 @@ const SRC = {
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const P = (id, file) => `assets/properties/${id}/plans/${file}.webp`;
 
+// 120 E 56th St: the typical drawings every cut-away of floors 3–12 is built
+// on (suite plans composite their own drawing into them), and its layouts.
+const E56 = {
+  t39: { src: P('120-e-56th', 'typical-floors-03-09-1960s'), box: [0.02649, -0.0066, 0.95204, 0.9959] },
+  t1012: { src: P('120-e-56th', 'typical-floors-10-12-1960s'), box: [0.04223, -0.0065, 0.92166, 0.9945] },
+};
+const L = (name) => `120-e-56th/${name}`;
+
 export const floorPlans = {
+  // The typicals' cut-aways show each floor as it is let today — suites off the
+  // common corridor, from the 5th-floor plan and the test fits (see
+  // js/data/layouts-120-e-56th.js) — at true scale (the drawing scaled
+  // uniformly onto the model's 19.8 m front; the rear beyond the drawn walls
+  // is open roof). Suite and test-fit plans lay their own drawing into the
+  // whole floor, at its real place.
   '120-e-56th': [
-    { floors: range(3, 9), label: 'Typical 3–9', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-03-09-1960s'), model3d: { box: [0.028, 0.044, 0.951, 0.997] },  note: 'Original typical floor plan, 3rd–9th floors: 63 ft frontage, twin elevators, two stairs and core restrooms. Terraces at the 7th-floor setback.', source: SRC.columbia120e56 },
-    { floors: range(10, 12), label: 'Typical 10–12', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-10-12-1960s'), model3d: { box: [0.042, 0.045, 0.921, 0.998] },  note: 'Original typical floor plan, 10th–12th floors, with street terrace at the 10th floor and rear terrace at the 12th.', source: SRC.columbia120e56 },
-    { floors: range(13, 15), label: 'Typical 13–15', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-13-15-1960s'), model3d: { box: [0.036, -0.157, 0.94, 0.849] },  note: 'Original typical floor plan, 13th–15th floors, under the crown — terraces on three sides.', source: SRC.columbia120e56 },
-    { floors: [5], label: 'Suite 510', kind: 'Suite', src: P('120-e-56th', 'floor-05-suite-510'), note: 'Current 5th-floor layout with Suite 510 (620 RSF) shaded off the common corridor.', source: SRC.loopnet120e56 },
-    { floors: [7], label: 'Suite 740', kind: 'Test fit', src: P('120-e-56th', 'floor-07-suite-740'), note: 'Suite 740 test fit (1,275 SF): reception, meeting room, private office and seven workstations.', source: SRC.loopnet120e56 },
-    { floors: [9], label: 'Suite 900', kind: 'Test fit', src: P('120-e-56th', 'floor-09-suite-900'), note: 'Suite 900 medical test fit (1,247 SF): reception, waiting, consultation, two exam rooms and lab/pantry.', source: SRC.loopnet120e56 },
-    { floors: [10], label: 'Suite 1040 · office', kind: 'Test fit', src: P('120-e-56th', 'floor-10-suite-1040-office'), note: 'Suite 1040 test fit 1 (1,521 SF): three meeting rooms, reception, office and pantry.', source: SRC.loopnet120e56 },
-    { floors: [10], label: 'Suite 1040 · medical', kind: 'Test fit', src: P('120-e-56th', 'floor-10-suite-1040-medical'), note: 'Suite 1040 test fit 2 (1,521 SF): two consultation rooms, four exam rooms, reception and waiting.', source: SRC.loopnet120e56 },
+    { floors: range(3, 9), label: 'Typical 3–9', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-03-09-1960s'), model3d: { ...E56.t39, layout: (f) => (f === 5 ? L('floor-5') : f >= 7 ? L('floors-7-9') : L('floors-3-6')) }, note: 'Original typical floor plan, 3rd–9th floors: 63 ft frontage, twin elevators, two stairs and core restrooms; the rear corner bays become terraces at the 7th-floor setback. Today these floors are let as suites off the common corridor — the 3D shows that division (from the 5th-floor plan and the test fits).', source: SRC.columbia120e56 },
+    { floors: range(10, 12), label: 'Typical 10–12', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-10-12-1960s'), model3d: { ...E56.t1012, layout: (f) => L(`floor-${f}`) }, note: 'Original typical floor plan, 10th–12th floors, with the rear terrace at the 10th floor and the street terrace at the 12th. The 3D shows the floors divided into suites as today (Suite 1040 takes the rear east).', source: SRC.columbia120e56 },
+    { floors: range(13, 15), label: 'Typical 13–15', kind: 'Typical floor', src: P('120-e-56th', 'typical-floors-13-15-1960s'), model3d: { box: [0.0359, -0.205, 0.9389, 0.8495] }, note: 'Original typical floor plan, 13th–15th floors, under the crown — terraces on three sides.', source: SRC.columbia120e56 },
+    { floors: [5], label: 'Suite 510', kind: 'Suite', src: P('120-e-56th', 'floor-05-suite-510'), model3d: { ...E56.t39, layout: L('floor-5-suite-510') }, note: 'Current 5th-floor layout with Suite 510 (620 RSF) shaded off the common corridor.', source: SRC.loopnet120e56 },
+    { floors: [7], label: 'Suite 740', kind: 'Test fit', src: P('120-e-56th', 'floor-07-suite-740'), model3d: { ...E56.t39, layout: L('floor-7-suite-740') }, note: 'Suite 740 test fit (1,275 SF): reception, meeting room, private office and seven workstations.', source: SRC.loopnet120e56 },
+    { floors: [9], label: 'Suite 900', kind: 'Test fit', src: P('120-e-56th', 'floor-09-suite-900'), model3d: { ...E56.t39, layout: L('floor-9-suite-900') }, note: 'Suite 900 medical test fit (1,247 SF): reception, waiting, consultation, two exam rooms and lab/pantry.', source: SRC.loopnet120e56 },
+    { floors: [10], label: 'Suite 1040 · office', kind: 'Test fit', src: P('120-e-56th', 'floor-10-suite-1040-office'), model3d: { ...E56.t1012, layout: L('floor-10-suite-1040-office') }, note: 'Suite 1040 test fit 1 (1,521 SF): three meeting rooms, reception, office and pantry.', source: SRC.loopnet120e56 },
+    { floors: [10], label: 'Suite 1040 · medical', kind: 'Test fit', src: P('120-e-56th', 'floor-10-suite-1040-medical'), model3d: { ...E56.t1012, layout: L('floor-10-suite-1040-medical') }, note: 'Suite 1040 test fit 2 (1,521 SF): two consultation rooms, four exam rooms, reception and waiting.', source: SRC.loopnet120e56 },
   ],
   '10-e-38th': [
     { floors: [3], label: '3rd floor', kind: 'Full floor', src: P('10-e-38th', 'floor-03'), model3d: { rot: 1, box: [0.035, 0.025, 0.856, 0.974] },  note: 'Full floor of ≈5,250 SF, offered as office/retail. Largely open loft with column grid; three elevators, stair and restrooms along the core wall.', source: SRC.loopnet10e38 },

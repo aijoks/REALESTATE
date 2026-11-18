@@ -15,6 +15,11 @@
 //   src : (optional) image used for the cut-away instead of the plan's own
 //         src — e.g. a building-only crop of a site plan (box is then
 //         measured in that image, and furnishings are keyed by it).
+//   layout: (optional) furnishing key, or (floor) => key, when it is not the
+//         image's src — e.g. a suite plan whose cut-away is its whole floor
+//         (the floor's drawing + the suite's own drawing composited in place,
+//         see `compose` in js/data/furnishings.js), or a typical plan whose
+//         floors differ (setbacks).
 //
 // Buildings that are not a plain box (e.g. the L-shaped Mona Lisa Plaza) pass
 // their real outline as `footprint`: world rectangles [x0, z0, x1, z1] whose
@@ -48,13 +53,51 @@ const loadImage = (src) => {
 // Rotate the image `rot` quarter-turns counter-clockwise onto a canvas.
 function rotated(img, rot) {
   const r = ((rot % 4) + 4) % 4;
+  const iw = img.naturalWidth ?? img.width, ih = img.naturalHeight ?? img.height;
   const c = document.createElement('canvas');
-  c.width = r % 2 ? img.naturalHeight : img.naturalWidth;
-  c.height = r % 2 ? img.naturalWidth : img.naturalHeight;
+  c.width = r % 2 ? ih : iw;
+  c.height = r % 2 ? iw : ih;
   const x = c.getContext('2d');
   x.translate(c.width / 2, c.height / 2);
   x.rotate((-r * Math.PI) / 2);
-  x.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+  x.drawImage(img, -iw / 2, -ih / 2);
+  return c;
+}
+
+// Composite floors (a furnishing's `compose`, see js/data/furnishings.js):
+// other published drawings of the same building laid into the base drawing
+// at their real place — e.g. a suite test fit dropped into the floor it is
+// on — plus a few inked partitions (demising walls the drawings imply but do
+// not draw thick enough to read as walls). All rectangles are in the
+// furnishing's grid over the base drawing; `crop` is in the layer's own px.
+//   clear  : [[x0, y0, x1, y1]]  base drawing removed there first
+//   layers : [{ src, crop, at: [x0, y0, x1, y1], clear, bold }]
+//   ink    : [[x0, y0, x1, y1]]  filled with wall ink last
+async function composed(img, furnish) {
+  const { compose: cp, grid: [GW, GH] } = furnish;
+  const w = img.naturalWidth, h = img.naturalHeight, kx = w / GW, ky = h / GH;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const x = c.getContext('2d');
+  x.imageSmoothingEnabled = true;
+  x.imageSmoothingQuality = 'high';
+  x.drawImage(img, 0, 0);
+  const R = ([a, b, cc, d]) => [a * kx, b * ky, (cc - a) * kx, (d - b) * ky];
+  for (const r of cp.clear ?? []) x.clearRect(...R(r));
+  const layers = cp.layers ?? [];
+  const imgs = await Promise.all(layers.map((l) => loadImage(l.src)));
+  layers.forEach((l, i) => {
+    for (const r of l.clear ?? []) x.clearRect(...R(r));
+    const im = imgs[i];
+    const [a, b, cc, d] = l.crop ?? [0, 0, im.naturalWidth, im.naturalHeight];
+    const [dx, dy, dw, dh] = R(l.at);
+    // `bold` (base px): a drawing much finer than the base (its partitions
+    // would fall under the wall threshold) is drawn thickened.
+    const k = l.bold ?? 0;
+    for (const [ox, oy] of k ? [[0, 0], [-k, 0], [k, 0], [0, -k], [0, k]] : [[0, 0]]) x.drawImage(im, a, b, cc - a, d - b, dx + ox * kx, dy + oy * ky, dw, dh);
+  });
+  x.fillStyle = cp.inkColor ?? '#1c2330';
+  for (const r of cp.ink ?? []) x.fillRect(...R(r));
   return c;
 }
 // The footprint box after the same rotation.
@@ -317,12 +360,15 @@ function slabGeometry(cells, inset, t) {
   return g;
 }
 
-export async function buildPlanFloor({ src, model3d, W, D, footprint = null, maxAniso = 8 }) {
-  const img = await loadImage(src);
+// `layout`: furnishing key when it is not the drawing's src (several furnished
+// layouts — e.g. composites — can share one base drawing).
+export async function buildPlanFloor({ src, model3d, W, D, footprint = null, maxAniso = 8, layout = null }) {
+  const furnish = furnishingFor(layout ?? src);
+  let img = await loadImage(src);
+  if (furnish?.compose) img = await composed(img, furnish);
   const rot = model3d.rot ?? 0;
   const canvas = rotated(img, rot);
   const [bx0, by0, bx1, by1] = rotBox(model3d.box, rot);
-  const furnish = furnishingFor(src);
 
   // The whole image plane, scaled so the footprint box lands on W × D.
   const PW = W / (bx1 - bx0), PD = D / (by1 - by0);
@@ -524,8 +570,16 @@ export async function buildPlanFloor({ src, model3d, W, D, footprint = null, max
   wallMesh.receiveShadow = false;
   group.add(wallMesh);
 
+  // `focus` (grid rect): the part of the floor the camera should frame — e.g.
+  // the suite a test fit is about — as a world centre and size.
+  let focus = null;
+  if (furnish?.focus) {
+    const [fx0, fy0, fx1, fy1] = furnish.focus;
+    const [ax, az] = gridToWorld(fx0, fy0), [bx, bz] = gridToWorld(fx1, fy1);
+    focus = { x: (ax + bx) / 2, z: (az + bz) / 2, w: Math.abs(bx - ax), d: Math.abs(bz - az) };
+  }
   group.userData = {
-    wallH, rects: rects.length, furnished: !!furnish, camera: furnish?.camera,
+    wallH, rects: rects.length, furnished: !!furnish, focus,
     dispose() {
       tex.dispose();
       furniture?.dispose();
