@@ -676,7 +676,9 @@ function addCutaway(mat, u) {
       void main() {
         if (uFPOn > 0.5) {
           if (vFPWorld.y > uFPCut) discard;
-          if (vFPWorld.y > uFPFloor && ${room ? 'true' : 'fpInside(vFPWorld.xz)'}) discard;
+          // Window-interior boxes of the storey below reach up to the slab and
+          // z-fought with it (black streaks on the floor): clear them 0.3 m below.
+          if (vFPWorld.y > uFPFloor ${room ? '- 0.3' : ''} && ${room ? 'true' : 'fpInside(vFPWorld.xz)'}) discard;
         }`);
   };
   mat.customProgramCacheKey = () => (room ? 'fp-cutaway-room' : 'fp-cutaway');
