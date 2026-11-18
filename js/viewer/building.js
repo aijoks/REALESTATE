@@ -474,5 +474,9 @@ export function buildPrewarBrick(params) {
     }
   };
 
-  return { group: g, width: W, depth: D, height: totalH + 4, floorRange, hotspotPosition };
+  // Above the base the centre bays are recessed between the pavilions: the
+  // tower floors' cut-away only covers the real floor (not the recess, which
+  // is the roof of the base below).
+  const footprint = [[-W / 2, -D / 2, W / 2, zc], [-W / 2, -D / 2, -W / 2 + pw, D / 2], [W / 2 - pw, -D / 2, W / 2, D / 2]];
+  return { group: g, width: W, depth: D, height: totalH + 4, floorRange, hotspotPosition, footprint };
 }
